@@ -13,7 +13,7 @@ export function Composer({ onSend, disabled = false }: ComposerProps) {
       e.preventDefault();
       const trimmed = value.trim();
       if (trimmed) {
-        onSend(value + '\n');
+        onSend(value + '\r');
         setValue('');
       }
     }
