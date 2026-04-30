@@ -28,7 +28,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. User can compose a multiline message in the input area and send it to the running session
   4. User can scroll back through terminal history and use keyboard copy/paste shortcuts
   5. Terminal reflows and resizes correctly when the browser window or sidebar width changes
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Project scaffold + backend (Express, WebSocket, PTY manager)
+- [ ] 01-02-PLAN.md — xterm.js Terminal component + usePty + useResize + FolderPicker
+- [ ] 01-03-PLAN.md — Composer component + App.tsx layout wiring
+- [ ] 01-04-PLAN.md — Full automated suite + end-to-end manual verification checkpoint
 
 ### Phase 2: File System
 **Goal**: User has a VSCode-style file explorer at their fingertips and can attach files to messages with previews
@@ -61,6 +67,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. PTY Core | 0/TBD | Not started | - |
+| 1. PTY Core | 0/4 | Not started | - |
 | 2. File System | 0/TBD | Not started | - |
 | 3. Voice I/O | 0/TBD | Not started | - |
