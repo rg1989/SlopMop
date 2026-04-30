@@ -5,7 +5,7 @@ import os from 'os';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { fileURLToPath } from 'url';
-import { readFile } from 'fs/promises';
+import { readFile, writeFile } from 'fs/promises';
 import { isBinaryFile } from 'isbinaryfile';
 import { attachWebSocketServer } from './ws-handler.js';
 import { buildFileTree, getGitChangedPaths } from './file-api.js';
@@ -135,6 +135,31 @@ app.get('/api/file', async (req, res) => {
     } else {
       res.status(500).json({ error: String(err) });
     }
+  }
+});
+
+// PUT /api/file — overwrite a file with new content
+app.put('/api/file', async (req, res) => {
+  const { cwd, path: relPath, content } = req.body as { cwd?: string; path?: string; content?: string };
+  if (!cwd || !relPath || content === undefined) {
+    res.status(400).json({ error: 'cwd, path, and content required' });
+    return;
+  }
+
+  const resolvedCwd = path.resolve(cwd);
+  const absPath = path.resolve(resolvedCwd, relPath);
+
+  // Security: block path traversal
+  if (!absPath.startsWith(resolvedCwd + path.sep) && absPath !== resolvedCwd) {
+    res.status(403).json({ error: 'Path outside cwd' });
+    return;
+  }
+
+  try {
+    await writeFile(absPath, content, 'utf-8');
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
   }
 });
 
