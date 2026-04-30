@@ -51,8 +51,9 @@ export default function App() {
   const { tree, changedPaths, mode, setMode } = useFileTree(cwd);
 
   const handleConnect = useCallback((path: string) => {
-    persistPath(path);
-    setCwd(path);
+    const normalized = path.replace(/\/+$/, '');
+    persistPath(normalized);
+    setCwd(normalized);
   }, []);
 
   const handleReady = useCallback((t: Terminal) => {
@@ -139,6 +140,8 @@ export default function App() {
               disabled={!connected}
               attachments={attachments}
               clearAttachments={() => setAttachments([])}
+              onAttach={(paths) => setAttachments(prev => [...prev, ...paths.filter(p => !prev.includes(p))])}
+              cwd={cwd}
             />
           </div>
         </div>

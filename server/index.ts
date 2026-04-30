@@ -50,6 +50,25 @@ app.post('/api/pick-folder', async (_req, res) => {
   }
 });
 
+app.post('/api/pick-file', async (req, res) => {
+  if (process.platform !== 'darwin') {
+    res.status(400).json({ error: 'Native picker only available on macOS' });
+    return;
+  }
+  const { cwd } = req.body as { cwd?: string };
+  const defaultLoc = cwd ? ` default location POSIX file "${cwd}"` : '';
+  try {
+    const { stdout } = await execFileAsync('osascript', [
+      '-e',
+      `set theFiles to (choose file with prompt "Attach file(s)" ${defaultLoc}with multiple selections allowed)\nset out to ""\nrepeat with f in theFiles\n  set out to out & POSIX path of f & "\n"\nend repeat\nreturn out`,
+    ]);
+    const paths = stdout.split('\n').map(p => p.trim()).filter(Boolean);
+    res.json({ paths });
+  } catch {
+    res.status(400).json({ error: 'cancelled' });
+  }
+});
+
 app.get('/api/homedir', (_req, res) => {
   res.json({ path: os.homedir() });
 });
