@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
-// @ts-expect-error — module does not exist yet (Wave 0 RED state)
 import { useFileTree } from '../client/hooks/useFileTree';
 
 describe('useFileTree', () => {
@@ -41,7 +40,7 @@ describe('useFileTree', () => {
     result.current.setMode('changes');
 
     await waitFor(() => {
-      const calls: string[] = mockFetch.mock.calls.map((c: [string]) => c[0]);
+      const calls: string[] = mockFetch.mock.calls.map((c: unknown[]) => c[0] as string);
       expect(calls.some((url: string) => url.includes('/api/git-status'))).toBe(true);
     });
   });
@@ -57,7 +56,7 @@ describe('useFileTree', () => {
     result.current.setMode('changes');
 
     await waitFor(() => {
-      const calls: string[] = mockFetch.mock.calls.map((c: [string]) => c[0]);
+      const calls: string[] = mockFetch.mock.calls.map((c: unknown[]) => c[0] as string);
       expect(calls.some((url: string) => url.includes('/api/git-status'))).toBe(true);
     });
 
@@ -69,7 +68,7 @@ describe('useFileTree', () => {
     // Allow any potential async effects to settle
     await new Promise((resolve) => setTimeout(resolve, 50));
 
-    const callsAfterAll: string[] = mockFetch.mock.calls.slice(callCountAfterChanges).map((c: [string]) => c[0]);
+    const callsAfterAll: string[] = mockFetch.mock.calls.slice(callCountAfterChanges).map((c: unknown[]) => c[0] as string);
     expect(callsAfterAll.some((url: string) => url.includes('/api/git-status'))).toBe(false);
   });
 });

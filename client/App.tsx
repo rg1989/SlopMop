@@ -1,9 +1,11 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { Terminal } from '@xterm/xterm';
 import { usePty } from './hooks/usePty';
+import { useFileTree } from './hooks/useFileTree';
 import { Terminal as TerminalComponent } from './components/Terminal';
 import { FolderPicker } from './components/FolderPicker';
 import { Composer } from './components/Composer';
+import { FileTree } from './components/FileTree';
 import './App.css';
 
 const STORAGE_KEY = 'claudetalk_last_folder';
@@ -29,6 +31,8 @@ export default function App() {
   const composerRef = useRef<HTMLTextAreaElement>(null);
 
   const [initialPath] = useState(getInitialPath);
+  const [attachments, setAttachments] = useState<string[]>([]);
+  const [previewPath, setPreviewPath] = useState<string | null>(null);
 
   const cols = terminal?.cols ?? 80;
   const rows = terminal?.rows ?? 24;
@@ -39,6 +43,8 @@ export default function App() {
     cols,
     rows,
   });
+
+  const { tree, changedPaths, mode, setMode } = useFileTree(cwd);
 
   const handleConnect = useCallback((path: string) => {
     persistPath(path);
@@ -61,6 +67,12 @@ export default function App() {
     if (connected) composerRef.current?.focus();
   }, [connected]);
 
+  // Clear attachments and preview when cwd changes
+  useEffect(() => {
+    setAttachments([]);
+    setPreviewPath(null);
+  }, [cwd]);
+
   return (
     <div className="app">
       <div className="folder-bar">
@@ -71,14 +83,48 @@ export default function App() {
           </span>
         )}
       </div>
-      <div
-        className="terminal-area"
-        onClick={() => composerRef.current?.focus()}
-      >
-        <TerminalComponent onReady={handleReady} sendResize={sendResize} />
-      </div>
-      <div className="composer-area">
-        <Composer ref={composerRef} onSend={sendInput} disabled={!connected} />
+      <div className="app-body">
+        {cwd && (
+          <div className="sidebar">
+            <div className="sidebar-toolbar">
+              <button
+                className={`mode-btn ${mode === 'all' ? 'active' : ''}`}
+                onClick={() => setMode('all')}
+              >All</button>
+              <button
+                className={`mode-btn ${mode === 'changes' ? 'active' : ''}`}
+                onClick={() => setMode('changes')}
+              >Changes</button>
+            </div>
+            <FileTree
+              nodes={tree}
+              selected={new Set(attachments)}
+              onSelect={(p) => setAttachments(prev => prev.includes(p) ? prev : [...prev, p])}
+              onPreview={setPreviewPath}
+              changedPaths={changedPaths}
+              mode={mode}
+            />
+          </div>
+        )}
+        <div className="main-area">
+          <div
+            className="terminal-area"
+            onClick={() => composerRef.current?.focus()}
+          >
+            <TerminalComponent onReady={handleReady} sendResize={sendResize} />
+          </div>
+          <div className="composer-area">
+            <Composer ref={composerRef} onSend={sendInput} disabled={!connected} />
+          </div>
+        </div>
+        {previewPath && (
+          <div className="preview-panel">
+            {/* FilePreview wired in 02-04 */}
+            <div style={{ padding: 12, color: '#8b949e', fontSize: 12 }}>
+              Preview: {previewPath.split('/').pop()}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

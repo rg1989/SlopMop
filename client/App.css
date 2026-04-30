@@ -33,3 +33,85 @@ html, body, #root { height: 100%; background: #0d1117; color: #c9d1d9; }
   max-width: 260px;
   letter-spacing: 0.01em;
 }
+
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 240px;
+  min-width: 160px;
+  max-width: 320px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  background: #161b22;
+  border-right: 1px solid #30363d;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-toolbar {
+  display: flex;
+  gap: 4px;
+  padding: 6px 8px;
+  border-bottom: 1px solid #30363d;
+  flex-shrink: 0;
+}
+
+.mode-btn {
+  font-size: 11px;
+  padding: 2px 8px;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  background: transparent;
+  color: #8b949e;
+  cursor: pointer;
+}
+.mode-btn.active { background: #21262d; color: #c9d1d9; border-color: #58a6ff; }
+
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.preview-panel {
+  width: 320px;
+  min-width: 200px;
+  flex-shrink: 0;
+  overflow: auto;
+  background: #0d1117;
+  border-left: 1px solid #30363d;
+}
+
+/* File tree node styles */
+.ft-tree { list-style: none; padding: 4px 0; font-size: 13px; font-family: monospace; }
+.ft-dir { }
+.ft-dir-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+  color: #c9d1d9;
+  user-select: none;
+}
+.ft-dir-header:hover { background: #21262d; }
+.ft-caret { font-size: 10px; color: #8b949e; width: 12px; }
+.ft-file {
+  padding: 2px 8px 2px 24px;
+  cursor: pointer;
+  color: #8b949e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ft-file:hover { background: #21262d; color: #c9d1d9; }
+.ft-file.ft-selected { background: #1f3a5f; color: #58a6ff; }
+.ft-file.ft-changed { color: #e3b341; }
+.ft-file.ft-changed.ft-selected { background: #1f3a5f; }
+.ft-name { font-weight: 500; color: #c9d1d9; }

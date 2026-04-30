@@ -1,8 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-// @ts-expect-error — module does not exist yet (Wave 0 RED state)
 import { FileTree } from '../client/components/FileTree';
-// @ts-expect-error — module does not exist yet (Wave 0 RED state)
 import type { FileNode } from '../client/components/FileTree';
 
 // Minimal test fixture: one directory containing two files
