@@ -19,7 +19,7 @@ describe('Composer', () => {
     await user.keyboard('{Enter}');
 
     expect(mockOnSend).toHaveBeenCalledTimes(1);
-    expect(mockOnSend).toHaveBeenCalledWith('hello\n');
+    expect(mockOnSend).toHaveBeenCalledWith('hello\r');
   });
 
   it('clears the textarea after onSend is called (TERM-03)', async () => {
@@ -89,7 +89,7 @@ describe('Composer', () => {
     // and the textarea was cleared proves preventDefault was called effectively.
     // Additionally verify the textarea didn't get a browser-default newline.
     expect(mockOnSend).toHaveBeenCalledTimes(1);
-    expect(mockOnSend).toHaveBeenCalledWith('hello\n');
+    expect(mockOnSend).toHaveBeenCalledWith('hello\r');
     // Textarea cleared — proves Enter didn't add a browser newline before our handler
     expect(textarea).toHaveValue('');
   });
@@ -113,6 +113,6 @@ describe('Composer', () => {
     await user.keyboard('{Enter}');
 
     expect(mockOnSend).toHaveBeenCalledTimes(1);
-    expect(mockOnSend).toHaveBeenCalledWith('line1\nline2\n');
+    expect(mockOnSend).toHaveBeenCalledWith('line1\nline2\r');
   });
 });

@@ -1,11 +1,12 @@
-import { useState, KeyboardEvent } from 'react';
+import { useState, KeyboardEvent, forwardRef } from 'react';
 
 interface ComposerProps {
   onSend: (text: string) => void;
   disabled?: boolean;
 }
 
-export function Composer({ onSend, disabled = false }: ComposerProps) {
+export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(
+  function Composer({ onSend, disabled = false }, ref) {
   const [value, setValue] = useState('');
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -22,6 +23,7 @@ export function Composer({ onSend, disabled = false }: ComposerProps) {
 
   return (
     <textarea
+      ref={ref}
       value={value}
       onChange={(e) => setValue(e.target.value)}
       onKeyDown={handleKeyDown}
@@ -42,4 +44,4 @@ export function Composer({ onSend, disabled = false }: ComposerProps) {
       }}
     />
   );
-}
+});

@@ -34,7 +34,6 @@ export function usePty({ cwd, terminal, cols, rows }: UsePtyOptions): UsePtyRetu
     ws.onopen = () => {
       setConnected(true);
       send({ type: 'start', cwd, cols, rows });
-      terminal.focus();
     };
 
     ws.onmessage = (event) => {
@@ -51,14 +50,10 @@ export function usePty({ cwd, terminal, cols, rows }: UsePtyOptions): UsePtyRetu
 
     ws.onclose = () => setConnected(false);
 
-    // Route keystrokes typed in the terminal directly to the PTY
-    const inputDisposable = terminal.onData((data) => send({ type: 'input', data }));
-
     return () => {
       ws.close();
       wsRef.current = null;
       setConnected(false);
-      inputDisposable.dispose();
     };
   }, [cwd, terminal]); // cols/rows intentionally excluded — resize handled separately
 
