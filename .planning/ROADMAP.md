@@ -12,7 +12,7 @@ Three phases that build on each other: first establish a fully-functional PTY te
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: PTY Core** - Node.js backend + xterm.js frontend wired end-to-end; user can open Claude CLI in a real terminal session in the browser
+- [x] **Phase 1: PTY Core** - Node.js backend + xterm.js frontend wired end-to-end; user can open Claude CLI in a real terminal session in the browser
 - [ ] **Phase 2: File System** - VSCode-style file explorer sidebar, file attachment with previews, file preview panel
 - [ ] **Phase 3: Voice I/O** - Voice transcription into the message composer, TTS playback of agent responses, mid-sentence interruption
 
@@ -31,10 +31,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 4 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Project scaffold + backend (Express, WebSocket, PTY manager)
-- [ ] 01-02-PLAN.md — xterm.js Terminal component + usePty + useResize + FolderPicker
-- [ ] 01-03-PLAN.md — Composer component + App.tsx layout wiring
-- [ ] 01-04-PLAN.md — Full automated suite + end-to-end manual verification checkpoint
+- [x] 01-01-PLAN.md — Project scaffold + backend (Express, WebSocket, PTY manager)
+- [x] 01-02-PLAN.md — xterm.js Terminal component + usePty + useResize + FolderPicker
+- [x] 01-03-PLAN.md — Composer component + App.tsx layout wiring
+- [x] 01-04-PLAN.md — Full automated suite + end-to-end manual verification checkpoint
 
 ### Phase 2: File System
 **Goal**: User has a VSCode-style file explorer at their fingertips and can attach files to messages with previews
@@ -67,6 +67,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. PTY Core | 3/4 | In Progress|  |
+| 1. PTY Core | 4/4 | Complete | 2026-04-30 |
 | 2. File System | 0/TBD | Not started | - |
 | 3. Voice I/O | 0/TBD | Not started | - |
