@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: "Completed 03-01: Voice I/O Wave 0 test scaffolds"
-last_updated: "2026-04-30T17:38:24.946Z"
+stopped_at: "Completed 03-02: useVoiceInput hook + usePty onData extension"
+last_updated: "2026-04-30T17:38:48.536Z"
 last_activity: "2026-04-30 — Plan 01-04 complete: E2E verification, all 5 TERM criteria confirmed"
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 12
-  completed_plans: 10
+  completed_plans: 11
   percent: 100
 ---
 
@@ -59,6 +59,7 @@ Progress: [██████████] 100% (Phase 1)
 | Phase 02-file-system P04 | 20min | 3 tasks | 7 files |
 | Phase 03-voice-io P03 | 2min | 1 tasks | 2 files |
 | Phase 03-voice-io P01 | 3min | 2 tasks | 4 files |
+| Phase 03-voice-io P02 | 8min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,8 @@ Recent decisions affecting current work:
 - [Phase 03-voice-io]: flushSentences capture-group split keeps terminator attached to sentence text — utterance.text includes period
 - [Phase 03-voice-io]: vi.stubGlobal at module level persists speech API globals; beforeEach resets call counts to prevent test bleed
 - [Phase 03-voice-io]: Export MockSpeechRecognition and mockSpeechSynthesis from setup.ts so test files can assert on exact calls without re-creating mocks
+- [Phase 03-voice-io]: Create fresh SpeechRecognition instance on each start() call — avoids browser DOMException on re-start
+- [Phase 03-voice-io]: onData added to UsePtyOptions as optional callback — zero-cost when absent, enables useTts PTY interception
 
 ### Pending Todos
 
@@ -109,6 +112,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-30T17:38:24.943Z
-Stopped at: Completed 03-01: Voice I/O Wave 0 test scaffolds
+Last session: 2026-04-30T17:38:48.534Z
+Stopped at: Completed 03-02: useVoiceInput hook + usePty onData extension
 Resume file: None
