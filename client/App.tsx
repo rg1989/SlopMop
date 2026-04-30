@@ -247,7 +247,7 @@ export default function App() {
               <span className="preview-filename">{previewPath.split('/').pop()}</span>
               <button className="preview-close" onClick={() => { setPreviewPath(null); setPreviewData(null); }}>&times;</button>
             </div>
-            <FilePreview data={previewData} />
+            <FilePreview data={previewData} filePath={previewPath} cwd={cwd} />
           </div>
           </>
         )}
