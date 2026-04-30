@@ -1,8 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-// @ts-expect-error — module does not exist yet (Wave 0 RED state)
 import { FilePreview } from '../client/components/FilePreview';
-// @ts-expect-error — module does not exist yet (Wave 0 RED state)
 import type { FilePreviewData } from '../client/components/FilePreview';
 
 describe('FilePreview', () => {

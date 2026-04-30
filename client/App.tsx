@@ -6,6 +6,9 @@ import { Terminal as TerminalComponent } from './components/Terminal';
 import { FolderPicker } from './components/FolderPicker';
 import { Composer } from './components/Composer';
 import { FileTree } from './components/FileTree';
+import { FilePreview } from './components/FilePreview';
+import type { FilePreviewData } from './components/FilePreview';
+import { AttachBar } from './components/AttachBar';
 import './App.css';
 
 const STORAGE_KEY = 'claudetalk_last_folder';
@@ -33,6 +36,7 @@ export default function App() {
   const [initialPath] = useState(getInitialPath);
   const [attachments, setAttachments] = useState<string[]>([]);
   const [previewPath, setPreviewPath] = useState<string | null>(null);
+  const [previewData, setPreviewData] = useState<FilePreviewData | null>(null);
 
   const cols = terminal?.cols ?? 80;
   const rows = terminal?.rows ?? 24;
@@ -71,7 +75,18 @@ export default function App() {
   useEffect(() => {
     setAttachments([]);
     setPreviewPath(null);
+    setPreviewData(null);
   }, [cwd]);
+
+  // Fetch file content when previewPath changes
+  useEffect(() => {
+    if (!previewPath || !cwd) { setPreviewData(null); return; }
+    const relPath = previewPath.startsWith(cwd) ? previewPath.slice(cwd.length + 1) : previewPath;
+    fetch(`/api/file?cwd=${encodeURIComponent(cwd)}&path=${encodeURIComponent(relPath)}`)
+      .then(r => r.json())
+      .then(setPreviewData)
+      .catch(() => setPreviewData(null));
+  }, [previewPath, cwd]);
 
   return (
     <div className="app">
@@ -104,6 +119,10 @@ export default function App() {
               changedPaths={changedPaths}
               mode={mode}
             />
+            <AttachBar
+              attachments={attachments}
+              onRemove={(p) => setAttachments(prev => prev.filter(x => x !== p))}
+            />
           </div>
         )}
         <div className="main-area">
@@ -114,15 +133,22 @@ export default function App() {
             <TerminalComponent onReady={handleReady} sendResize={sendResize} />
           </div>
           <div className="composer-area">
-            <Composer ref={composerRef} onSend={sendInput} disabled={!connected} />
+            <Composer
+              ref={composerRef}
+              onSend={sendInput}
+              disabled={!connected}
+              attachments={attachments}
+              clearAttachments={() => setAttachments([])}
+            />
           </div>
         </div>
         {previewPath && (
           <div className="preview-panel">
-            {/* FilePreview wired in 02-04 */}
-            <div style={{ padding: 12, color: '#8b949e', fontSize: 12 }}>
-              Preview: {previewPath.split('/').pop()}
+            <div className="preview-panel-header">
+              <span className="preview-filename">{previewPath.split('/').pop()}</span>
+              <button className="preview-close" onClick={() => { setPreviewPath(null); setPreviewData(null); }}>&times;</button>
             </div>
+            <FilePreview data={previewData} />
           </div>
         )}
       </div>
