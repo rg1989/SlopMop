@@ -1,38 +1,62 @@
 import { useState } from 'react';
 
 interface FolderPickerProps {
+  initialPath?: string;
   onConnect: (cwd: string) => void;
 }
 
-export function FolderPicker({ onConnect }: FolderPickerProps) {
-  const [path, setPath] = useState('');
+export function FolderPicker({ initialPath, onConnect }: FolderPickerProps) {
+  const [path, setPath] = useState(initialPath ?? '');
+  const [picking, setPicking] = useState(false);
+
+  const handleBrowse = async () => {
+    setPicking(true);
+    try {
+      const res = await fetch('/api/pick-folder', { method: 'POST' });
+      if (res.ok) {
+        const { path: selected } = await res.json();
+        setPath(selected);
+        onConnect(selected);
+      }
+    } finally {
+      setPicking(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = path.trim();
-    if (trimmed) {
-      onConnect(trimmed);
-    }
+    if (trimmed) onConnect(trimmed);
   };
 
   return (
     <form
       onSubmit={handleSubmit}
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '12px 16px',
-        background: '#161b22',
-        borderBottom: '1px solid #30363d',
-      }}
+      style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}
     >
+      <button
+        type="button"
+        onClick={handleBrowse}
+        disabled={picking}
+        style={{
+          padding: '6px 14px',
+          background: '#21262d',
+          color: picking ? '#484f58' : '#c9d1d9',
+          border: '1px solid #30363d',
+          borderRadius: '6px',
+          fontSize: '13px',
+          cursor: picking ? 'not-allowed' : 'pointer',
+          whiteSpace: 'nowrap',
+          flexShrink: 0,
+        }}
+      >
+        {picking ? 'Choosing…' : '📁 Choose Folder'}
+      </button>
       <input
         type="text"
         value={path}
         onChange={(e) => setPath(e.target.value)}
-        placeholder="Enter folder path, e.g. /Users/you/myproject"
+        placeholder="/path/to/your/project"
         style={{
           flex: 1,
           padding: '6px 10px',
@@ -43,19 +67,23 @@ export function FolderPicker({ onConnect }: FolderPickerProps) {
           fontFamily: 'monospace',
           fontSize: '13px',
           outline: 'none',
+          minWidth: 0,
         }}
       />
       <button
         type="submit"
+        disabled={!path.trim()}
         style={{
           padding: '6px 16px',
-          background: '#238636',
-          color: '#ffffff',
+          background: path.trim() ? '#238636' : '#21262d',
+          color: path.trim() ? '#ffffff' : '#484f58',
           border: 'none',
           borderRadius: '6px',
           fontSize: '13px',
-          cursor: 'pointer',
+          cursor: path.trim() ? 'pointer' : 'not-allowed',
           fontWeight: 600,
+          whiteSpace: 'nowrap',
+          flexShrink: 0,
         }}
       >
         Connect
