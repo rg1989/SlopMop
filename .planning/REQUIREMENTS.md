@@ -15,11 +15,11 @@
 
 ### Files
 
-- [ ] **FILE-01**: User sees a VSCode-style collapsible file tree sidebar for the selected folder
-- [ ] **FILE-02**: User can toggle the file tree between "All Files" and "Changes Only" (git-changed files, like VSCode Source Control)
-- [ ] **FILE-03**: User can select files to attach to a message, with image/text previews shown before sending
-- [ ] **FILE-04**: Attached files are passed to Claude CLI using @path syntax when the message is sent
-- [ ] **FILE-05**: User can click a file in the explorer to preview its contents in a side panel
+- [x] **FILE-01**: User sees a VSCode-style collapsible file tree sidebar for the selected folder
+- [x] **FILE-02**: User can toggle the file tree between "All Files" and "Changes Only" (git-changed files, like VSCode Source Control)
+- [x] **FILE-03**: User can select files to attach to a message, with image/text previews shown before sending
+- [x] **FILE-04**: Attached files are passed to Claude CLI using @path syntax when the message is sent
+- [x] **FILE-05**: User can click a file in the explorer to preview its contents in a side panel
 
 ### Voice Input
 
@@ -70,11 +70,11 @@
 | TERM-03 | Phase 1 | Complete |
 | TERM-04 | Phase 1 | Complete |
 | TERM-05 | Phase 1 | Complete |
-| FILE-01 | Phase 2 | Pending |
-| FILE-02 | Phase 2 | Pending |
-| FILE-03 | Phase 2 | Pending |
-| FILE-04 | Phase 2 | Pending |
-| FILE-05 | Phase 2 | Pending |
+| FILE-01 | Phase 2 | Complete |
+| FILE-02 | Phase 2 | Complete |
+| FILE-03 | Phase 2 | Complete |
+| FILE-04 | Phase 2 | Complete |
+| FILE-05 | Phase 2 | Complete |
 | VOICE-01 | Phase 3 | Pending |
 | VOICE-02 | Phase 3 | Pending |
 | TTS-01 | Phase 3 | Pending |

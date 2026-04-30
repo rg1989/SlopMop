@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-04-PLAN.md — E2E verification passed; Phase 1 PTY Core complete
-last_updated: "2026-04-30T15:48:12.489Z"
+stopped_at: Completed 02-02-PLAN.md — three file system API endpoints live
+last_updated: "2026-04-30T16:15:17.860Z"
 last_activity: "2026-04-30 — Plan 01-04 complete: E2E verification, all 5 TERM criteria confirmed"
 progress:
   total_phases: 3
   completed_phases: 1
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 8
+  completed_plans: 6
   percent: 100
 ---
 
@@ -52,6 +52,8 @@ Progress: [██████████] 100% (Phase 1)
 *Updated after each plan completion*
 | Phase 01-pty-core P02 | 2 | 2 tasks | 9 files |
 | Phase 01-pty-core P03 | 8 | 2 tasks | 4 files |
+| Phase 02-file-system P01 | 2 min | 2 tasks | 4 files |
+| Phase 02-file-system P02 | 2min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -76,6 +78,11 @@ Recent decisions affecting current work:
 - [Phase 01-04]: Composer is the sole input surface; terminal panel is display-only (clicks redirected to Composer)
 - [Phase 01-04]: Native macOS folder picker via osascript invoked from /api/pick-folder backend endpoint
 - [Phase 01-04]: Working directory persisted in localStorage + URL ?cwd= query param for session continuity
+- [Phase 02-file-system]: Wave 0 tests use @ts-expect-error on non-existent imports so Vitest runs RED without TypeScript blocking compilation
+- [Phase 02-file-system]: Composer @path injection: prepend '@absPath1 @absPath2\n' to message before '\r' when attachments is non-empty
+- [Phase 02-file-system]: path.sep suffix in traversal check: absPath.startsWith(resolvedCwd + path.sep) blocks root-level attacks while remaining platform-safe
+- [Phase 02-file-system]: getGitChangedPaths always returns [] on error — callers never need try/catch for the git-status route
+- [Phase 02-file-system]: buildFileTree max depth 8 guard prevents hangs on pathological repos; sort dirs-before-files matches IDE conventions
 
 ### Pending Todos
 
@@ -87,6 +94,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-30T15:30:00.000Z
-Stopped at: Completed 01-04-PLAN.md — E2E verification passed; Phase 1 PTY Core complete
+Last session: 2026-04-30T16:15:17.858Z
+Stopped at: Completed 02-02-PLAN.md — three file system API endpoints live
 Resume file: None

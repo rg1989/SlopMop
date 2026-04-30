@@ -74,5 +74,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. PTY Core | 4/4 | Complete    | 2026-04-30 |
-| 2. File System | 0/4 | Not started | - |
+| 2. File System | 2/4 | In Progress|  |
 | 3. Voice I/O | 0/TBD | Not started | - |
