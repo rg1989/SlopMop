@@ -7,6 +7,7 @@ interface UsePtyOptions {
   terminal: Terminal | null;
   cols: number;
   rows: number;
+  onData?: (raw: string) => void;
 }
 
 interface UsePtyReturn {
@@ -15,7 +16,7 @@ interface UsePtyReturn {
   connected: boolean;
 }
 
-export function usePty({ cwd, terminal, cols, rows }: UsePtyOptions): UsePtyReturn {
+export function usePty({ cwd, terminal, cols, rows, onData }: UsePtyOptions): UsePtyReturn {
   const wsRef = useRef<WebSocket | null>(null);
   const [connected, setConnected] = useState(false);
 
@@ -38,7 +39,10 @@ export function usePty({ cwd, terminal, cols, rows }: UsePtyOptions): UsePtyRetu
 
     ws.onmessage = (event) => {
       const msg: ServerMessage = JSON.parse(event.data);
-      if (msg.type === 'data') terminal.write(msg.data);
+      if (msg.type === 'data') {
+        terminal.write(msg.data);
+        onData?.(msg.data);
+      }
       if (msg.type === 'error') console.error('PTY error:', msg.message);
       if (msg.type === 'exit') {
         setConnected(false);
