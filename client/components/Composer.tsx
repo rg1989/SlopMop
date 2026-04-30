@@ -3,10 +3,12 @@ import { useState, KeyboardEvent, forwardRef } from 'react';
 interface ComposerProps {
   onSend: (text: string) => void;
   disabled?: boolean;
+  attachments?: string[];
+  clearAttachments?: () => void;
 }
 
 export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(
-  function Composer({ onSend, disabled = false }, ref) {
+  function Composer({ onSend, disabled = false, attachments, clearAttachments }, ref) {
   const [value, setValue] = useState('');
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -14,7 +16,10 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(
       e.preventDefault();
       const trimmed = value.trim();
       if (trimmed) {
-        onSend(value + '\r');
+        const atPaths = (attachments ?? []).map(p => `@${p}`).join(' ');
+        const fullMessage = atPaths ? `${atPaths}\n${value}` : value;
+        onSend(fullMessage + '\r');
+        clearAttachments?.();
         setValue('');
       }
     }
