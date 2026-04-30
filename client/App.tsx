@@ -10,6 +10,8 @@ import { Composer } from './components/Composer';
 import { FileTree } from './components/FileTree';
 import { FilePreview } from './components/FilePreview';
 import type { FilePreviewData } from './components/FilePreview';
+import { EditorTabBar } from './components/EditorTabBar';
+import type { EditorTab } from './components/EditorTabBar';
 import { AttachBar } from './components/AttachBar';
 import { VoiceBar } from './components/VoiceBar';
 import './App.css';
@@ -77,6 +79,16 @@ function persistPath(cwd: string) {
   window.history.replaceState(null, '', url.toString());
 }
 
+async function fetchFileContent(cwd: string, filePath: string): Promise<FilePreviewData | null> {
+  try {
+    const relPath = filePath.startsWith(cwd) ? filePath.slice(cwd.length + 1) : filePath;
+    const res = await fetch(`/api/file?cwd=${encodeURIComponent(cwd)}&path=${encodeURIComponent(relPath)}`);
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
 export default function App() {
   const [cwd, setCwd] = useState<string | null>(null);
   const [terminal, setTerminal] = useState<Terminal | null>(null);
@@ -84,8 +96,9 @@ export default function App() {
 
   const [initialPath] = useState(getInitialPath);
   const [attachments, setAttachments] = useState<string[]>([]);
-  const [previewPath, setPreviewPath] = useState<string | null>(null);
-  const [previewData, setPreviewData] = useState<FilePreviewData | null>(null);
+  const [editorTabs, setEditorTabs] = useState<EditorTab[]>([]);
+  const [activeTabId, setActiveTabId] = useState<string | null>(null);
+  const [editingTabId, setEditingTabId] = useState<string | null>(null);
   const [ttsEnabled, setTtsEnabled] = useState(false);
 
   const sidebarMaxRef = useRef<number>(Infinity);
@@ -95,7 +108,7 @@ export default function App() {
   const preview = useDragResize(PREVIEW_DEFAULT, PREVIEW_MIN, 'right', previewMaxRef);
 
   // Keep max refs current every render so drag handlers always see the latest values
-  const previewVisible = previewPath !== null;
+  const previewVisible = editorTabs.length > 0;
   sidebarMaxRef.current = window.innerWidth - TERMINAL_MIN - (previewVisible ? preview.width + RESIZE_HANDLE_WIDTH : 0) - RESIZE_HANDLE_WIDTH;
   previewMaxRef.current = window.innerWidth - TERMINAL_MIN - sidebar.width - RESIZE_HANDLE_WIDTH - (previewVisible ? RESIZE_HANDLE_WIDTH : 0);
 
@@ -147,22 +160,86 @@ export default function App() {
     if (connected) composerRef.current?.focus();
   }, [connected]);
 
-  // Clear attachments and preview when cwd changes
+  // Clear attachments and tabs when cwd changes
   useEffect(() => {
     setAttachments([]);
-    setPreviewPath(null);
-    setPreviewData(null);
+    setEditorTabs([]);
+    setActiveTabId(null);
+    setEditingTabId(null);
   }, [cwd]);
 
-  // Fetch file content when previewPath changes
-  useEffect(() => {
-    if (!previewPath || !cwd) { setPreviewData(null); return; }
-    const relPath = previewPath.startsWith(cwd) ? previewPath.slice(cwd.length + 1) : previewPath;
-    fetch(`/api/file?cwd=${encodeURIComponent(cwd)}&path=${encodeURIComponent(relPath)}`)
-      .then(r => r.json())
-      .then(setPreviewData)
-      .catch(() => setPreviewData(null));
-  }, [previewPath, cwd]);
+  const openFile = useCallback(async (path: string, isPreview: boolean) => {
+    if (!cwd) return;
+
+    if (isPreview) {
+      // Replace existing preview tab or push a new one
+      setEditorTabs((prev) => {
+        const existingPreviewIdx = prev.findIndex((t) => t.isPreview);
+        if (existingPreviewIdx !== -1) {
+          // Replace the preview tab with new path
+          const updated = [...prev];
+          updated[existingPreviewIdx] = { id: path, path, isPreview: true, data: null };
+          return updated;
+        }
+        // No preview tab — add one
+        return [...prev, { id: path, path, isPreview: true, data: null }];
+      });
+      setActiveTabId(path);
+
+      // Fetch content and update the tab
+      const data = await fetchFileContent(cwd, path);
+      setEditorTabs((prev) =>
+        prev.map((t) => (t.id === path ? { ...t, data } : t))
+      );
+    } else {
+      // Permanent tab — check if already open
+      setEditorTabs((prev) => {
+        const existing = prev.find((t) => t.path === path);
+        if (existing) {
+          // Promote if preview, otherwise just activate
+          return prev.map((t) =>
+            t.path === path ? { ...t, isPreview: false } : t
+          );
+        }
+        return [...prev, { id: path, path, isPreview: false, data: null }];
+      });
+      setActiveTabId(path);
+
+      // Fetch content
+      const data = await fetchFileContent(cwd, path);
+      setEditorTabs((prev) =>
+        prev.map((t) => (t.id === path ? { ...t, data } : t))
+      );
+    }
+  }, [cwd]);
+
+  const closeTab = useCallback((id: string) => {
+    setEditorTabs((prev) => {
+      const idx = prev.findIndex((t) => t.id === id);
+      if (idx === -1) return prev;
+      const next = prev.filter((t) => t.id !== id);
+      // Update active tab: prefer right neighbor, then left, then null
+      setActiveTabId((currentActive) => {
+        if (currentActive !== id) return currentActive;
+        if (next.length === 0) return null;
+        const newIdx = Math.min(idx, next.length - 1);
+        return next[newIdx].id;
+      });
+      return next;
+    });
+    setEditingTabId((prev) => (prev === id ? null : prev));
+  }, []);
+
+  const promoteTab = useCallback((id: string) => {
+    setEditorTabs((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, isPreview: false } : t))
+    );
+    setEditingTabId(id);
+  }, []);
+
+  // Derive the active tab's path for FileTree highlighting
+  const activeTab = editorTabs.find((t) => t.id === activeTabId);
+  const activeFilePath = activeTab?.path ?? null;
 
   return (
     <div className="app">
@@ -192,9 +269,11 @@ export default function App() {
                 nodes={tree}
                 selected={new Set(attachments)}
                 onSelect={(p) => setAttachments(prev => prev.includes(p) ? prev : [...prev, p])}
-                onPreview={setPreviewPath}
+                onPreview={(p) => openFile(p, true)}
+                onOpen={(p) => openFile(p, false)}
                 changedPaths={changedPaths}
                 mode={mode}
+                activePath={activeFilePath ?? undefined}
               />
             </div>
             <div
@@ -237,19 +316,34 @@ export default function App() {
             />
           </div>
         </div>
-        {previewPath && (
+        {editorTabs.length > 0 && (
           <>
-          <div
-            className={`resize-handle${preview.isDragging ? ' dragging' : ''}`}
-            onMouseDown={preview.onMouseDown}
-          />
-          <div className="preview-panel" style={{ width: preview.width }}>
-            <div className="preview-panel-header">
-              <span className="preview-filename">{previewPath.split('/').pop()}</span>
-              <button className="preview-close" onClick={() => { setPreviewPath(null); setPreviewData(null); }}>&times;</button>
+            <div
+              className={`resize-handle${preview.isDragging ? ' dragging' : ''}`}
+              onMouseDown={preview.onMouseDown}
+            />
+            <div className="preview-panel" style={{ width: preview.width }}>
+              <EditorTabBar
+                tabs={editorTabs}
+                activeId={activeTabId}
+                onSelect={setActiveTabId}
+                onClose={closeTab}
+                onPromote={promoteTab}
+              />
+              {(() => {
+                const tab = editorTabs.find((t) => t.id === activeTabId);
+                if (!tab) return null;
+                return (
+                  <FilePreview
+                    data={tab.data}
+                    filePath={tab.path}
+                    cwd={cwd}
+                    initialEditing={activeTabId === editingTabId}
+                    onPromote={() => promoteTab(activeTabId!)}
+                  />
+                );
+              })()}
             </div>
-            <FilePreview data={previewData} filePath={previewPath} cwd={cwd} />
-          </div>
           </>
         )}
       </div>

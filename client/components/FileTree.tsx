@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 // SVG eye-off icon for hidden (dotfile) entries
 function EyeOffIcon() {
@@ -44,8 +44,10 @@ interface FileTreeNodeProps {
   selected: Set<string>;
   onSelect: (path: string) => void;
   onPreview: (path: string) => void;
+  onOpen?: (path: string) => void;
   changedPaths: Set<string>;
   mode: 'all' | 'changes';
+  activePath?: string;
   depth?: number;
 }
 
@@ -54,8 +56,10 @@ function FileTreeNode({
   selected,
   onSelect,
   onPreview,
+  onOpen,
   changedPaths,
   mode,
+  activePath,
   depth = 0,
 }: FileTreeNodeProps) {
   const [open, setOpen] = useState(true);
@@ -90,8 +94,10 @@ function FileTreeNode({
                   selected={selected}
                   onSelect={onSelect}
                   onPreview={onPreview}
+                  onOpen={onOpen}
                   changedPaths={changedPaths}
                   mode={mode}
+                  activePath={activePath}
                   depth={depth + 1}
                 />
               );
@@ -105,11 +111,13 @@ function FileTreeNode({
   // File node
   const isSelected = selected.has(node.path);
   const isChanged = changedPaths.has(node.path);
+  const isActive = node.path === activePath;
   const classNames = [
     'ft-file',
     isSelected ? 'ft-selected' : '',
     isChanged ? 'ft-changed' : '',
     node.hidden ? 'ft-hidden' : '',
+    isActive ? 'ft-active' : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -117,9 +125,13 @@ function FileTreeNode({
   return (
     <li
       className={classNames}
+      data-path={node.path}
       style={{ paddingLeft: `${24 + depth * 12}px` }}
       onClick={() => onPreview(node.path)}
-      onDoubleClick={() => onSelect(node.path)}
+      onDoubleClick={() => {
+        onSelect(node.path);
+        onOpen?.(node.path);
+      }}
     >
       {node.hidden && <EyeOffIcon />}
       {node.name}
@@ -132,8 +144,10 @@ interface FileTreeProps {
   selected: Set<string>;
   onSelect: (path: string) => void;
   onPreview: (path: string) => void;
+  onOpen?: (path: string) => void;
   changedPaths: Set<string>;
   mode?: 'all' | 'changes';
+  activePath?: string;
 }
 
 export function FileTree({
@@ -141,16 +155,27 @@ export function FileTree({
   selected,
   onSelect,
   onPreview,
+  onOpen,
   changedPaths,
   mode = 'all',
+  activePath,
 }: FileTreeProps) {
+  const rootRef = useRef<HTMLUListElement>(null);
+
+  // Scroll active file into view when activePath changes
+  useEffect(() => {
+    if (!activePath || !rootRef.current) return;
+    const el = rootRef.current.querySelector<HTMLElement>(`li[data-path="${CSS.escape(activePath)}"]`);
+    if (el) el.scrollIntoView({ block: 'nearest' });
+  }, [activePath]);
+
   // In Changes mode with no changed files, show empty state
   if (mode === 'changes' && changedPaths.size === 0) {
     return <p className="ft-empty">Working tree clean</p>;
   }
 
   return (
-    <ul className="ft-tree">
+    <ul className="ft-tree" ref={rootRef}>
       {nodes.map((node) => {
         // In 'changes' mode, skip top-level file nodes not in changedPaths
         if (mode === 'changes' && node.type === 'file' && !changedPaths.has(node.path)) {
@@ -163,8 +188,10 @@ export function FileTree({
             selected={selected}
             onSelect={onSelect}
             onPreview={onPreview}
+            onOpen={onOpen}
             changedPaths={changedPaths}
             mode={mode}
+            activePath={activePath}
           />
         );
       })}
