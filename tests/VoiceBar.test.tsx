@@ -1,4 +1,3 @@
-// @ts-expect-error — module does not exist yet (Wave 0 stub)
 import { VoiceBar } from '../client/components/VoiceBar';
 import { render, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';

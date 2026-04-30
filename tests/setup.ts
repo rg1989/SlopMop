@@ -4,6 +4,7 @@ import { vi, beforeEach } from 'vitest';
 // --- Web Speech API mocks (jsdom does not implement these) ---
 
 class MockSpeechRecognition {
+  static instances: MockSpeechRecognition[] = [];
   lang = 'en-US';
   interimResults = false;
   continuous = false;
@@ -14,6 +15,7 @@ class MockSpeechRecognition {
   start = vi.fn(() => { this.onstart?.(); });
   stop = vi.fn(() => { this.onend?.(); });
   abort = vi.fn();
+  constructor() { MockSpeechRecognition.instances.push(this); }
 }
 
 const mockSpeechSynthesis = {
@@ -46,6 +48,7 @@ vi.stubGlobal('SpeechSynthesisUtterance', class {
 // Reset mocks between tests
 beforeEach(() => {
   vi.clearAllMocks();
+  MockSpeechRecognition.instances = [];
   mockSpeechSynthesis.speaking = false;
   mockSpeechSynthesis.speak.mockClear();
   mockSpeechSynthesis.cancel.mockClear();

@@ -1,4 +1,3 @@
-// @ts-expect-error — module does not exist yet (Wave 0 stub)
 import { useVoiceInput } from '../client/hooks/useVoiceInput';
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
@@ -16,13 +15,12 @@ describe('useVoiceInput', () => {
     const onTranscript = vi.fn();
     const { result } = renderHook(() => useVoiceInput({ onTranscript }));
     act(() => { result.current.start(); });
-    // Simulate a recognition result
+    const instance = MockSpeechRecognition.instances[0];
     const fakeEvent = {
       results: [Object.assign([{ transcript: 'hello world' }], { isFinal: true })],
     } as unknown as SpeechRecognitionEvent;
-    // The hook wires onresult to the SR instance — verify callback fires
-    // (full behavior verified in implementation plan)
-    expect(onTranscript).not.toHaveBeenCalled(); // placeholder until impl
+    act(() => { instance.onresult?.(fakeEvent); });
+    expect(onTranscript).toHaveBeenCalledWith('hello world');
   });
 
   it('VOICE-02: stop() sets recording to false', () => {
