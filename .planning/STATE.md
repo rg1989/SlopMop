@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-04-30)
 ## Current Position
 
 Phase: 1 of 3 (PTY Core)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-04-30 — Roadmap created, 16/16 requirements mapped across 3 phases
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-04-30 — Plan 01-01 complete: backend PTY manager, WebSocket handler, HTTP server
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 10%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: —
-- Total execution time: 0 hours
+- Total plans completed: 1
+- Average duration: 3 min
+- Total execution time: 0.05 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 01-pty-core | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: —
-- Trend: —
+- Last 5 plans: 3 min
+- Trend: Baseline established
 
 *Updated after each plan completion*
 
@@ -45,6 +45,9 @@ Recent decisions affecting current work:
 - [Init]: Local web app over Electron — faster to ship, design quality independent of packaging
 - [Init]: Real PTY over chat-style input — full terminal fidelity (color, interactive prompts, stdin/stdout)
 - [Init]: Ghost-pepper pattern for TTS — already solved streaming + interruption
+- [01-01]: Use vi.hoisted() for Vitest mock factory — vi.mock is hoisted but factory closures are not; hoisted() ensures mocks are initialized before module imports
+- [01-01]: Inject login-shell PATH from /bin/bash -lc rather than relying on process.env.PATH — prevents claude-not-found errors in non-interactive Node.js process
+- [01-01]: Kill PTY on WebSocket close in Phase 1 — session persistence deferred to v2 (POW-05)
 
 ### Pending Todos
 
@@ -57,5 +60,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-30
-Stopped at: Roadmap created — ready to plan Phase 1
+Stopped at: Completed 01-01-PLAN.md — backend PTY infrastructure done, ready for 01-02 and 01-03
 Resume file: None

@@ -7,8 +7,8 @@
 
 ### Terminal
 
-- [ ] **TERM-01**: User can select a folder from the UI which opens a real PTY Claude CLI session in that directory
-- [ ] **TERM-02**: Terminal renders full ANSI/color output with correct Claude CLI interactive behavior
+- [x] **TERM-01**: User can select a folder from the UI which opens a real PTY Claude CLI session in that directory
+- [x] **TERM-02**: Terminal renders full ANSI/color output with correct Claude CLI interactive behavior
 - [ ] **TERM-03**: User can compose multiline messages in an input area before sending to the terminal
 - [ ] **TERM-04**: Terminal supports scrollback buffer and keyboard copy/paste shortcuts
 - [ ] **TERM-05**: Terminal resizes correctly when browser window or sidebar width changes
@@ -65,8 +65,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TERM-01 | Phase 1 | Pending |
-| TERM-02 | Phase 1 | Pending |
+| TERM-01 | Phase 1 | Complete |
+| TERM-02 | Phase 1 | Complete |
 | TERM-03 | Phase 1 | Pending |
 | TERM-04 | Phase 1 | Pending |
 | TERM-05 | Phase 1 | Pending |
