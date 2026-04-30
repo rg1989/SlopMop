@@ -50,11 +50,12 @@ created: 2026-04-30
 
 ## Wave 0 Requirements
 
-- [ ] `src/__tests__/fileTree.test.ts` — stubs for FILE-01, FILE-02 (file tree rendering, git toggle)
-- [ ] `src/__tests__/fileAttachment.test.ts` — stubs for FILE-03, FILE-04 (@path injection)
-- [ ] `server/__tests__/fileEndpoints.test.ts` — path traversal security test for `/api/file`
+- [ ] `tests/FileTree.test.tsx` — stubs for FILE-01, FILE-02 (file tree rendering, git toggle, preview click)
+- [ ] `tests/useFileTree.test.ts` — stubs for FILE-02 hook (cwd change fetch, mode toggle)
+- [ ] `tests/FilePreview.test.tsx` — stubs for FILE-03, FILE-05 (text/image/binary rendering)
+- [ ] `tests/Composer.test.tsx` — extended with @path injection cases for FILE-04
 
-*If none: "Existing infrastructure covers all phase requirements."*
+*All four files are created by plan 02-01. Wave 0 tests run RED until implementation plans (02-02 through 02-04) turn them GREEN.*
 
 ---
 
@@ -62,8 +63,9 @@ created: 2026-04-30
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| Image preview renders correctly | FILE-03 | Requires visual inspection of rendered image | Select an image file, confirm thumbnail appears in attachment area |
+| File attachment chips appear on double-click | FILE-03 | UI interaction | Double-click a file, confirm chip appears below tree with filename |
 | File contents open in preview panel | FILE-05 | Requires UI interaction | Click any file in tree, confirm preview panel opens with content |
+| Image preview renders correctly | FILE-05 | Requires visual inspection of rendered image | Select an image file, confirm img element appears in preview panel |
 
 ---
 
