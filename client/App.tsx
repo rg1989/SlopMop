@@ -65,9 +65,11 @@ export default function App() {
     <div className="app">
       <div className="folder-bar">
         <FolderPicker initialPath={initialPath ?? undefined} onConnect={handleConnect} />
-        <span className={`status-badge ${connected ? 'connected' : 'disconnected'}`}>
-          {connected ? 'Connected' : 'Disconnected'}
-        </span>
+        {cwd && (
+          <span className="active-path" title={cwd}>
+            {cwd.replace(/\/$/, '').split('/').pop()}
+          </span>
+        )}
       </div>
       <div
         className="terminal-area"

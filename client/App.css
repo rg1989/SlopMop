@@ -22,23 +22,14 @@ html, body, #root { height: 100%; background: #0d1117; color: #c9d1d9; }
   flex-shrink: 0;
 }
 
-.status-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 11px;
+.active-path {
+  font-family: monospace;
+  font-size: 13px;
   font-weight: 600;
+  color: #d4845a;
   white-space: nowrap;
-}
-
-.status-badge.connected {
-  background: #1a4730;
-  color: #3fb950;
-  border: 1px solid #2ea043;
-}
-
-.status-badge.disconnected {
-  background: #21262d;
-  color: #8b949e;
-  border: 1px solid #30363d;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+  letter-spacing: 0.01em;
 }
