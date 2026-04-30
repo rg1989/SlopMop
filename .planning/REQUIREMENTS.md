@@ -28,8 +28,8 @@
 
 ### TTS Output
 
-- [ ] **TTS-01**: User can toggle a TTS mode where agent responses are streamed and read aloud using the AudioContext pattern (ghost-pepper approach)
-- [ ] **TTS-02**: TTS playback can be stopped at any point via a manual stop button
+- [x] **TTS-01**: User can toggle a TTS mode where agent responses are streamed and read aloud using the AudioContext pattern (ghost-pepper approach)
+- [x] **TTS-02**: TTS playback can be stopped at any point via a manual stop button
 - [ ] **TTS-03**: User can interrupt TTS mid-sentence by speaking — playback stops and the transcribed speech is sent as a new message
 - [ ] **TTS-04**: TTS and voice input are mutually exclusive — TTS pauses/stops when voice recording starts
 
@@ -77,8 +77,8 @@
 | FILE-05 | Phase 2 | Complete |
 | VOICE-01 | Phase 3 | Pending |
 | VOICE-02 | Phase 3 | Pending |
-| TTS-01 | Phase 3 | Pending |
-| TTS-02 | Phase 3 | Pending |
+| TTS-01 | Phase 3 | Complete |
+| TTS-02 | Phase 3 | Complete |
 | TTS-03 | Phase 3 | Pending |
 | TTS-04 | Phase 3 | Pending |
 
