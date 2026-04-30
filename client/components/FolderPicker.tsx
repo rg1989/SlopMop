@@ -70,24 +70,6 @@ export function FolderPicker({ initialPath, onConnect }: FolderPickerProps) {
           minWidth: 0,
         }}
       />
-      <button
-        type="submit"
-        disabled={!path.trim()}
-        style={{
-          padding: '6px 16px',
-          background: path.trim() ? '#238636' : '#21262d',
-          color: path.trim() ? '#ffffff' : '#484f58',
-          border: 'none',
-          borderRadius: '6px',
-          fontSize: '13px',
-          cursor: path.trim() ? 'pointer' : 'not-allowed',
-          fontWeight: 600,
-          whiteSpace: 'nowrap',
-          flexShrink: 0,
-        }}
-      >
-        Connect
-      </button>
     </form>
   );
 }
