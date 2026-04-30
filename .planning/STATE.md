@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 02-03-PLAN.md — FileTree sidebar and useFileTree hook with All/Changes toggle
-last_updated: "2026-04-30T16:20:54.753Z"
+stopped_at: "Checkpoint: human-verify — Complete Phase 2 file system feature"
+last_updated: "2026-04-30T16:26:28.707Z"
 last_activity: "2026-04-30 — Plan 01-04 complete: E2E verification, all 5 TERM criteria confirmed"
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
   percent: 100
 ---
 
@@ -55,6 +55,7 @@ Progress: [██████████] 100% (Phase 1)
 | Phase 02-file-system P01 | 2 min | 2 tasks | 4 files |
 | Phase 02-file-system P02 | 2min | 2 tasks | 4 files |
 | Phase 02-file-system P03 | 4min | 2 tasks | 6 files |
+| Phase 02-file-system P04 | 3min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,8 @@ Recent decisions affecting current work:
 - [Phase 02-file-system]: buildFileTree max depth 8 guard prevents hangs on pathological repos; sort dirs-before-files matches IDE conventions
 - [Phase 02-file-system]: FileNode interface defined in FileTree.tsx and imported by useFileTree.ts — avoids shared types coupling between client and server
 - [Phase 02-file-system]: Preview panel slot added as empty placeholder in 02-03 so 02-04 can wire FilePreview without further layout changes
+- [Phase 02-file-system]: FilePreview returns null for null data; AttachBar filename-only chips; Composer clearAttachments after onSend
+- [Phase 02-file-system]: Removed @ts-expect-error from FilePreview.test.tsx after module created — unused suppressions cause TS2578
 
 ### Pending Todos
 
@@ -97,6 +100,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-30T16:20:54.751Z
-Stopped at: Completed 02-03-PLAN.md — FileTree sidebar and useFileTree hook with All/Changes toggle
+Last session: 2026-04-30T16:26:28.704Z
+Stopped at: Checkpoint: human-verify — Complete Phase 2 file system feature
 Resume file: None

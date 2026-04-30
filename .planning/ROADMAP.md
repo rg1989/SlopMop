@@ -13,7 +13,7 @@ Three phases that build on each other: first establish a fully-functional PTY te
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: PTY Core** - Node.js backend + xterm.js frontend wired end-to-end; user can open Claude CLI in a real terminal session in the browser
-- [ ] **Phase 2: File System** - VSCode-style file explorer sidebar, file attachment with previews, file preview panel
+- [x] **Phase 2: File System** - VSCode-style file explorer sidebar, file attachment with previews, file preview panel (completed 2026-04-30)
 - [ ] **Phase 3: Voice I/O** - Voice transcription into the message composer, TTS playback of agent responses, mid-sentence interruption
 
 ## Phase Details
@@ -74,5 +74,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. PTY Core | 4/4 | Complete    | 2026-04-30 |
-| 2. File System | 2/4 | In Progress|  |
+| 2. File System | 4/4 | Complete   | 2026-04-30 |
 | 3. Voice I/O | 0/TBD | Not started | - |
