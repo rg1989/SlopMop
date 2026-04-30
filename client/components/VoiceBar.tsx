@@ -4,6 +4,7 @@ interface VoiceBarProps {
   recording: boolean;
   speaking: boolean;
   ttsEnabled: boolean;
+  micError?: string | null;
   onMicStart: () => void;
   onMicStop: () => void;
   onTtsToggle: () => void;
@@ -15,6 +16,7 @@ export const VoiceBar: FC<VoiceBarProps> = ({
   recording,
   speaking,
   ttsEnabled,
+  micError,
   onMicStart,
   onMicStop,
   onTtsToggle,
@@ -102,6 +104,13 @@ export const VoiceBar: FC<VoiceBarProps> = ({
       {speaking && (
         <span style={{ color: '#388bfd', fontSize: '12px', fontStyle: 'italic' }}>
           Speaking…
+        </span>
+      )}
+
+      {/* Mic error */}
+      {micError && (
+        <span style={{ color: '#f85149', fontSize: '12px' }}>
+          {micError}
         </span>
       )}
     </div>

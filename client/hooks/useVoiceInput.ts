@@ -7,6 +7,7 @@ interface UseVoiceInputOptions {
 
 interface UseVoiceInputReturn {
   recording: boolean;
+  micError: string | null;
   start: () => void;
   stop: () => void;
   supported: boolean;
@@ -14,7 +15,10 @@ interface UseVoiceInputReturn {
 
 export function useVoiceInput({ onTranscript, onStart }: UseVoiceInputOptions): UseVoiceInputReturn {
   const [recording, setRecording] = useState(false);
+  const [micError, setMicError] = useState<string | null>(null);
   const recRef = useRef<SpeechRecognition | null>(null);
+  // Tracks whether onerror fired so onend doesn't double-reset
+  const erroredRef = useRef(false);
 
   const SR = (window as Window & typeof globalThis & {
     SpeechRecognition?: typeof SpeechRecognition;
@@ -27,17 +31,31 @@ export function useVoiceInput({ onTranscript, onStart }: UseVoiceInputOptions): 
 
   const start = useCallback(() => {
     if (!SR) return;
+    setMicError(null);
+    erroredRef.current = false;
     onStart?.();                 // TTS-04: stop TTS before mic opens
     const rec = new SR();
     rec.lang = 'en-US';
-    rec.interimResults = false;  // final results only — simpler state
-    rec.continuous = false;      // single utterance; new instance per call
+    rec.interimResults = false;
+    rec.continuous = false;
     rec.onresult = (e: SpeechRecognitionEvent) => {
       const text = e.results[e.results.length - 1][0].transcript;
       onTranscript(text);
     };
-    rec.onend = () => setRecording(false);
-    rec.onerror = () => setRecording(false);
+    rec.onerror = (e: SpeechRecognitionErrorEvent) => {
+      erroredRef.current = true;
+      setRecording(false);
+      if (e.error === 'not-allowed') {
+        setMicError('Microphone permission denied. Allow access in your browser settings.');
+      } else if (e.error === 'no-speech') {
+        setMicError(null); // silent — just ended without hearing anything
+      } else {
+        setMicError(`Mic error: ${e.error}`);
+      }
+    };
+    rec.onend = () => {
+      if (!erroredRef.current) setRecording(false);
+    };
     rec.start();
     recRef.current = rec;
     setRecording(true);
@@ -49,5 +67,5 @@ export function useVoiceInput({ onTranscript, onStart }: UseVoiceInputOptions): 
     setRecording(false);
   }, []);
 
-  return { recording, start, stop, supported };
+  return { recording, micError, start, stop, supported };
 }

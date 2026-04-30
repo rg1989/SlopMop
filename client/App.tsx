@@ -219,6 +219,7 @@ export default function App() {
               recording={voice.recording}
               speaking={tts.speaking}
               ttsEnabled={ttsEnabled}
+              micError={voice.micError}
               onMicStart={voice.start}
               onMicStop={voice.stop}
               onTtsToggle={() => setTtsEnabled(e => !e)}
