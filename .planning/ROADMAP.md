@@ -64,7 +64,13 @@ Plans:
   3. User can stop TTS at any point with a manual stop button
   4. User can interrupt TTS mid-sentence by speaking; playback stops and the transcribed speech is sent as a new message
   5. TTS pauses automatically when voice recording starts — the two modes never overlap
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Wave 0 test scaffolds (Web Speech API mocks, useVoiceInput/useTts/VoiceBar stubs)
+- [ ] 03-02-PLAN.md — usePty onData extension + useVoiceInput hook (VOICE-01, VOICE-02, TTS-03)
+- [ ] 03-03-PLAN.md — useTts hook with ANSI stripping + sentence buffering (TTS-01, TTS-02)
+- [ ] 03-04-PLAN.md — VoiceBar component + App.tsx wiring + human verification checkpoint
 
 ## Progress
 
@@ -75,4 +81,4 @@ Phases execute in numeric order: 1 → 2 → 3
 |-------|----------------|--------|-----------|
 | 1. PTY Core | 4/4 | Complete    | 2026-04-30 |
 | 2. File System | 4/4 | Complete    | 2026-04-30 |
-| 3. Voice I/O | 0/TBD | Not started | - |
+| 3. Voice I/O | 0/4 | Not started | - |
