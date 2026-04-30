@@ -23,15 +23,15 @@
 
 ### Voice Input
 
-- [ ] **VOICE-01**: User can record a voice message that is transcribed and dropped into the message input composer
-- [ ] **VOICE-02**: Transcription is triggered by a button press (push-to-talk or start/stop toggle)
+- [x] **VOICE-01**: User can record a voice message that is transcribed and dropped into the message input composer
+- [x] **VOICE-02**: Transcription is triggered by a button press (push-to-talk or start/stop toggle)
 
 ### TTS Output
 
 - [x] **TTS-01**: User can toggle a TTS mode where agent responses are streamed and read aloud using the AudioContext pattern (ghost-pepper approach)
 - [x] **TTS-02**: TTS playback can be stopped at any point via a manual stop button
-- [ ] **TTS-03**: User can interrupt TTS mid-sentence by speaking — playback stops and the transcribed speech is sent as a new message
-- [ ] **TTS-04**: TTS and voice input are mutually exclusive — TTS pauses/stops when voice recording starts
+- [x] **TTS-03**: User can interrupt TTS mid-sentence by speaking — playback stops and the transcribed speech is sent as a new message
+- [x] **TTS-04**: TTS and voice input are mutually exclusive — TTS pauses/stops when voice recording starts
 
 ## v2 Requirements
 
@@ -75,12 +75,12 @@
 | FILE-03 | Phase 2 | Complete |
 | FILE-04 | Phase 2 | Complete |
 | FILE-05 | Phase 2 | Complete |
-| VOICE-01 | Phase 3 | Pending |
-| VOICE-02 | Phase 3 | Pending |
+| VOICE-01 | Phase 3 | Complete |
+| VOICE-02 | Phase 3 | Complete |
 | TTS-01 | Phase 3 | Complete |
 | TTS-02 | Phase 3 | Complete |
-| TTS-03 | Phase 3 | Pending |
-| TTS-04 | Phase 3 | Pending |
+| TTS-03 | Phase 3 | Complete |
+| TTS-04 | Phase 3 | Complete |
 
 **Coverage:**
 - v1 requirements: 16 total
