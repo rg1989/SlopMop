@@ -16,11 +16,14 @@ const SIDEBAR_MIN = 140;
 const SIDEBAR_DEFAULT = 240;
 const PREVIEW_MIN = 180;
 const PREVIEW_DEFAULT = 320;
+const TERMINAL_MIN = 140;
+const RESIZE_HANDLE_WIDTH = 4;
 
 function useDragResize(
   initial: number,
   min: number,
   direction: 'left' | 'right',
+  maxRef?: React.RefObject<number>,
 ) {
   const [width, setWidth] = useState(initial);
   const dragging = useRef(false);
@@ -40,7 +43,8 @@ function useDragResize(
       const delta = direction === 'left'
         ? ev.clientX - startX.current
         : startX.current - ev.clientX;
-      setWidth(Math.max(min, startW.current + delta));
+      const max = maxRef?.current ?? Infinity;
+      setWidth(Math.max(min, Math.min(max, startW.current + delta)));
     };
     const onUp = () => {
       dragging.current = false;
@@ -50,7 +54,7 @@ function useDragResize(
     };
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onUp);
-  }, [width, min, direction]);
+  }, [width, min, direction, maxRef]);
 
   return { width, isDragging, onMouseDown };
 }
@@ -80,8 +84,16 @@ export default function App() {
   const [previewPath, setPreviewPath] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<FilePreviewData | null>(null);
 
-  const sidebar = useDragResize(SIDEBAR_DEFAULT, SIDEBAR_MIN, 'left');
-  const preview = useDragResize(PREVIEW_DEFAULT, PREVIEW_MIN, 'right');
+  const sidebarMaxRef = useRef<number>(Infinity);
+  const previewMaxRef = useRef<number>(Infinity);
+
+  const sidebar = useDragResize(SIDEBAR_DEFAULT, SIDEBAR_MIN, 'left', sidebarMaxRef);
+  const preview = useDragResize(PREVIEW_DEFAULT, PREVIEW_MIN, 'right', previewMaxRef);
+
+  // Keep max refs current every render so drag handlers always see the latest values
+  const previewVisible = previewPath !== null;
+  sidebarMaxRef.current = window.innerWidth - TERMINAL_MIN - (previewVisible ? preview.width + RESIZE_HANDLE_WIDTH : 0) - RESIZE_HANDLE_WIDTH;
+  previewMaxRef.current = window.innerWidth - TERMINAL_MIN - sidebar.width - RESIZE_HANDLE_WIDTH - (previewVisible ? RESIZE_HANDLE_WIDTH : 0);
 
   const cols = terminal?.cols ?? 80;
   const rows = terminal?.rows ?? 24;
@@ -166,10 +178,6 @@ export default function App() {
                 changedPaths={changedPaths}
                 mode={mode}
               />
-              <AttachBar
-                attachments={attachments}
-                onRemove={(p) => setAttachments(prev => prev.filter(x => x !== p))}
-              />
             </div>
             <div
               className={`resize-handle${sidebar.isDragging ? ' dragging' : ''}`}
@@ -184,6 +192,10 @@ export default function App() {
           >
             <TerminalComponent onReady={handleReady} sendResize={sendResize} />
           </div>
+          <AttachBar
+            attachments={attachments}
+            onRemove={(p) => setAttachments(prev => prev.filter(x => x !== p))}
+          />
           <div className="composer-area">
             <Composer
               ref={composerRef}

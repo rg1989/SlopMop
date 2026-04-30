@@ -47,6 +47,16 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(
     }
   };
 
+  const handleSend = () => {
+    const trimmed = value.trim();
+    if (!trimmed || disabled) return;
+    const atPaths = (attachments ?? []).map(p => `@${p}`).join(' ');
+    const fullMessage = atPaths ? `${atPaths}\n${value}` : value;
+    onSend(fullMessage + '\r');
+    clearAttachments?.();
+    setValue('');
+  };
+
   return (
     <div style={{ position: 'relative' }}>
       <textarea
@@ -62,7 +72,7 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(
           resize: 'vertical',
           fontFamily: 'monospace',
           fontSize: '14px',
-          padding: '8px 40px 8px 8px',
+          padding: '8px 36px 8px 8px',
           boxSizing: 'border-box',
           background: '#161b22',
           color: '#c9d1d9',
@@ -70,30 +80,57 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(
           borderRadius: '6px',
         }}
       />
-      {onAttach && (
+      <div style={{
+        position: 'absolute',
+        right: '8px',
+        bottom: '8px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '6px',
+      }}>
         <button
           type="button"
-          onClick={handlePaperclip}
-          disabled={disabled || picking}
-          title="Attach file(s)"
+          onClick={handleSend}
+          disabled={disabled || !value.trim()}
+          title="Send message (Enter)"
           style={{
-            position: 'absolute',
-            right: '8px',
-            bottom: '10px',
             background: 'none',
             border: 'none',
-            cursor: disabled || picking ? 'not-allowed' : 'pointer',
+            cursor: disabled || !value.trim() ? 'not-allowed' : 'pointer',
             padding: '2px',
-            color: picking ? '#484f58' : '#8b949e',
+            color: disabled || !value.trim() ? '#484f58' : '#d4845a',
             lineHeight: 1,
           }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
             fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.41 17.41a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
           </svg>
         </button>
-      )}
+        {onAttach && (
+          <button
+            type="button"
+            onClick={handlePaperclip}
+            disabled={picking}
+            title="Attach file(s)"
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: picking ? 'not-allowed' : 'pointer',
+              padding: '2px',
+              color: picking ? '#484f58' : (disabled ? '#484f58' : '#8b949e'),
+              lineHeight: 1,
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.41 17.41a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+            </svg>
+          </button>
+        )}
+      </div>
     </div>
   );
 });

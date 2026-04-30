@@ -49,10 +49,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Wave 0 test scaffolds (FileTree, useFileTree, FilePreview, Composer @path tests)
-- [ ] 02-02-PLAN.md — Server file APIs (file tree, git status, file read endpoints + isbinaryfile)
-- [ ] 02-03-PLAN.md — FileTree component + useFileTree hook + App sidebar layout (FILE-01, FILE-02)
-- [ ] 02-04-PLAN.md — File attachment, preview panel, Composer @path injection (FILE-03, FILE-04, FILE-05)
+- [x] 02-01-PLAN.md — Wave 0 test scaffolds (FileTree, useFileTree, FilePreview, Composer @path tests)
+- [x] 02-02-PLAN.md — Server file APIs (file tree, git status, file read endpoints + isbinaryfile)
+- [x] 02-03-PLAN.md — FileTree component + useFileTree hook + App sidebar layout (FILE-01, FILE-02)
+- [x] 02-04-PLAN.md — File attachment, preview panel, Composer @path injection (FILE-03, FILE-04, FILE-05)
 
 ### Phase 3: Voice I/O
 **Goal**: User can speak to Claude and hear responses read aloud, with full interruption control

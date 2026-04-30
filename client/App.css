@@ -109,8 +109,9 @@ html, body, #root { height: 100%; background: #0d1117; color: #c9d1d9; }
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  padding: 6px 8px;
+  padding: 6px 12px;
   border-top: 1px solid #30363d;
+  background: #161b22;
   flex-shrink: 0;
 }
 .attach-chip {
