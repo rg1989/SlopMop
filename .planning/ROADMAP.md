@@ -104,7 +104,7 @@ Plans:
 **Goal:** First-time onboarding modal guides new users to connect a project folder; ongoing health check strip surfaces whether the active project has the prerequisites Claude Code needs (git, CLAUDE.md, agent CLI in PATH, node_modules).
 **Requirements**: ONBOARD-01, ONBOARD-02, ONBOARD-03, HEALTH-01, HEALTH-02, HEALTH-03
 **Depends on:** Phase 4
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 - [ ] 05-01-PLAN.md — Wave 0 test scaffolds (OnboardingModal, useProjectHealth, HealthStatusBar RED stubs)
