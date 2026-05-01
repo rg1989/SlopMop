@@ -51,9 +51,9 @@ created: 2026-05-01
 
 ## Wave 0 Requirements
 
-- [ ] `client/__tests__/useSessionTabs.test.ts` — unit stubs for SESS-01, SESS-02, SESS-03
-- [ ] `client/__tests__/sessionPersistence.test.ts` — stubs for SESS-04, SESS-05
-- [ ] `server/__tests__/sessionProtocol.test.ts` — stubs for SESS-06
+- [ ] `tests/useSessionManager.test.ts` — unit stubs for SESS-01, SESS-03, SESS-04, SESS-05 (spawn, close, status, naming, history)
+- [ ] `tests/SessionTabBar.test.tsx` — unit stubs for SESS-02 (tab rendering, active state, close button)
+- [ ] `tests/usePty.test.ts` (extended) — additional describe block asserting sessionId in start message for SESS-06
 
 *Existing vitest infrastructure covers framework; only test files need to be created.*
 
