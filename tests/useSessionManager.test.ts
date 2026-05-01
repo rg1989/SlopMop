@@ -35,26 +35,30 @@ describe('useSessionManager', () => {
       expect(id).toBeTruthy();
     });
 
-    it('initializes new session with name "Session 1"', () => {
+    it('initializes new session with name "New"', () => {
       const { result } = renderHook(() => useSessionManager());
 
       act(() => {
         result.current.spawn('/home/user/project');
       });
 
-      expect(result.current.sessions[0].name).toBe('Session 1');
+      expect(result.current.sessions[0].name).toBe('New');
     });
 
-    it('increments session name for subsequent sessions', () => {
+    it('creates a new "New" tab for each non-initial spawn', () => {
       const { result } = renderHook(() => useSessionManager());
 
       act(() => {
         result.current.spawn('/home/user/project');
+      });
+
+      act(() => {
         result.current.spawn('/home/user/project');
       });
 
-      expect(result.current.sessions[0].name).toBe('Session 1');
-      expect(result.current.sessions[1].name).toBe('Session 2');
+      // After re-render between spawns, second spawn deduplicates to the existing "New" tab
+      expect(result.current.sessions).toHaveLength(1);
+      expect(result.current.sessions[0].name).toBe('New');
     });
 
     it('includes id, name, status, cwd, createdAt in session entry', () => {
@@ -67,7 +71,7 @@ describe('useSessionManager', () => {
 
       const session = result.current.sessions[0];
       expect(session.id).toBeTruthy();
-      expect(session.name).toBe('Session 1');
+      expect(session.name).toBe('New');
       expect(session.status).toBe('connecting');
       expect(session.cwd).toBe('/tmp');
       expect(typeof session.createdAt).toBe('number');
