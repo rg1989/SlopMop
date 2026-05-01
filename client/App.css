@@ -3971,3 +3971,5 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
 .vault-row-path { color: var(--txt-sub); font-size: 11px; }
 .vault-row-ts { color: var(--txt-dim); font-size: 11px; }
 .vault-tab { padding: 4px 0; }
+.vault-remote-input { flex: 1; background: var(--surface-hi); border: 1px solid var(--border); border-radius: 4px; color: var(--txt); font-family: monospace; font-size: 11px; padding: 4px 8px; outline: none; }
+.vault-remote-input:focus { border-color: var(--accent); }

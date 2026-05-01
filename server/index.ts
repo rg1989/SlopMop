@@ -1072,6 +1072,43 @@ app.put('/api/recent-paths', async (req, res) => {
   res.json({ ok: true });
 });
 
+// POST /api/vault-git — init, commit, or clone ~/.slop as a git repo
+app.post('/api/vault-git', async (req, res) => {
+  const { action, remote } = req.body as { action?: string; remote?: string };
+  try {
+    await mkdir(SLOP_DIR, { recursive: true });
+    if (action === 'init') {
+      await execFileAsync('git', ['-C', SLOP_DIR, 'init']);
+      await execFileAsync('git', ['-C', SLOP_DIR, 'add', '-A']);
+      try { await execFileAsync('git', ['-C', SLOP_DIR, 'commit', '-m', 'init']); } catch { /* nothing to commit */ }
+      res.json({ ok: true, message: 'Git repo initialized in ~/.slop' });
+    } else if (action === 'pull') {
+      const { stdout } = await execFileAsync('git', ['-C', SLOP_DIR, 'pull']);
+      res.json({ ok: true, message: stdout.trim() || 'Already up to date.' });
+    } else if (action === 'clone' && remote) {
+      // Clone into a temp dir then merge into SLOP_DIR
+      const tmpClone = SLOP_DIR + '_clone_tmp';
+      try { await rm(tmpClone, { recursive: true, force: true }); } catch {}
+      await execFileAsync('git', ['clone', remote, tmpClone]);
+      // Copy files from clone into SLOP_DIR (non-destructive merge)
+      const { stdout: fileList } = await execFileAsync('bash', ['-c', `find "${tmpClone}" -not -path "*/.git/*" -not -name ".git" -type f`]);
+      const files = fileList.trim().split('\n').filter(Boolean);
+      for (const f of files) {
+        const rel = f.slice(tmpClone.length);
+        const dest = SLOP_DIR + rel;
+        await mkdir(path.dirname(dest), { recursive: true });
+        await execFileAsync('cp', [f, dest]);
+      }
+      await rm(tmpClone, { recursive: true, force: true });
+      res.json({ ok: true, message: `Synced ${files.length} files from remote.` });
+    } else {
+      res.status(400).json({ error: 'action must be init, pull, or clone (with remote)' });
+    }
+  } catch (e) {
+    res.status(500).json({ ok: false, error: String(e) });
+  }
+});
+
 // Attach WebSocket server
 attachWebSocketServer(server);
 

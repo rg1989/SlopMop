@@ -27,6 +27,11 @@ export const VaultTab: FC = () => {
   const [targets, setTargets] = useState<VaultTarget[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [gitBusy, setGitBusy] = useState(false);
+  const [gitMessage, setGitMessage] = useState<string | null>(null);
+  const [gitError, setGitError] = useState<string | null>(null);
+  const [remoteUrl, setRemoteUrl] = useState('');
+  const [showRemoteInput, setShowRemoteInput] = useState(false);
 
   async function fetchStatus() {
     setLoading(true);
@@ -131,9 +136,76 @@ export const VaultTab: FC = () => {
         ))}
       </div>
 
-      <div style={{ marginTop: 16, fontSize: 11, color: 'var(--txt-dim)', lineHeight: 1.6, borderTop: '1px solid var(--border)', paddingTop: 12 }}>
-        <strong style={{ color: 'var(--txt-sub)' }}>Tip:</strong> make ~/.slop/ a private git repo to sync configs across machines:<br />
-        <code style={{ color: 'var(--accent)', fontSize: 11 }}>cd ~/.slop && git init && git add -A && git commit -m "init"</code>
+      <div style={{ marginTop: 16, borderTop: '1px solid var(--border)', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ fontSize: 11, color: 'var(--txt-sub)', marginBottom: 2 }}>
+          Sync across machines — make <code style={{ color: 'var(--accent)', fontSize: 11 }}>~/.slop/</code> a private git repo:
+        </div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button
+            className="fp-btn"
+            disabled={gitBusy}
+            onClick={async () => {
+              setGitBusy(true); setGitMessage(null); setGitError(null);
+              try {
+                const r = await fetch('/api/vault-git', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'init' }) });
+                const d = await r.json() as { ok: boolean; message?: string; error?: string };
+                if (d.ok) setGitMessage(d.message ?? 'Done.');
+                else setGitError(d.error ?? 'Failed.');
+              } catch { setGitError('Request failed.'); } finally { setGitBusy(false); }
+            }}
+          >
+            Init git repo
+          </button>
+          <button
+            className="fp-btn"
+            disabled={gitBusy}
+            onClick={() => { setShowRemoteInput(v => !v); setGitMessage(null); setGitError(null); }}
+          >
+            Sync from remote
+          </button>
+        </div>
+        {showRemoteInput && (
+          <div style={{ display: 'flex', gap: 6 }}>
+            <input
+              className="vault-remote-input"
+              placeholder="git@github.com:you/slop-vault.git"
+              value={remoteUrl}
+              onChange={e => setRemoteUrl(e.target.value)}
+            />
+            <button
+              className="fp-btn"
+              disabled={gitBusy || !remoteUrl.trim()}
+              onClick={async () => {
+                setGitBusy(true); setGitMessage(null); setGitError(null);
+                try {
+                  const r = await fetch('/api/vault-git', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'clone', remote: remoteUrl.trim() }) });
+                  const d = await r.json() as { ok: boolean; message?: string; error?: string };
+                  if (d.ok) { setGitMessage(d.message ?? 'Done.'); setShowRemoteInput(false); }
+                  else setGitError(d.error ?? 'Failed.');
+                } catch { setGitError('Request failed.'); } finally { setGitBusy(false); }
+              }}
+            >
+              Clone & merge
+            </button>
+            <button
+              className="fp-btn"
+              disabled={gitBusy}
+              onClick={async () => {
+                setGitBusy(true); setGitMessage(null); setGitError(null);
+                try {
+                  const r = await fetch('/api/vault-git', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'pull' }) });
+                  const d = await r.json() as { ok: boolean; message?: string; error?: string };
+                  if (d.ok) { setGitMessage(d.message ?? 'Done.'); }
+                  else setGitError(d.error ?? 'Failed.');
+                } catch { setGitError('Request failed.'); } finally { setGitBusy(false); }
+              }}
+            >
+              Pull
+            </button>
+          </div>
+        )}
+        {gitMessage && <div style={{ fontSize: 11, color: 'var(--success)' }}>{gitMessage}</div>}
+        {gitError && <div style={{ fontSize: 11, color: 'var(--error)' }}>{gitError}</div>}
       </div>
     </div>
   );

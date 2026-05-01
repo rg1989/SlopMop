@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import mermaid from 'mermaid';
 
 // ── Mermaid — initialised once ───────────────────────────────────────────────
@@ -167,6 +167,42 @@ function parseBlocks(md: string): Block[] {
   return out;
 }
 
+// ── Shiki code block ─────────────────────────────────────────────────────────
+
+function ShikiCodeBlock({ lang, content }: { lang: string; content: string }) {
+  const [html, setHtml] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!lang) return;
+    let cancelled = false;
+    fetch('/api/highlight', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content, lang }),
+    })
+      .then(r => r.json())
+      .then(({ html: h }: { html: string | null }) => { if (!cancelled && h) setHtml(h); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [lang, content]);
+
+  if (html) {
+    return (
+      <div className="md-code-block md-code-block--shiki">
+        {lang && <span className="md-code-lang">{lang}</span>}
+        <div className="fp-shiki" dangerouslySetInnerHTML={{ __html: html }} />
+      </div>
+    );
+  }
+
+  return (
+    <pre className="md-code-block">
+      {lang && <span className="md-code-lang">{lang}</span>}
+      <code>{content}</code>
+    </pre>
+  );
+}
+
 // ── MarkdownRenderer ──────────────────────────────────────────────────────────
 
 export function MarkdownRenderer({ content }: { content: string }) {
@@ -185,12 +221,7 @@ export function MarkdownRenderer({ content }: { content: string }) {
           case 'mermaid':
             return <MermaidBlock key={`${idx}-${b.content.slice(0, 20)}`} content={b.content} />;
           case 'code':
-            return (
-              <pre key={idx} className="md-code-block">
-                {b.lang && <span className="md-code-lang">{b.lang}</span>}
-                <code>{b.content}</code>
-              </pre>
-            );
+            return <ShikiCodeBlock key={idx} lang={b.lang} content={b.content} />;
           case 'ul':
             return <ul key={idx} className="md-ul">{b.items.map((it, j) => <li key={j} dangerouslySetInnerHTML={{ __html: inlineHtml(it) }} />)}</ul>;
           case 'ol':
