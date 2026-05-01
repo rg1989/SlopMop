@@ -86,6 +86,43 @@ app.get('/api/which', async (req, res) => {
   res.json({ found: resolved !== null, path: resolved });
 });
 
+// GET /api/project-health?cwd=...&agent=...
+app.get('/api/project-health', async (req, res) => {
+  const { cwd, agent = 'claude' } = req.query as { cwd?: string; agent?: string };
+  if (!cwd) { res.status(400).json({ error: 'cwd required' }); return; }
+
+  const resolved = path.resolve(cwd as string);
+
+  let dirAccessible = false;
+  try { await fsAccess(resolved); dirAccessible = true; } catch { /* inaccessible */ }
+
+  let isGitRepo = false;
+  try {
+    await execFileAsync('git', ['-C', resolved, 'rev-parse', '--git-dir']);
+    isGitRepo = true;
+  } catch { /* not a git repo */ }
+
+  let hasClaudeMd = false;
+  try { await fsAccess(path.join(resolved, 'CLAUDE.md')); hasClaudeMd = true; } catch { /* missing */ }
+
+  const agentPath = await commandExists(agent as string);
+
+  let hasNodeModules: boolean | null = null;
+  const hasPkgJson = await fsAccess(path.join(resolved, 'package.json')).then(() => true).catch(() => false);
+  if (hasPkgJson) {
+    hasNodeModules = await fsAccess(path.join(resolved, 'node_modules')).then(() => true).catch(() => false);
+  }
+
+  res.json({
+    dirAccessible,
+    isGitRepo,
+    hasClaudeMd,
+    agentFound: agentPath !== null,
+    agentPath,
+    hasNodeModules,
+  });
+});
+
 // Open native macOS folder picker, return the selected absolute path
 app.post('/api/pick-folder', async (_req, res) => {
   if (process.platform !== 'darwin') {
@@ -429,48 +466,77 @@ app.get('/api/gsd-roadmap', async (req, res) => {
 
     const plans = await Promise.all(p.plans.map(async plan => {
       const planId = plan.file.replace('-PLAN.md', '');
-      const summaryPath = absPhaseDir ? path.join(absPhaseDir, plan.file.replace('-PLAN.md', '-SUMMARY.md')) : null;
-      // SUMMARY.md existing on disk is an authoritative completion signal
+      const summaryFile = plan.file.replace('-PLAN.md', '-SUMMARY.md');
+      const summaryPath = absPhaseDir ? path.join(absPhaseDir, summaryFile) : null;
+      const planFilePath = absPhaseDir ? path.join(absPhaseDir, plan.file) : null;
+      // When a phase dir exists, SUMMARY.md presence is authoritative (both ways)
       let completed = plan.completed;
-      if (!completed && summaryPath) {
-        try { await fsAccess(summaryPath); completed = true; } catch { /* not present */ }
+      if (summaryPath) {
+        try { await fsAccess(summaryPath); completed = true; } catch { completed = false; }
       }
       return {
         id: planId,
         name: plan.name,
         completed,
-        planPath: absPhaseDir ? path.join(absPhaseDir, plan.file) : null,
+        planPath: planFilePath,
         summaryPath,
       };
     }));
+
+    // Recalculate phase completion from actual plan data
+    const phaseCompleted = plans.length > 0 && plans.every(pl => pl.completed);
+
+    // Only return research/verification paths when the files actually exist
+    let researchPath: string | null = null;
+    let verificationPath: string | null = null;
+    if (absPhaseDir) {
+      const rFile = path.join(absPhaseDir, `${numStr}-RESEARCH.md`);
+      const vFile = path.join(absPhaseDir, `${numStr}-VERIFICATION.md`);
+      try { await fsAccess(rFile); researchPath = rFile; } catch { /* not present */ }
+      try { await fsAccess(vFile); verificationPath = vFile; } catch { /* not present */ }
+    }
 
     return {
       number: p.number,
       name: p.name,
       goal: p.goal,
-      completed: p.completed,
+      completed: phaseCompleted,
       dirName,
-      researchPath: absPhaseDir ? path.join(absPhaseDir, `${numStr}-RESEARCH.md`) : null,
-      verificationPath: absPhaseDir ? path.join(absPhaseDir, `${numStr}-VERIFICATION.md`) : null,
+      researchPath,
+      verificationPath,
       plans,
     };
   }));
 
-  const completedNums = new Set(stateData.quickTasks.map(q => q.number));
-  const quickTasks = quickDirNames.map(dirName => {
+  const quickTasks = await Promise.all(quickDirNames.map(async dirName => {
     const num = parseInt(dirName);
     const stateTask = stateData.quickTasks.find(q => q.number === num);
+    const quickDir = path.join(planningDir, 'quick', dirName);
+    const planFile = path.join(quickDir, `${num}-PLAN.md`);
+    const summaryFile = path.join(quickDir, `${num}-SUMMARY.md`);
+    let completed = false;
+    let hasPlan = false;
+    try { await fsAccess(summaryFile); completed = true; } catch { /* not done */ }
+    try { await fsAccess(planFile); hasPlan = true; } catch { /* no plan file */ }
     return {
       number: num,
       description: stateTask?.description ?? dirName.replace(/^\d+-/, '').replace(/-/g, ' '),
       date: stateTask?.date ?? '',
-      completed: completedNums.has(num),
+      completed,
       dirName,
-      planPath: path.join(planningDir, 'quick', dirName, `${num}-PLAN.md`),
+      planPath: hasPlan ? planFile : null,
     };
-  });
+  }));
 
-  res.json({ exists: true, milestone: stateData.milestone, milestoneName: stateData.milestoneName, status: stateData.status, progress: stateData.progress, phases, quickTasks });
+  // Collect optional planning doc paths that exist
+  const roadmapPath = path.join(planningDir, 'ROADMAP.md');
+  const statePath = path.join(planningDir, 'STATE.md');
+  let projectPath: string | null = null;
+  let requirementsPath: string | null = null;
+  try { await fsAccess(path.join(planningDir, 'PROJECT.md')); projectPath = path.join(planningDir, 'PROJECT.md'); } catch { /* optional */ }
+  try { await fsAccess(path.join(planningDir, 'REQUIREMENTS.md')); requirementsPath = path.join(planningDir, 'REQUIREMENTS.md'); } catch { /* optional */ }
+
+  res.json({ exists: true, milestone: stateData.milestone, milestoneName: stateData.milestoneName, status: stateData.status, progress: stateData.progress, phases, quickTasks, roadmapPath, statePath, projectPath, requirementsPath });
 });
 
 // DELETE /api/gsd/phase — remove a phase via gsd-tools
@@ -778,6 +844,67 @@ app.post('/api/git-push', async (req, res) => {
   } catch (err) {
     res.json({ ok: false, error: String(err) });
   }
+});
+
+// GET /api/rules — load CLAUDE.md files (global + project hierarchy) with @-import resolution
+function parseAtImports(content: string): string[] {
+  const imports: string[] = [];
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith('@')) continue;
+    let p = trimmed.slice(1);
+    if (p.startsWith('~')) p = path.join(os.homedir(), p.slice(1));
+    if (path.isAbsolute(p) && p.endsWith('.md')) imports.push(p);
+  }
+  return [...new Set(imports)];
+}
+
+app.get('/api/rules', async (req, res) => {
+  const cwd = typeof req.query.cwd === 'string' ? req.query.cwd : null;
+  interface RuleFile { id: string; path: string; displayPath: string; scope: 'global' | 'project' | 'import'; parentId?: string; content: string; imports: string[]; }
+  const files: RuleFile[] = [];
+  const seen = new Set<string>();
+
+  const tryRead = async (filePath: string, id: string, scope: 'global' | 'project' | 'import', parentId?: string) => {
+    if (seen.has(filePath)) return;
+    seen.add(filePath);
+    try {
+      const content = await readFile(filePath, 'utf-8');
+      const displayPath = filePath.startsWith(os.homedir()) ? '~' + filePath.slice(os.homedir().length) : filePath;
+      const imports = parseAtImports(content);
+      files.push({ id, path: filePath, displayPath, scope, parentId, content, imports });
+    } catch { /* file not found */ }
+  };
+
+  const globalMd = path.join(os.homedir(), '.claude', 'CLAUDE.md');
+  await tryRead(globalMd, 'global', 'global');
+
+  if (cwd) {
+    const cwdResolved = path.resolve(cwd);
+    let dir = cwdResolved;
+    let depth = 0;
+    while (depth < 5) {
+      const candidate = path.join(dir, 'CLAUDE.md');
+      const relOrAbs = dir === cwdResolved ? 'CLAUDE.md' : candidate;
+      await tryRead(candidate, `project-${depth}`, 'project');
+      const parent = path.dirname(dir);
+      if (parent === dir) break;
+      dir = parent;
+      depth++;
+    }
+  }
+
+  const importParents = new Map<string, string>();
+  for (const f of [...files]) {
+    for (const imp of f.imports) {
+      if (!importParents.has(imp)) importParents.set(imp, f.id);
+    }
+  }
+  for (const [impPath, parentId] of importParents) {
+    await tryRead(impPath, `import-${impPath}`, 'import', parentId);
+  }
+
+  res.json({ files });
 });
 
 // Attach WebSocket server
