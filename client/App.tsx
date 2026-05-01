@@ -1,21 +1,18 @@
 import { useState, useCallback, useEffect, useRef, type JSX } from 'react';
-import type { Terminal } from '@xterm/xterm';
-import { useSession } from './hooks/useSession';
+import { useSessionManager } from './hooks/useSessionManager';
 import { useFileTree } from './hooks/useFileTree';
 import { useAudioCoordinator } from './hooks/useAudioCoordinator';
 import { useSettings, matchesPttCombo } from './hooks/useSettings';
 import { useDragResize } from './hooks/useDragResize';
-import { Terminal as TerminalComponent } from './components/Terminal';
 import { FolderPicker } from './components/FolderPicker';
-import { Composer } from './components/Composer';
+import { VoiceBar } from './components/VoiceBar';
 import { FileTree } from './components/FileTree';
 import { SourceControl } from './components/SourceControl';
-import { FilePreview } from './components/FilePreview';
-import { EditorTabBar } from './components/EditorTabBar';
-import { AttachBar } from './components/AttachBar';
-import { VoiceBar } from './components/VoiceBar';
 import { SettingsModal } from './components/SettingsModal';
 import { GsdRoadmap } from './components/GsdRoadmap';
+import { BrainPanel } from './components/BrainPanel';
+import { SessionTabBar } from './components/SessionTabBar';
+import { SessionPane } from './components/SessionPane';
 import { SuperToolsModal } from './components/SuperToolsModal';
 import type { SuperTool } from './components/SuperToolsModal';
 import './App.css';
@@ -57,29 +54,7 @@ const SIDEBAR_TABS: { id: SidebarTabId; label: string; Icon: () => JSX.Element }
 const STORAGE_KEY = 'slopdock_last_folder';
 const SIDEBAR_MIN = 140;
 const SIDEBAR_DEFAULT = 240;
-const PREVIEW_MIN = 180;
-const PREVIEW_DEFAULT = 320;
-const TERMINAL_MIN = 140;
 const RESIZE_HANDLE_WIDTH = 4;
-
-// ── Per-cwd UI persistence ────────────────────────────────────────────────────
-interface PersistedUIState {
-  sidebarWidth: number;
-  previewWidth: number;
-  tabs: Array<{ path: string; isPreview: boolean }>;
-  activeTabId: string | null;
-}
-
-function loadUIState(cwd: string): PersistedUIState | null {
-  try {
-    const raw = localStorage.getItem(`slopdock_ui_${cwd}`);
-    return raw ? (JSON.parse(raw) as PersistedUIState) : null;
-  } catch { return null; }
-}
-
-function saveUIState(cwd: string, state: PersistedUIState) {
-  try { localStorage.setItem(`slopdock_ui_${cwd}`, JSON.stringify(state)); } catch {}
-}
 
 // ── Path persistence ──────────────────────────────────────────────────────────
 function getInitialPath(): string | null {
@@ -96,49 +71,56 @@ function persistPath(cwd: string) {
   window.history.replaceState(null, '', url.toString());
 }
 
+// ── Active session actions ref type ──────────────────────────────────────────
+interface ActiveSessionActions {
+  sendInput: (data: string) => void;
+  openFile: (path: string, isPreview: boolean) => void;
+  openDiff: (path: string, staged: boolean) => void;
+  addAttachment: (path: string) => void;
+  openBrainEntry: (id: string, isPreview: boolean) => void;
+  activeFilePath: string | null | undefined;
+  activeTabId: string | null;
+  attachments: string[];
+}
+
 // ── App ───────────────────────────────────────────────────────────────────────
 export default function App() {
   // ── App-scoped state ────────────────────────────────────────────────────────
   const [cwd, setCwd] = useState<string | null>(null);
-  const [terminal, setTerminal] = useState<Terminal | null>(null);
   const [ttsEnabled, setTtsEnabled] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [superToolsOpen, setSuperToolsOpen] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<SidebarTabId>('explorer');
   const [sidebarSearch, setSidebarSearch] = useState('');
   const [collapseKey, setCollapseKey] = useState(0);
+  const [brainRefreshKey, setBrainRefreshKey] = useState(0);
 
   const [initialPath] = useState(getInitialPath);
   const composerRef = useRef<HTMLTextAreaElement>(null);
 
+  // Active session actions — populated by the active SessionPane
+  const activeActionsRef = useRef<ActiveSessionActions | null>(null);
+  // Track active session actions state for re-render (sidebar highlights)
+  const [activeFilePath, setActiveFilePath] = useState<string | undefined>(undefined);
+  const [activeAttachments, setActiveAttachments] = useState<string[]>([]);
+  const [activeBrainTabId, setActiveBrainTabId] = useState<string | null>(null);
+
   const { settings, update: updateSettings } = useSettings();
 
-  // Drag-resize — app-scoped because layout is global
+  // Drag-resize — sidebar only (app-scoped because layout is global)
   const sidebarMaxRef = useRef<number>(Infinity);
-  const previewMaxRef = useRef<number>(Infinity);
   const sidebar = useDragResize(SIDEBAR_DEFAULT, SIDEBAR_MIN, 'left', sidebarMaxRef);
-  const preview = useDragResize(PREVIEW_DEFAULT, PREVIEW_MIN, 'right', previewMaxRef);
 
-  // ── Session ─────────────────────────────────────────────────────────────────
-  // One session today. When multi-session lands, App maps over an array of these.
-  const cols = terminal?.cols ?? 80;
-  const rows = terminal?.rows ?? 24;
+  // ── Session manager ──────────────────────────────────────────────────────────
+  const sessionManager = useSessionManager();
 
+  // ── Audio coordinator (app-scoped — routes to active session via ref) ────────
   const audio = useAudioCoordinator({
     ttsEnabled,
-    onTranscript: (text) => session.sendInput(text + '\r'),
+    onTranscript: (text) => activeActionsRef.current?.sendInput(text + '\r'),
   });
 
-  const session = useSession({
-    cwd,
-    terminal,
-    cols,
-    rows,
-    agentConfig: settings.agent,
-    onData: ttsEnabled ? audio.tts.handleData : undefined,
-  });
-
-  // ── File tree (app-scoped — shared across all future sessions) ───────────────
+  // ── File tree (app-scoped — shared across all sessions) ──────────────────────
   const { tree, changedPaths, gitStatus, loadChanges, mode, setMode } = useFileTree(cwd);
 
   useEffect(() => {
@@ -146,57 +128,26 @@ export default function App() {
   }, [sidebarTab, setMode]);
 
   // ── Layout max-width refs (updated every render) ─────────────────────────────
-  const previewVisible = session.tabs.length > 0;
-  sidebarMaxRef.current = window.innerWidth - TERMINAL_MIN - (previewVisible ? preview.width + RESIZE_HANDLE_WIDTH : 0) - RESIZE_HANDLE_WIDTH;
-  previewMaxRef.current = window.innerWidth - TERMINAL_MIN - sidebar.width - RESIZE_HANDLE_WIDTH - (previewVisible ? RESIZE_HANDLE_WIDTH : 0);
+  sidebarMaxRef.current = window.innerWidth - 300 - RESIZE_HANDLE_WIDTH;
 
   // ── Folder connect ───────────────────────────────────────────────────────────
   const handleConnect = useCallback((path: string) => {
     const normalized = path.replace(/\/+$/, '');
     persistPath(normalized);
     setCwd(normalized);
-  }, []);
+    sessionManager.spawn(normalized);
+  }, [sessionManager]);
 
-  const handleReady = useCallback((t: Terminal) => setTerminal(t), []);
-
-  // Auto-connect when terminal is ready if we have a saved path
+  // Auto-connect from saved path on first load
   useEffect(() => {
-    if (terminal && initialPath && !cwd) handleConnect(initialPath);
-  }, [terminal, initialPath, cwd, handleConnect]);
-
-  // Focus Composer when session connects
-  useEffect(() => {
-    if (session.connected) composerRef.current?.focus();
-  }, [session.connected]);
-
-  // ── UI state restore / persist per cwd ──────────────────────────────────────
-  useEffect(() => {
-    if (!cwd) return;
-    setSidebarSearch('');
-    session.clearAttachments();
-
-    const saved = loadUIState(cwd);
-    if (saved) {
-      sidebar.setWidth(saved.sidebarWidth);
-      preview.setWidth(saved.previewWidth);
-      session.restoreFromSaved(saved, cwd);
-    } else {
-      session.resetTabs();
+    if (initialPath) {
+      const normalized = initialPath.replace(/\/+$/, '');
+      persistPath(normalized);
+      setCwd(normalized);
+      sessionManager.spawn(normalized);
     }
-  }, [cwd]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (!cwd) return;
-    const timer = setTimeout(() => {
-      saveUIState(cwd, {
-        sidebarWidth: sidebar.width,
-        previewWidth: preview.width,
-        tabs: session.tabs.map(t => ({ path: t.path, isPreview: t.isPreview })),
-        activeTabId: session.activeTabId,
-      });
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [cwd, sidebar.width, preview.width, session.tabs, session.activeTabId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Push-to-talk ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -226,6 +177,13 @@ export default function App() {
     };
   }, [settings.pttKey, settings.recordingMode, audio.voice]);
 
+  // ── Sidebar routing — resolved from active session via ref ───────────────────
+  const handleSidebarPreview = useCallback((p: string) => activeActionsRef.current?.openFile(p, true), []);
+  const handleSidebarOpen = useCallback((p: string) => activeActionsRef.current?.openFile(p, false), []);
+  const handleSidebarAttach = useCallback((p: string) => activeActionsRef.current?.addAttachment(p), []);
+  const handleSidebarDiff = useCallback((p: string, staged: boolean) => activeActionsRef.current?.openDiff(p, staged), []);
+  const handleSidebarBrainEntry = useCallback((id: string, isPreview: boolean) => activeActionsRef.current?.openBrainEntry(id, isPreview), []);
+
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <div
@@ -249,7 +207,7 @@ export default function App() {
           cwd={cwd}
           onClose={() => setSuperToolsOpen(false)}
           onRunDirect={(command) => {
-            session.sendInput('\x15' + command + '\r');
+            activeActionsRef.current?.sendInput('\x15' + command + '\r');
             setSuperToolsOpen(false);
           }}
           onRunWithGsd={async (tool: SuperTool) => {
@@ -258,7 +216,7 @@ export default function App() {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ cwd, name: tool.phaseName, description: tool.phaseDescription }),
             });
-            session.sendInput('\x15' + tool.directCommand + '\r');
+            activeActionsRef.current?.sendInput('\x15' + tool.directCommand + '\r');
             setSuperToolsOpen(false);
           }}
         />
@@ -316,13 +274,13 @@ export default function App() {
                 {sidebarTab === 'explorer' ? (
                   <FileTree
                     nodes={tree}
-                    selected={new Set(session.attachments)}
-                    onPreview={(p) => session.openFile(p, true)}
-                    onOpen={(p) => session.openFile(p, false)}
-                    onAttach={session.addAttachment}
+                    selected={new Set(activeAttachments)}
+                    onPreview={handleSidebarPreview}
+                    onOpen={handleSidebarOpen}
+                    onAttach={handleSidebarAttach}
                     changedPaths={changedPaths}
                     mode={mode}
-                    activePath={session.activeFilePath ?? undefined}
+                    activePath={activeFilePath}
                     collapseKey={collapseKey}
                     searchQuery={sidebarSearch}
                     showHiddenFiles={settings.showHiddenFiles}
@@ -334,12 +292,17 @@ export default function App() {
                     cwd={cwd}
                     gitStatus={gitStatus}
                     onRefresh={loadChanges}
-                    onOpenDiff={session.openDiff}
+                    onOpenDiff={handleSidebarDiff}
                   />
                 ) : sidebarTab === 'roadmap' ? (
-                  <GsdRoadmap cwd={cwd} onOpenFile={session.openFile} />
+                  <GsdRoadmap cwd={cwd} onOpenFile={handleSidebarOpen} activeFilePath={activeFilePath} />
                 ) : (
-                  <div className="sidebar-empty-panel">Second Brain — coming soon</div>
+                  <BrainPanel
+                    cwd={cwd}
+                    onOpenEntry={handleSidebarBrainEntry}
+                    refreshKey={brainRefreshKey}
+                    activeEntryId={activeBrainTabId?.startsWith('brain:') ? activeBrainTabId.slice(6) : undefined}
+                  />
                 )}
               </div>
             </div>
@@ -353,15 +316,43 @@ export default function App() {
         <div className="main-area">
           <div
             className="terminal-area"
+            style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
             onClick={() => composerRef.current?.focus()}
           >
-            <TerminalComponent onReady={handleReady} sendResize={session.sendResize} />
+            <SessionTabBar
+              sessions={sessionManager.sessions}
+              activeId={sessionManager.activeId}
+              onSetActive={sessionManager.setActive}
+              onClose={sessionManager.close}
+              onSpawn={() => { if (cwd) sessionManager.spawn(cwd); }}
+            />
+            {sessionManager.sessions.map(s => (
+              <SessionPane
+                key={s.id}
+                sessionId={s.id}
+                cwd={s.cwd}
+                agentConfig={settings.agent}
+                isActive={s.id === sessionManager.activeId}
+                onStatus={(status) => sessionManager.updateStatus(s.id, status)}
+                onExit={(code) => sessionManager.updateStatus(s.id, code === 0 ? 'done' : 'error')}
+                onFirstInput={(_id, text) => sessionManager.updateName(s.id, text)}
+                composerRef={s.id === sessionManager.activeId ? composerRef : undefined}
+                ttsEnabled={ttsEnabled}
+                onTtsData={audio.tts.handleData}
+                brainRefreshTrigger={() => setBrainRefreshKey(k => k + 1)}
+                onRegisterActions={(actions) => {
+                  if (s.id === sessionManager.activeId) {
+                    activeActionsRef.current = actions;
+                    setActiveFilePath(actions.activeFilePath ?? undefined);
+                    setActiveAttachments(actions.attachments);
+                    setActiveBrainTabId(actions.activeTabId);
+                  }
+                }}
+              />
+            ))}
           </div>
-          <AttachBar
-            attachments={session.attachments}
-            onRemove={session.removeAttachment}
-          />
-          <div className="composer-area">
+
+          <div className="voice-bar-row">
             <VoiceBar
               recording={audio.voice.recording}
               transcribing={audio.voice.transcribing}
@@ -376,48 +367,8 @@ export default function App() {
               ttsAvailable={audio.tts.piperAvailable}
               whisperAvailable={audio.voice.whisperAvailable}
             />
-            <Composer
-              ref={composerRef}
-              onSend={session.sendInput}
-              disabled={!session.connected}
-              attachments={session.attachments}
-              clearAttachments={session.clearAttachments}
-              onAttach={session.addAttachments}
-              cwd={cwd}
-            />
           </div>
         </div>
-
-        {session.tabs.length > 0 && (
-          <>
-            <div
-              className={`resize-handle${preview.isDragging ? ' dragging' : ''}`}
-              onMouseDown={preview.onMouseDown}
-            />
-            <div className="preview-panel" style={{ width: preview.width }}>
-              <EditorTabBar
-                tabs={session.tabs}
-                activeId={session.activeTabId}
-                onSelect={session.setActiveTabId}
-                onClose={session.closeTab}
-                onPromote={session.promoteTab}
-              />
-              {(() => {
-                const tab = session.tabs.find((t) => t.id === session.activeTabId);
-                if (!tab) return null;
-                return (
-                  <FilePreview
-                    data={tab.data}
-                    filePath={tab.path}
-                    cwd={cwd}
-                    initialEditing={session.activeTabId === session.editingTabId}
-                    onPromote={() => session.promoteTab(session.activeTabId!)}
-                  />
-                );
-              })()}
-            </div>
-          </>
-        )}
       </div>
     </div>
   );

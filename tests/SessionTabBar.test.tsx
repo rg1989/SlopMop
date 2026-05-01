@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 
-// @ts-expect-error — module does not exist yet (Wave 0 RED)
 import { SessionTabBar } from '../client/components/SessionTabBar';
 
 type SessionStatus = 'connecting' | 'waiting' | 'working' | 'done' | 'error';
