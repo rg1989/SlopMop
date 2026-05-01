@@ -60,6 +60,7 @@ export function useSessionManager(): UseSessionManagerReturn {
   // Keep a ref to sessions for use inside callbacks without stale closure issues
   const sessionsRef = useRef<SessionEntry[]>([]);
   const activeIdRef = useRef<string | null>(null);
+  const initialSessionIdRef = useRef<string | null>(null);
 
   useEffect(() => { sessionsRef.current = sessions; }, [sessions]);
   useEffect(() => { activeIdRef.current = activeId; }, [activeId]);
@@ -86,6 +87,18 @@ export function useSessionManager(): UseSessionManagerReturn {
       return activeIdRef.current ?? current[current.length - 1]?.id ?? '';
     }
 
+    if (initial) {
+      if (initialSessionIdRef.current) {
+        setActiveId(initialSessionIdRef.current);
+        return initialSessionIdRef.current;
+      }
+      const existing = current.find(s => s.name === '');
+      if (existing) {
+        setActiveId(existing.id);
+        return existing.id;
+      }
+    }
+
     // If spawning an additional session, focus existing "New" tab instead of creating another
     if (!initial) {
       const unnamedTab = current.find(s => s.name === 'New');
@@ -100,6 +113,7 @@ export function useSessionManager(): UseSessionManagerReturn {
     const name = initial ? '' : 'New';
     const newEntry: SessionEntry = { id, name, status: 'connecting', cwd, createdAt: Date.now() };
 
+    if (initial) initialSessionIdRef.current = id;
     setSessions(prev => [...prev, newEntry]);
     setActiveId(id);
     return id;

@@ -252,4 +252,47 @@ describe('useSessionManager', () => {
       expect(result.current.history).toEqual([]);
     });
   });
+
+  describe('dedup guard for initial spawn', () => {
+    it('calling spawn with initial:true twice returns the same id', () => {
+      const { result } = renderHook(() => useSessionManager());
+
+      let id1 = '';
+      let id2 = '';
+      act(() => {
+        id1 = result.current.spawn('/tmp', { initial: true });
+        id2 = result.current.spawn('/tmp', { initial: true });
+      });
+
+      expect(id1).toBeTruthy();
+      expect(id2).toBe(id1);
+    });
+
+    it('sessions.length === 1 after two initial spawns', () => {
+      const { result } = renderHook(() => useSessionManager());
+
+      act(() => {
+        result.current.spawn('/tmp', { initial: true });
+        result.current.spawn('/tmp', { initial: true });
+      });
+
+      expect(result.current.sessions).toHaveLength(1);
+    });
+
+    it('non-initial spawn does not trigger the initial dedup path', () => {
+      const { result } = renderHook(() => useSessionManager());
+
+      act(() => {
+        result.current.spawn('/tmp', { initial: true });
+      });
+
+      let nonInitialId = '';
+      act(() => {
+        nonInitialId = result.current.spawn('/tmp');
+      });
+
+      expect(result.current.sessions).toHaveLength(2);
+      expect(nonInitialId).not.toBe(result.current.sessions[0].id);
+    });
+  });
 });

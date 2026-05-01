@@ -20,31 +20,46 @@ export type PhaseDraft = {
 
 export function parseRoadmapMd(content: string): PhaseDraft[] {
   const lines = content.split('\n');
+
+  // Pass 1: scan ## Phases overview list → build completedMap
+  const completedMap = new Map<number, boolean>();
+  let inPhasesOverview = false;
+  for (const line of lines) {
+    if (/^## Phases/.test(line)) { inPhasesOverview = true; continue; }
+    if (/^## /.test(line) && !/^## Phases/.test(line)) { inPhasesOverview = false; continue; }
+    if (inPhasesOverview) {
+      const m = line.match(/^- \[([x ])\] \*\*Phase (\d+(?:\.\d+)?): /);
+      if (m) completedMap.set(parseFloat(m[2]), m[1] === 'x');
+    }
+  }
+
+  // Pass 2: scan ### Phase N: detail sections → build phases array directly
   const phases: PhaseDraft[] = [];
-  let inPhasesSection = false;
   let currentPhase: PhaseDraft | null = null;
   let inPlans = false;
 
   for (const line of lines) {
-    if (/^## Phases/.test(line)) { inPhasesSection = true; continue; }
-    if (/^## /.test(line) && !/^## Phases/.test(line)) { inPhasesSection = false; }
-
-    if (inPhasesSection) {
-      const m = line.match(/^- \[([x ])\] \*\*Phase (\d+(?:\.\d+)?): ([^*]+)\*\*/);
-      if (m) phases.push({ number: parseFloat(m[2]), name: m[3].trim(), goal: '', completed: m[1] === 'x', plans: [] });
-    }
-
-    const detailM = line.match(/^### Phase (\d+(?:\.\d+)?): /);
+    const detailM = line.match(/^### Phase (\d+(?:\.\d+)?): (.+)/);
     if (detailM) {
-      currentPhase = phases.find(p => p.number === parseFloat(detailM[1])) ?? null;
+      const num = parseFloat(detailM[1]);
+      const name = detailM[2].trim();
+      currentPhase = {
+        number: num,
+        name,
+        goal: '',
+        completed: completedMap.get(num) ?? false,
+        plans: [],
+      };
+      phases.push(currentPhase);
       inPlans = false;
       continue;
     }
 
     if (currentPhase) {
       const goalM = line.match(/^\*\*Goal\*\*: (.+)/);
-      if (goalM) { currentPhase.goal = goalM[1].trim(); }
+      if (goalM) { currentPhase.goal = goalM[1].trim(); continue; }
       if (line.trim() === 'Plans:') { inPlans = true; continue; }
+      if (/^### /.test(line)) { inPlans = false; continue; }
       if (inPlans) {
         if (!line.startsWith('- ')) { inPlans = false; continue; }
         const planM = line.match(/^- \[([x ])\] (\S+\.md) — (.+)/);
@@ -52,7 +67,8 @@ export function parseRoadmapMd(content: string): PhaseDraft[] {
       }
     }
   }
-  return phases;
+
+  return phases.sort((a, b) => a.number - b.number);
 }
 
 export type QuickTask = {
