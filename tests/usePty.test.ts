@@ -213,3 +213,35 @@ describe('usePty', () => {
     expect(mockTerminal.write).not.toHaveBeenCalled();
   });
 });
+
+describe('sessionId in protocol', () => {
+  let mockTerminal: import('@xterm/xterm').Terminal;
+
+  beforeEach(() => {
+    wsInstances = [];
+    MockWebSocket.mockClear();
+
+    mockTerminal = {
+      write: vi.fn(),
+      reset: vi.fn(),
+      cols: 80,
+      rows: 24,
+    } as unknown as import('@xterm/xterm').Terminal;
+  });
+
+  it('includes sessionId in start message (SESS-06)', () => {
+    renderHook(() =>
+      usePty({ cwd: '/tmp', terminal: mockTerminal, cols: 80, rows: 24, agentConfig: DEFAULT_AGENT })
+    );
+
+    const ws = wsInstances[0];
+    act(() => ws.simulateOpen());
+
+    expect(ws.send).toHaveBeenCalledTimes(1);
+    const startMsg = JSON.parse(ws.send.mock.calls[0][0]);
+    expect(startMsg.type).toBe('start');
+    // sessionId must be a non-empty string (UUID)
+    expect(typeof startMsg.sessionId).toBe('string');
+    expect(startMsg.sessionId).toBeTruthy();
+  });
+});
