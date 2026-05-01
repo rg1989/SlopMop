@@ -1,9 +1,11 @@
 import { useState, useCallback } from 'react';
 import type { Terminal } from '@xterm/xterm';
 import { usePty } from './usePty';
+import type { SessionStatus } from './usePty';
 import { useEditorTabs } from './useEditorTabs';
 import type { AgentConfig } from './useSettings';
 import type { UseEditorTabsReturn } from './useEditorTabs';
+import type { FilePreviewData } from '../components/FilePreview';
 
 // Everything a single agent session owns.
 // When SlopDock grows to support multiple concurrent sessions,
@@ -17,6 +19,12 @@ export interface UseSessionOptions {
   agentConfig: AgentConfig;
   /** Called with raw PTY output — used by the audio coordinator for TTS */
   onData?: (raw: string) => void;
+  /** Stable UUID from useSessionManager — forwarded into usePty */
+  sessionId?: string;
+  /** Called whenever the PTY status changes — forwarded into usePty */
+  onStatus?: (status: SessionStatus) => void;
+  /** Called when PTY exits with exit code — forwarded into usePty */
+  onExit?: (code: number) => void;
 }
 
 export interface UseSessionReturn {
@@ -32,6 +40,8 @@ export interface UseSessionReturn {
   setActiveTabId: UseEditorTabsReturn['setActiveTabId'];
   openFile: UseEditorTabsReturn['openFile'];
   openDiff: UseEditorTabsReturn['openDiff'];
+  openBrainEntry: UseEditorTabsReturn['openBrainEntry'];
+  updateTabData: (id: string, data: FilePreviewData) => void;
   closeTab: UseEditorTabsReturn['closeTab'];
   promoteTab: UseEditorTabsReturn['promoteTab'];
   restoreFromSaved: UseEditorTabsReturn['restoreFromSaved'];
@@ -51,6 +61,9 @@ export function useSession({
   rows,
   agentConfig,
   onData,
+  sessionId,
+  onStatus,
+  onExit,
 }: UseSessionOptions): UseSessionReturn {
   // PTY
   const { sendInput, sendResize, connected } = usePty({
@@ -60,6 +73,9 @@ export function useSession({
     rows,
     agentConfig,
     onData,
+    sessionId,
+    onStatus,
+    onExit,
   });
 
   // Editor tabs
@@ -93,6 +109,8 @@ export function useSession({
     setActiveTabId: editorTabs.setActiveTabId,
     openFile: editorTabs.openFile,
     openDiff: editorTabs.openDiff,
+    openBrainEntry: editorTabs.openBrainEntry,
+    updateTabData: editorTabs.updateTabData,
     closeTab: editorTabs.closeTab,
     promoteTab: editorTabs.promoteTab,
     restoreFromSaved: editorTabs.restoreFromSaved,

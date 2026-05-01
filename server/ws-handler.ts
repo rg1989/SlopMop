@@ -36,6 +36,8 @@ export function attachWebSocketServer(server: Server): void {
         }
         try {
           ptyProcess = spawnSession(msg.cwd, msg.cols, msg.rows, msg.agentCommand, msg.agentArgs);
+          // Echo session-ready so clients can confirm the session is live
+          send({ type: 'session-ready', sessionId: msg.sessionId });
           ptyProcess.onData((data: string) => {
             send({ type: 'data', data });
           });

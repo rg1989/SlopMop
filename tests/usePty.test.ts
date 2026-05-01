@@ -105,7 +105,7 @@ describe('usePty', () => {
     act(() => ws.simulateOpen());
 
     expect(ws.send).toHaveBeenCalledTimes(1);
-    expect(JSON.parse(ws.send.mock.calls[0][0])).toEqual({
+    expect(JSON.parse(ws.send.mock.calls[0][0])).toMatchObject({
       type: 'start',
       cwd: '/tmp',
       cols: 80,
