@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 06-03-PLAN.md — OnboardingModal rewire + slop health dot
-last_updated: "2026-05-01T19:44:25.743Z"
+stopped_at: Completed 06-04-PLAN.md — useSettings + FolderPicker server migration
+last_updated: "2026-05-01T19:49:18.898Z"
 last_activity: "2026-04-30 - Completed quick task 1: add syntax colors and edit mode to file preview panel"
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 25
-  completed_plans: 23
+  completed_plans: 24
   percent: 100
 ---
 
@@ -72,6 +72,7 @@ Progress: [██████████] 100% (All Phases)
 | Phase 06-slop-config-vault P01 | 4min | 2 tasks | 9 files |
 | Phase 06-slop-config-vault P02 | 3min | 2 tasks | 1 files |
 | Phase 06-slop-config-vault P03 | 5min | 2 tasks | 5 files |
+| Phase 06-slop-config-vault P04 | 6min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -135,6 +136,8 @@ Recent decisions affecting current work:
 - [Phase 06-slop-config-vault]: atomicWrite uses .tmp + rename pattern for safe filesystem writes
 - [Phase 06-slop-config-vault]: Discriminated union props on OnboardingModal preserves legacy tests while adding prop-driven mode
 - [Phase 06-slop-config-vault]: Strict slopExists === false in JSX prevents flash of OnboardingModal during null loading state
+- [Phase 06-slop-config-vault]: useSettings mount effect uses active flag for cleanup — prevents stale setSettings on unmounted component
+- [Phase 06-slop-config-vault]: TS type narrowing via cast-after-find pattern (putCall as [string, RequestInit]) — avoids broken overload on find() callback with destructured args
 
 ### Roadmap Evolution
 
@@ -159,6 +162,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-01T19:44:20.081Z
-Stopped at: Completed 06-03-PLAN.md — OnboardingModal rewire + slop health dot
+Last session: 2026-05-01T19:49:18.896Z
+Stopped at: Completed 06-04-PLAN.md — useSettings + FolderPicker server migration
 Resume file: None

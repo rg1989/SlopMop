@@ -119,7 +119,7 @@ Plans:
 **Goal:** Settings and onboarding state move from localStorage to per-project .slop/ and global ~/.slop/ on disk; dotfile vault backs up and restores Claude, GSD, git, and SSH configs; two pre-existing bugs (double-spawn, roadmap parser) are fixed.
 **Requirements**: SLOP-01, SLOP-02, SETTINGS-01, RECENT-01, VAULT-01, VAULT-02, VAULT-03, ONBOARD-01, ONBOARD-02, BUG-01, BUG-02
 **Depends on:** Phase 5
-**Plans:** 3/5 plans executed
+**Plans:** 4/5 plans executed
 
 Plans:
 - [ ] 06-01-PLAN.md — Wave 0 test stubs + bug fixes (double-spawn dedup, parseRoadmapMd rewrite)
