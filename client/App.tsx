@@ -68,6 +68,22 @@ const SIDEBAR_MIN = 180;
 const SIDEBAR_DEFAULT = 240;
 const RESIZE_HANDLE_WIDTH = 4;
 
+// ── UI state persistence ──────────────────────────────────────────────────────
+const UI = {
+  sidebarTab:   'slopdock_ui:sidebar_tab',
+  sidebarWidth: 'slopdock_ui:sidebar_width',
+  editorWidth:  'slopdock_ui:editor_width',
+  editorTabs:   (cwd: string) => `slopdock_ui:editor_tabs:${cwd}`,
+} as const;
+
+function uiRead<T>(key: string, fallback: T): T {
+  try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; }
+  catch { return fallback; }
+}
+function uiWrite(key: string, value: unknown) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+}
+
 // ── Path persistence ──────────────────────────────────────────────────────────
 function getInitialPath(): string | null {
   const params = new URLSearchParams(window.location.search);
@@ -109,7 +125,11 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [superToolsOpen, setSuperToolsOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
-  const [sidebarTab, setSidebarTab] = useState<SidebarTabId>('explorer');
+  const [sidebarTab, setSidebarTabRaw] = useState<SidebarTabId>(() => {
+    const saved = uiRead<string>(UI.sidebarTab, 'explorer');
+    const valid: SidebarTabId[] = ['explorer', 'changes', 'roadmap', 'brain'];
+    return valid.includes(saved as SidebarTabId) ? (saved as SidebarTabId) : 'explorer';
+  });
   const [sidebarSearch, setSidebarSearch] = useState('');
   const [collapseKey, setCollapseKey] = useState(0);
   const [brainRefreshKey, setBrainRefreshKey] = useState(0);
@@ -133,11 +153,28 @@ export default function App() {
   const { settings, update: updateSettings } = useSettings();
   const health = useProjectHealth(cwd, settings.agent.command);
 
-  // Drag-resize — sidebar (left) and editor panel (right)
+  // Drag-resize — restore persisted widths as initial values
   const sidebarMaxRef = useRef<number>(Infinity);
-  const sidebar = useDragResize(SIDEBAR_DEFAULT, SIDEBAR_MIN, 'left', sidebarMaxRef);
+  const [sidebarInitWidth] = useState(() => Math.max(SIDEBAR_MIN, uiRead(UI.sidebarWidth, SIDEBAR_DEFAULT)));
+  const sidebar = useDragResize(sidebarInitWidth, SIDEBAR_MIN, 'left', sidebarMaxRef);
   const editorMaxRef = useRef<number>(Infinity);
-  const editor = useDragResize(320, 180, 'right', editorMaxRef);
+  const [editorInitWidth] = useState(() => Math.max(180, uiRead(UI.editorWidth, 320)));
+  const editor = useDragResize(editorInitWidth, 180, 'right', editorMaxRef);
+
+  // Track drag-end to persist widths (avoid writing on every pixel during drag)
+  const prevSidebarDragging = useRef(false);
+  const prevEditorDragging = useRef(false);
+  useEffect(() => {
+    if (prevSidebarDragging.current && !sidebar.isDragging) uiWrite(UI.sidebarWidth, sidebar.width);
+    prevSidebarDragging.current = sidebar.isDragging;
+  }, [sidebar.isDragging, sidebar.width]);
+  useEffect(() => {
+    if (prevEditorDragging.current && !editor.isDragging) uiWrite(UI.editorWidth, editor.width);
+    prevEditorDragging.current = editor.isDragging;
+  }, [editor.isDragging, editor.width]);
+
+  // Ref used to restore editor tabs exactly once per cwd
+  const initialSessionRestoredRef = useRef(false);
 
   // ── Session manager ──────────────────────────────────────────────────────────
   const sessionManager = useSessionManager();
@@ -150,6 +187,25 @@ export default function App() {
 
   // ── File tree (app-scoped — shared across all sessions) ──────────────────────
   const { tree, changedPaths, gitStatus, loadChanges, mode, setMode } = useFileTree(cwd);
+
+  const setSidebarTab = useCallback((tab: SidebarTabId) => {
+    setSidebarTabRaw(tab);
+    uiWrite(UI.sidebarTab, tab);
+  }, []);
+
+  // Persist editor tabs whenever the active session's tabs change
+  useEffect(() => {
+    if (!cwd) return;
+    uiWrite(UI.editorTabs(cwd), {
+      tabs: activeTabs.map(t => ({ path: t.path, isPreview: t.isPreview })),
+      activeTabId: activeEditorTabId,
+    });
+  }, [activeTabs, activeEditorTabId, cwd]);
+
+  // Reset restore flag when project changes so new project gets its own tabs
+  useEffect(() => {
+    initialSessionRestoredRef.current = false;
+  }, [cwd]);
 
   useEffect(() => {
     setMode(sidebarTab === 'changes' ? 'changes' : 'all');
@@ -431,6 +487,14 @@ export default function App() {
                     setActiveTabs(actions.tabs);
                     setActiveEditorTabId(actions.activeTabId);
                     setActiveEditingTabId(actions.editingTabId);
+
+                    if (!initialSessionRestoredRef.current && cwd) {
+                      initialSessionRestoredRef.current = true;
+                      const saved = uiRead<{ tabs: Array<{ path: string; isPreview: boolean }>; activeTabId: string | null } | null>(UI.editorTabs(cwd), null);
+                      if (saved && saved.tabs.length > 0) {
+                        actions.restoreFromSaved(saved, cwd);
+                      }
+                    }
                   }
                 }}
               />
