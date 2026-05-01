@@ -1,7 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-// @ts-expect-error — module does not exist yet (Wave 0 RED)
 import { OnboardingModal } from '../client/components/OnboardingModal';
 
 describe('OnboardingModal', () => {

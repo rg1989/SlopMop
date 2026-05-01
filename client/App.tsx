@@ -22,6 +22,8 @@ import { BrainEntryView } from './components/BrainEntryView';
 import type { BrainEntryData } from './components/BrainEntryView';
 import { SuperToolsModal } from './components/SuperToolsModal';
 import type { SuperTool } from './components/SuperToolsModal';
+import { RulesModal } from './components/RulesModal';
+import { OnboardingModal } from './components/OnboardingModal';
 import './App.css';
 
 type SidebarTabId = 'explorer' | 'changes' | 'roadmap' | 'brain';
@@ -103,6 +105,7 @@ export default function App() {
   const [ttsEnabled, setTtsEnabled] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [superToolsOpen, setSuperToolsOpen] = useState(false);
+  const [rulesOpen, setRulesOpen] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<SidebarTabId>('explorer');
   const [sidebarSearch, setSidebarSearch] = useState('');
   const [collapseKey, setCollapseKey] = useState(0);
@@ -122,6 +125,7 @@ export default function App() {
   const [activeEditorTabId, setActiveEditorTabId] = useState<string | null>(null);
   const [activeEditingTabId, setActiveEditingTabId] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [onboardingDone, setOnboardingDone] = useState(false);
 
   const { settings, update: updateSettings } = useSettings();
 
@@ -218,12 +222,20 @@ export default function App() {
         : { '--type-indicator-size': `${settings.typeIndicatorSize}px`, '--type-indicator-display': 'inline-flex' } as React.CSSProperties
       }
     >
+      {!onboardingDone && (
+        <OnboardingModal
+          initialPath={initialPath}
+          onDismiss={() => setOnboardingDone(true)}
+        />
+      )}
+
       <div className="folder-bar">
         <FolderPicker
           cwd={cwd}
           onConnect={handleConnect}
           onSettingsOpen={() => setSettingsOpen(true)}
           onSuperToolsOpen={() => setSuperToolsOpen(true)}
+          onRulesOpen={() => setRulesOpen(true)}
         />
       </div>
 
@@ -252,6 +264,13 @@ export default function App() {
           settings={settings}
           onUpdate={updateSettings}
           onClose={() => setSettingsOpen(false)}
+        />
+      )}
+
+      {rulesOpen && (
+        <RulesModal
+          cwd={cwd}
+          onClose={() => setRulesOpen(false)}
         />
       )}
 
@@ -330,7 +349,12 @@ export default function App() {
                     onAttach={handleSidebarAttach}
                   />
                 ) : sidebarTab === 'roadmap' ? (
-                  <GsdRoadmap cwd={cwd} onOpenFile={handleSidebarOpen} activeFilePath={activeFilePath} />
+                  <GsdRoadmap
+                    cwd={cwd}
+                    onOpenFile={handleSidebarOpen}
+                    activeFilePath={activeFilePath}
+                    onSendCommand={(cmd) => activeActionsRef.current?.sendInput('\x15' + cmd + '\r')}
+                  />
                 ) : (
                   <BrainPanel
                     cwd={cwd}
