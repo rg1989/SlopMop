@@ -3,6 +3,7 @@ import { useSessionManager } from './hooks/useSessionManager';
 import { useFileTree } from './hooks/useFileTree';
 import { useAudioCoordinator } from './hooks/useAudioCoordinator';
 import { useSettings, matchesPttCombo } from './hooks/useSettings';
+import type { AgentConfig } from './hooks/useSettings';
 import { useDragResize } from './hooks/useDragResize';
 import { FolderPicker } from './components/FolderPicker';
 import { VoiceBar } from './components/VoiceBar';
@@ -127,7 +128,7 @@ export default function App() {
   const [activeEditorTabId, setActiveEditorTabId] = useState<string | null>(null);
   const [activeEditingTabId, setActiveEditingTabId] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [onboardingDone, setOnboardingDone] = useState(false);
+  const [slopExists, setSlopExists] = useState<boolean | null>(null);
 
   const { settings, update: updateSettings } = useSettings();
   const health = useProjectHealth(cwd, settings.agent.command);
@@ -153,6 +154,17 @@ export default function App() {
   useEffect(() => {
     setMode(sidebarTab === 'changes' ? 'changes' : 'all');
   }, [sidebarTab, setMode]);
+
+  useEffect(() => {
+    if (!cwd) { setSlopExists(null); return; }
+    fetch(`/api/slop-status?cwd=${encodeURIComponent(cwd)}`)
+      .then(r => r.json())
+      .then(({ exists, config }: { exists: boolean; config: { agent?: AgentConfig } | null }) => {
+        setSlopExists(exists);
+        if (config?.agent) updateSettings({ agent: config.agent });
+      })
+      .catch(() => setSlopExists(null));
+  }, [cwd]);
 
   // ── Layout max-width refs (updated every render) ─────────────────────────────
   sidebarMaxRef.current = window.innerWidth - 300 - RESIZE_HANDLE_WIDTH;
@@ -225,10 +237,10 @@ export default function App() {
         : { '--type-indicator-size': `${settings.typeIndicatorSize}px`, '--type-indicator-display': 'inline-flex' } as React.CSSProperties
       }
     >
-      {!onboardingDone && (
+      {cwd && slopExists === false && (
         <OnboardingModal
-          initialPath={initialPath}
-          onDismiss={() => setOnboardingDone(true)}
+          cwd={cwd}
+          onInit={() => setSlopExists(true)}
         />
       )}
 
@@ -241,7 +253,7 @@ export default function App() {
           onRulesOpen={() => setRulesOpen(true)}
         />
       </div>
-      {cwd && <HealthStatusBar health={health} />}
+      {cwd && <HealthStatusBar health={health} slopExists={slopExists} />}
 
       {superToolsOpen && (
         <SuperToolsModal
