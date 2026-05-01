@@ -32,8 +32,8 @@ describe('pty-manager', () => {
       spawnSession('/tmp/test', 80, 24);
 
       expect(mockSpawn).toHaveBeenCalledOnce();
-      const callArgs = mockSpawn.mock.calls[0];
-      const options = callArgs[2];
+      const callArgs = mockSpawn.mock.calls[0] as unknown[];
+      const options = callArgs[2] as Record<string, unknown>;
       expect(options.cwd).toBe('/tmp/test');
     });
 
@@ -41,8 +41,8 @@ describe('pty-manager', () => {
       spawnSession('/tmp/test', 80, 24);
 
       expect(mockSpawn).toHaveBeenCalledOnce();
-      const callArgs = mockSpawn.mock.calls[0];
-      const options = callArgs[2];
+      const callArgs = mockSpawn.mock.calls[0] as unknown[];
+      const options = callArgs[2] as { env: Record<string, unknown>; cols: number; rows: number; cwd: string };
       expect(options.env.TERM).toBe('xterm-256color');
     });
 
@@ -52,8 +52,8 @@ describe('pty-manager', () => {
 
       spawnSession('/tmp/test', 80, 24);
 
-      const callArgs = mockSpawn.mock.calls[0];
-      const options = callArgs[2];
+      const callArgs = mockSpawn.mock.calls[0] as unknown[];
+      const options = callArgs[2] as { env: Record<string, unknown>; cols: number; rows: number; cwd: string };
       expect(options.env.TERM).toBe('xterm-256color');
 
       if (originalTerm !== undefined) {
@@ -65,8 +65,8 @@ describe('pty-manager', () => {
       spawnSession('/tmp/test', 120, 40);
 
       expect(mockSpawn).toHaveBeenCalledOnce();
-      const callArgs = mockSpawn.mock.calls[0];
-      const options = callArgs[2];
+      const callArgs = mockSpawn.mock.calls[0] as unknown[];
+      const options = callArgs[2] as Record<string, unknown>;
       expect(options.cols).toBe(120);
       expect(options.rows).toBe(40);
     });

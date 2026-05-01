@@ -8,11 +8,28 @@ export interface PttCombo {
   meta: boolean;
 }
 
+// Configures which agent process is spawned in the terminal.
+// command: the executable on PATH (e.g. 'claude', 'aider', 'hermes')
+// args: additional CLI arguments passed on every launch
+// label: display name shown in the UI
+export interface AgentConfig {
+  command: string;
+  args: string[];
+  label: string;
+}
+
+export const DEFAULT_AGENT: AgentConfig = {
+  command: 'claude',
+  args: [],
+  label: 'Claude',
+};
+
 export interface AppSettings {
   recordingMode: 'toggle' | 'hold';
-  pttKey: PttCombo | null;   // null means disabled
+  pttKey: PttCombo | null;
   sidebarTabsOrientation: 'horizontal' | 'vertical';
   showHiddenFiles: boolean;
+  agent: AgentConfig;
 }
 
 const DEFAULTS: AppSettings = {
@@ -20,6 +37,7 @@ const DEFAULTS: AppSettings = {
   pttKey: null,
   sidebarTabsOrientation: 'horizontal',
   showHiddenFiles: true,
+  agent: DEFAULT_AGENT,
 };
 
 const STORAGE_KEY = 'slopdock_settings';

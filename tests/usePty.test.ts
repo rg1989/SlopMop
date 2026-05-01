@@ -1,6 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { Terminal } from '@xterm/xterm';
+import { DEFAULT_AGENT } from '../client/hooks/useSettings';
 
 // Mock @xterm/xterm
 vi.mock('@xterm/xterm', () => ({
@@ -67,6 +68,7 @@ describe('usePty', () => {
 
     mockTerminal = {
       write: vi.fn(),
+      reset: vi.fn(),
       cols: 80,
       rows: 24,
     } as unknown as Terminal;
@@ -76,18 +78,27 @@ describe('usePty', () => {
     vi.clearAllMocks();
   });
 
-  it('opens a WebSocket to ws://localhost:3000/ws when cwd and terminal are provided', () => {
+  it('opens a WebSocket derived from window.location when cwd and terminal are provided', () => {
     renderHook(() =>
-      usePty({ cwd: '/tmp', terminal: mockTerminal, cols: 80, rows: 24 })
+      usePty({ cwd: '/tmp', terminal: mockTerminal, cols: 80, rows: 24, agentConfig: DEFAULT_AGENT })
     );
 
     expect(MockWebSocket).toHaveBeenCalledTimes(1);
-    expect(MockWebSocket).toHaveBeenCalledWith('ws://localhost:3000/ws');
+    // jsdom default location is http://localhost/ → ws://localhost/ws
+    expect(MockWebSocket).toHaveBeenCalledWith('ws://localhost/ws');
   });
 
-  it('sends {type:start, cwd, cols, rows} on WebSocket open (TERM-01)', () => {
+  it('uses wsUrl override when provided', () => {
     renderHook(() =>
-      usePty({ cwd: '/tmp', terminal: mockTerminal, cols: 80, rows: 24 })
+      usePty({ cwd: '/tmp', terminal: mockTerminal, cols: 80, rows: 24, agentConfig: DEFAULT_AGENT, wsUrl: 'ws://custom:9000/ws' })
+    );
+
+    expect(MockWebSocket).toHaveBeenCalledWith('ws://custom:9000/ws');
+  });
+
+  it('sends {type:start} with cwd, cols, rows, agentCommand, agentArgs on WebSocket open (TERM-01)', () => {
+    renderHook(() =>
+      usePty({ cwd: '/tmp', terminal: mockTerminal, cols: 80, rows: 24, agentConfig: DEFAULT_AGENT })
     );
 
     const ws = wsInstances[0];
@@ -99,12 +110,27 @@ describe('usePty', () => {
       cwd: '/tmp',
       cols: 80,
       rows: 24,
+      agentCommand: 'claude',
+      agentArgs: [],
     });
+  });
+
+  it('propagates custom agentCommand and agentArgs in start message', () => {
+    renderHook(() =>
+      usePty({ cwd: '/tmp', terminal: mockTerminal, cols: 80, rows: 24, agentConfig: { command: 'aider', args: ['--model', 'gpt-4'], label: 'Aider' } })
+    );
+
+    const ws = wsInstances[0];
+    act(() => ws.simulateOpen());
+
+    const msg = JSON.parse(ws.send.mock.calls[0][0]);
+    expect(msg.agentCommand).toBe('aider');
+    expect(msg.agentArgs).toEqual(['--model', 'gpt-4']);
   });
 
   it('calls terminal.write(data) when server sends {type:data, data} (TERM-02)', () => {
     renderHook(() =>
-      usePty({ cwd: '/tmp', terminal: mockTerminal, cols: 80, rows: 24 })
+      usePty({ cwd: '/tmp', terminal: mockTerminal, cols: 80, rows: 24, agentConfig: DEFAULT_AGENT })
     );
 
     const ws = wsInstances[0];
@@ -116,12 +142,11 @@ describe('usePty', () => {
 
   it('sendInput sends {type:input, data} over WebSocket', () => {
     const { result } = renderHook(() =>
-      usePty({ cwd: '/tmp', terminal: mockTerminal, cols: 80, rows: 24 })
+      usePty({ cwd: '/tmp', terminal: mockTerminal, cols: 80, rows: 24, agentConfig: DEFAULT_AGENT })
     );
 
     const ws = wsInstances[0];
     act(() => ws.simulateOpen());
-
     act(() => result.current.sendInput('ls\n'));
 
     // First send is 'start', second is the input
@@ -134,12 +159,11 @@ describe('usePty', () => {
 
   it('sendResize sends {type:resize, cols, rows} over WebSocket', () => {
     const { result } = renderHook(() =>
-      usePty({ cwd: '/tmp', terminal: mockTerminal, cols: 80, rows: 24 })
+      usePty({ cwd: '/tmp', terminal: mockTerminal, cols: 80, rows: 24, agentConfig: DEFAULT_AGENT })
     );
 
     const ws = wsInstances[0];
     act(() => ws.simulateOpen());
-
     act(() => result.current.sendResize(120, 40));
 
     expect(ws.send).toHaveBeenCalledTimes(2);
@@ -152,7 +176,7 @@ describe('usePty', () => {
 
   it('closes WebSocket on unmount', () => {
     const { unmount } = renderHook(() =>
-      usePty({ cwd: '/tmp', terminal: mockTerminal, cols: 80, rows: 24 })
+      usePty({ cwd: '/tmp', terminal: mockTerminal, cols: 80, rows: 24, agentConfig: DEFAULT_AGENT })
     );
 
     const ws = wsInstances[0];
@@ -163,7 +187,7 @@ describe('usePty', () => {
 
   it('does not open WebSocket when cwd is null', () => {
     renderHook(() =>
-      usePty({ cwd: null, terminal: mockTerminal, cols: 80, rows: 24 })
+      usePty({ cwd: null, terminal: mockTerminal, cols: 80, rows: 24, agentConfig: DEFAULT_AGENT })
     );
 
     expect(MockWebSocket).not.toHaveBeenCalled();
@@ -171,7 +195,7 @@ describe('usePty', () => {
 
   it('does not open WebSocket when terminal is null', () => {
     renderHook(() =>
-      usePty({ cwd: '/tmp', terminal: null, cols: 80, rows: 24 })
+      usePty({ cwd: '/tmp', terminal: null, cols: 80, rows: 24, agentConfig: DEFAULT_AGENT })
     );
 
     expect(MockWebSocket).not.toHaveBeenCalled();
@@ -179,7 +203,7 @@ describe('usePty', () => {
 
   it('does not call terminal.write for non-data messages', () => {
     renderHook(() =>
-      usePty({ cwd: '/tmp', terminal: mockTerminal, cols: 80, rows: 24 })
+      usePty({ cwd: '/tmp', terminal: mockTerminal, cols: 80, rows: 24, agentConfig: DEFAULT_AGENT })
     );
 
     const ws = wsInstances[0];

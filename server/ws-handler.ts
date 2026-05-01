@@ -35,7 +35,7 @@ export function attachWebSocketServer(server: Server): void {
           }
         }
         try {
-          ptyProcess = spawnSession(msg.cwd, msg.cols, msg.rows);
+          ptyProcess = spawnSession(msg.cwd, msg.cols, msg.rows, msg.agentCommand, msg.agentArgs);
           ptyProcess.onData((data: string) => {
             send({ type: 'data', data });
           });

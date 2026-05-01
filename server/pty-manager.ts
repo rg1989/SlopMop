@@ -11,8 +11,14 @@ function getLoginShellPath(): string {
 
 const LOGIN_PATH = getLoginShellPath();
 
-export function spawnSession(cwd: string, cols: number, rows: number): pty.IPty {
-  return pty.spawn('claude', [], {
+export function spawnSession(
+  cwd: string,
+  cols: number,
+  rows: number,
+  command: string = 'claude',
+  args: string[] = [],
+): pty.IPty {
+  return pty.spawn(command, args, {
     name: 'xterm-256color',
     cols,
     rows,
