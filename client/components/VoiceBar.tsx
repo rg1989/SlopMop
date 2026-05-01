@@ -14,6 +14,7 @@ interface VoiceBarProps {
   supported?: boolean;
   ttsAvailable?: boolean | null;
   whisperAvailable?: boolean | null;
+  compact?: boolean;
 }
 
 export const VoiceBar: FC<VoiceBarProps> = ({
@@ -29,6 +30,7 @@ export const VoiceBar: FC<VoiceBarProps> = ({
   supported = true,
   ttsAvailable = null,
   whisperAvailable = null,
+  compact = false,
 }) => {
   const ttsNotReady = ttsEnabled && ttsAvailable === false;
   const sttNotReady = whisperAvailable === false;
@@ -37,6 +39,51 @@ export const VoiceBar: FC<VoiceBarProps> = ({
     if (recording) onMicStop();
     else onMicStart();
   };
+
+  if (compact) {
+    const micTitle = recording ? 'Stop recording' : transcribing ? 'Transcribing…' : 'Record voice message';
+    const micDisabled = transcribing || (!supported && !recording);
+    const micClass = [
+      'icon-btn',
+      recording ? 'vb-compact-recording' : '',
+      micDisabled ? 'icon-btn-disabled' : '',
+    ].filter(Boolean).join(' ');
+
+    return (
+      <div className="voice-bar">
+        <button
+          type="button"
+          className={micClass}
+          title={micTitle}
+          disabled={micDisabled}
+          onClick={handleMicClick}
+        >
+          {recording ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <rect x="4" y="4" width="16" height="16" rx="2" />
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          )}
+        </button>
+        <IconToggle
+          on={ttsEnabled}
+          onIcon={<SpeakerOnIcon />}
+          offIcon={<SpeakerOffIcon />}
+          onTooltip="AI voice on — click to mute"
+          offTooltip="AI voice off — click to enable"
+          pulsing={speaking}
+          onClick={onTtsToggle}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="voice-bar">

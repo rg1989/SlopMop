@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback, type FC } from 'react';
+import { useState, useEffect, useCallback, useRef, type FC } from 'react';
 import { ConfirmModal } from './ConfirmModal';
+import { GsdAddModal, ADD_OPTIONS, type AddOption } from './GsdAddModal';
 
 interface GsdPlan {
   id: string;
@@ -37,6 +38,10 @@ interface GsdRoadmapData {
   progress: { totalPhases: number; completedPhases: number; totalPlans: number; completedPlans: number; percent: number };
   phases: GsdPhase[];
   quickTasks: GsdQuickTask[];
+  roadmapPath: string;
+  statePath: string;
+  projectPath: string | null;
+  requirementsPath: string | null;
 }
 
 type RoadmapResponse = { exists: false } | GsdRoadmapData;
@@ -44,8 +49,8 @@ type RoadmapResponse = { exists: false } | GsdRoadmapData;
 interface GsdRoadmapProps {
   cwd: string;
   onOpenFile: (path: string, isPreview: boolean) => void;
-  /** Absolute path of the file currently open in the editor */
   activeFilePath?: string;
+  onSendCommand?: (command: string) => void;
 }
 
 const IconCheck = () => (
@@ -83,6 +88,27 @@ const IconTrashSm = () => (
   </svg>
 );
 
+const IconPlus = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+  </svg>
+);
+
+const IconFile = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14 2 14 8 20 8"/>
+  </svg>
+);
+
+const IconLayers = () => (
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+    <polyline points="2 17 12 22 22 17"/>
+    <polyline points="2 12 12 17 22 12"/>
+  </svg>
+);
+
 function statusColor(status: string): string {
   if (status === 'completed') return '#d4845a';
   if (status === 'in-progress') return '#d4845a';
@@ -92,26 +118,49 @@ function statusColor(status: string): string {
 function phaseStatusLabel(phase: GsdPhase): string {
   if (phase.completed) return 'Complete';
   const done = phase.plans.filter(p => p.completed).length;
-  if (done > 0) return `${done}/${phase.plans.length} plans`;
+  if (done > 0) return `${done}/${phase.plans.length} plans done`;
   return 'Planned';
 }
 
-function phaseColor(phase: GsdPhase): string {
+function phaseColor(phase: GsdPhase, isActive: boolean): string {
   if (phase.completed) return '#d4845a';
-  const done = phase.plans.filter(p => p.completed).length;
-  if (done > 0) return '#d4845a';
+  if (isActive) return '#d4845a';
   return '#484f58';
 }
 
-export const GsdRoadmap: FC<GsdRoadmapProps> = ({ cwd, onOpenFile, activeFilePath }) => {
+export const GsdRoadmap: FC<GsdRoadmapProps> = ({ cwd, onOpenFile, activeFilePath, onSendCommand }) => {
   const [data, setData] = useState<RoadmapResponse | null>(null);
   const [collapsed, setCollapsed] = useState<Set<number>>(new Set());
+  const [quickDoneCollapsed, setQuickDoneCollapsed] = useState(true);
   const [pendingDelete, setPendingDelete] = useState<{
     label: string;
     endpoint: string;
     body: Record<string, unknown>;
   } | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [addMenuOpen, setAddMenuOpen] = useState(false);
+  const [addOption, setAddOption] = useState<AddOption | null>(null);
+  const [phasesCollapsed, setPhasesCollapsed] = useState(false);
+  const addMenuRef = useRef<HTMLDivElement>(null);
+  const initializedRef = useRef(false);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    if (!addMenuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (addMenuRef.current && !addMenuRef.current.contains(e.target as Node)) {
+        setAddMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [addMenuOpen]);
+
+  const handleAddSubmit = (text: string) => {
+    if (!addOption) return;
+    onSendCommand?.(`${addOption.command} ${text}`);
+    setAddOption(null);
+  };
 
   const fetchRoadmap = useCallback((silent = false) => {
     if (!silent) setData(null);
@@ -119,17 +168,17 @@ export const GsdRoadmap: FC<GsdRoadmapProps> = ({ cwd, onOpenFile, activeFilePat
       .then(r => r.json())
       .then(d => {
         setData(d as RoadmapResponse);
-        if (d.exists && !silent) {
+        if (d.exists && !initializedRef.current) {
+          initializedRef.current = true;
           const rd = d as GsdRoadmapData;
-          // Always collapse completed phases; only active ones stay expanded
-          const toCollapse = new Set(rd.phases.filter((p: GsdPhase) => p.completed).map((p: GsdPhase) => p.number));
-          setCollapsed(toCollapse);
+          // Expand only the active phase (first in-progress), collapse everything else
+          const activeNum = rd.phases.find(p => !p.completed && p.plans.some((pl: GsdPlan) => pl.completed))?.number
+            ?? rd.phases.find(p => !p.completed)?.number;
+          setCollapsed(new Set(rd.phases.filter(p => p.number !== activeNum).map(p => p.number)));
         }
       })
       .catch(() => { if (!silent) setData({ exists: false }); });
   }, [cwd]);
-
-  const loadRoadmap = useCallback(() => fetchRoadmap(false), [fetchRoadmap]);
 
   useEffect(() => { fetchRoadmap(); }, [fetchRoadmap]);
 
@@ -138,7 +187,7 @@ export const GsdRoadmap: FC<GsdRoadmapProps> = ({ cwd, onOpenFile, activeFilePat
     return () => clearInterval(id);
   }, [fetchRoadmap]);
 
-  // Auto-expand the phase that contains the active file
+  // Auto-expand phase containing the active editor file
   useEffect(() => {
     if (!activeFilePath || !data || !('phases' in data)) return;
     const rd = data as GsdRoadmapData;
@@ -166,7 +215,7 @@ export const GsdRoadmap: FC<GsdRoadmapProps> = ({ cwd, onOpenFile, activeFilePat
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(pendingDelete.body),
       });
-      loadRoadmap();
+      fetchRoadmap(false);
     } catch { /* ignore */ } finally {
       setDeleteLoading(false);
       setPendingDelete(null);
@@ -188,9 +237,7 @@ export const GsdRoadmap: FC<GsdRoadmapProps> = ({ cwd, onOpenFile, activeFilePat
   if (data === null) {
     return (
       <div className="rm-loading">
-        <div className="rm-loading-dots">
-          <span /><span /><span />
-        </div>
+        <div className="rm-loading-dots"><span /><span /><span /></div>
       </div>
     );
   }
@@ -212,24 +259,78 @@ export const GsdRoadmap: FC<GsdRoadmapProps> = ({ cwd, onOpenFile, activeFilePat
   }
 
   const rd = data as GsdRoadmapData;
-  const { milestone, milestoneName, status, progress, phases, quickTasks } = rd;
+  const { milestone, status, phases, quickTasks, roadmapPath, statePath, projectPath, requirementsPath } = rd;
   const allPlans = phases.flatMap(p => p.plans);
   const actualCompleted = allPlans.filter(p => p.completed).length;
   const actualTotal = allPlans.length;
   const pct = actualTotal > 0 ? Math.round((actualCompleted / actualTotal) * 100) : 0;
   const color = statusColor(status);
 
+  const pendingQuickTasks = quickTasks.filter(t => !t.completed);
+  const doneQuickTasks = quickTasks.filter(t => t.completed);
+
+  // Active phase: first in-progress (has some but not all plans done), or first incomplete
+  const activePhaseNum = phases.find(p => !p.completed && p.plans.some(pl => pl.completed))?.number
+    ?? phases.find(p => !p.completed)?.number;
+
   return (
     <div className="rm-root">
-      {/* ── Milestone header ── */}
+      {/* ── Header: version + planning docs ── */}
       <div className="rm-header">
         <div className="rm-milestone-row">
-          <span className="rm-milestone-badge" style={{ borderColor: color, color }}>
-            {milestone || 'v?'}
+          <span className="rm-version-label">
+            <span className="rm-version-text">version</span>
+            <span className="rm-version-num" style={{ color }}>{(milestone || 'v?').replace(/^v/, '')}</span>
           </span>
-          <span className="rm-milestone-name">{milestoneName || 'Milestone'}</span>
-          <span className="rm-status-dot" style={{ background: color }} title={status} />
+          <div className="rm-header-actions" ref={addMenuRef}>
+            <button
+              className="rm-add-btn"
+              onClick={() => setAddMenuOpen(v => !v)}
+              title="Add phase, quick task, or milestone"
+            >
+              <IconPlus />
+            </button>
+            {addMenuOpen && (
+              <div className="rm-add-menu">
+                {ADD_OPTIONS.map(opt => (
+                  <button
+                    key={opt.id}
+                    className="rm-add-menu-item"
+                    onClick={() => { setAddOption(opt); setAddMenuOpen(false); }}
+                  >
+                    <span className="rm-add-menu-label">{opt.label}</span>
+                    <span className="rm-add-menu-desc">{opt.description}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Planning file links */}
+        <div className="rm-file-links">
+          <div className="rm-file-links-label">Planning Docs</div>
+          <button className="rm-file-link-btn" onClick={() => openFile(roadmapPath)}>
+            <span className="rm-file-link-icon"><IconFile /></span>ROADMAP.md
+          </button>
+          {projectPath && (
+            <button className="rm-file-link-btn" onClick={() => openFile(projectPath)}>
+              <span className="rm-file-link-icon"><IconFile /></span>PROJECT.md
+            </button>
+          )}
+          {requirementsPath && (
+            <button className="rm-file-link-btn" onClick={() => openFile(requirementsPath)}>
+              <span className="rm-file-link-icon"><IconFile /></span>REQUIREMENTS.md
+            </button>
+          )}
+          <button className="rm-file-link-btn" onClick={() => openFile(statePath)}>
+            <span className="rm-file-link-icon"><IconFile /></span>STATE.md
+          </button>
+        </div>
+      </div>
+
+      {/* ── Progress (below header divider) ── */}
+      <div className="rm-progress-section">
         <div className="rm-progress-bar-wrap">
           <div className="rm-progress-bar">
             <div className="rm-progress-fill" style={{ width: `${pct}%`, background: color }} />
@@ -247,114 +348,170 @@ export const GsdRoadmap: FC<GsdRoadmapProps> = ({ cwd, onOpenFile, activeFilePat
           <div className="rm-quick-header">
             <IconBolt />
             <span>Quick Tasks</span>
-            <span className="rm-quick-count">{quickTasks.filter(q => q.completed).length}/{quickTasks.length}</span>
+            <span className="rm-quick-count" style={{ color: pendingQuickTasks.length > 0 ? '#d4845a' : '#484f58' }}>
+              {pendingQuickTasks.length > 0 ? `${pendingQuickTasks.length} pending` : 'all done'}
+            </span>
           </div>
-          <div className="rm-quick-list">
-            {quickTasks.map(task => (
-              <div
-                key={task.number}
-                className={`rm-quick-item${task.planPath ? ' rm-quick-item--link' : ''}${task.planPath && activeFilePath === task.planPath ? ' rm-item--active' : ''}`}
-                onClick={() => openFile(task.planPath)}
-                title={task.planPath ? 'Open plan in editor' : undefined}
-              >
-                <span className={`rm-plan-check${task.completed ? ' rm-plan-check--done' : ''}`}>
-                  {task.completed ? <IconCheck /> : null}
-                </span>
-                <span className="rm-quick-num">{task.number}</span>
-                <span className="rm-quick-desc">{task.description}</span>
-                {task.date && <span className="rm-quick-date">{task.date.slice(5)}</span>}
-                <div className="rm-item-actions" onClick={e => {
-                  e.stopPropagation();
-                  setPendingDelete({ label: `Quick task ${task.number}: ${task.description}`, endpoint: '/api/gsd/quick', body: { cwd, dirName: task.dirName, num: task.number } });
-                }}>
-                  <button className="rm-delete-btn" title="Delete quick task"><IconTrashSm /></button>
+
+          {pendingQuickTasks.length > 0 && (
+            <div className="rm-quick-list">
+              {pendingQuickTasks.map(task => (
+                <div
+                  key={task.number}
+                  className={`rm-quick-item rm-quick-item--pending${task.planPath ? ' rm-quick-item--link' : ''}${task.planPath && activeFilePath === task.planPath ? ' rm-item--active' : ''}`}
+                  onClick={() => openFile(task.planPath)}
+                  title={task.planPath ? 'Open plan in editor' : undefined}
+                >
+                  <span className="rm-plan-check" />
+                  <span className="rm-quick-num">{task.number}</span>
+                  <span className="rm-quick-desc">{task.description}</span>
+                  {task.date && <span className="rm-quick-date">{task.date.slice(5)}</span>}
+                  <div className="rm-item-actions" onClick={e => {
+                    e.stopPropagation();
+                    setPendingDelete({ label: `Quick task ${task.number}: ${task.description}`, endpoint: '/api/gsd/quick', body: { cwd, dirName: task.dirName, num: task.number } });
+                  }}>
+                    <button className="rm-delete-btn" title="Delete quick task"><IconTrashSm /></button>
+                  </div>
                 </div>
+              ))}
+            </div>
+          )}
+
+          {doneQuickTasks.length > 0 && (
+            <>
+              <div className="rm-quick-done-toggle" onClick={() => setQuickDoneCollapsed(v => !v)}>
+                <IconChevron open={!quickDoneCollapsed} />
+                <span>{doneQuickTasks.length} completed</span>
               </div>
-            ))}
-          </div>
+              {!quickDoneCollapsed && (
+                <div className="rm-quick-list">
+                  {doneQuickTasks.map(task => (
+                    <div
+                      key={task.number}
+                      className={`rm-quick-item${task.planPath ? ' rm-quick-item--link' : ''}${task.planPath && activeFilePath === task.planPath ? ' rm-item--active' : ''}`}
+                      onClick={() => openFile(task.planPath)}
+                      title={task.planPath ? 'Open plan in editor' : undefined}
+                    >
+                      <span className="rm-plan-check rm-plan-check--done"><IconCheck /></span>
+                      <span className="rm-quick-num">{task.number}</span>
+                      <span className="rm-quick-desc">{task.description}</span>
+                      {task.date && <span className="rm-quick-date">{task.date.slice(5)}</span>}
+                      <div className="rm-item-actions" onClick={e => {
+                        e.stopPropagation();
+                        setPendingDelete({ label: `Quick task ${task.number}: ${task.description}`, endpoint: '/api/gsd/quick', body: { cwd, dirName: task.dirName, num: task.number } });
+                      }}>
+                        <button className="rm-delete-btn" title="Delete quick task"><IconTrashSm /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
 
-      {/* ── Phase timeline ── */}
-      <div className="rm-timeline">
-        {phases.map((phase) => {
-          const isOpen = !collapsed.has(phase.number);
-          const pc = phaseColor(phase);
-          const completedPlans = phase.plans.filter(p => p.completed).length;
+      {/* ── Phases ── */}
+      <div className="rm-phases-section">
+        <div className="rm-phases-header" onClick={() => setPhasesCollapsed(v => !v)}>
+          <IconLayers />
+          <span>Phases</span>
+          <span className="rm-phases-count">
+            {phases.filter(p => p.completed).length}/{phases.length}
+          </span>
+          <span className="rm-phases-chevron"><IconChevron open={!phasesCollapsed} /></span>
+        </div>
 
-          return (
-            <div key={phase.number} className="rm-phase-wrap">
-              {/* Phase node */}
-              <div className="rm-phase-row" onClick={() => toggleCollapse(phase.number)}>
-                <div className="rm-phase-track">
-                  <div className="rm-phase-dot" style={{ borderColor: pc, background: phase.completed ? pc : 'transparent' }}>
-                    {phase.completed && <IconCheck />}
-                  </div>
-                  <div className="rm-phase-line" />
-                </div>
-                <div className="rm-phase-body">
-                  <div className="rm-phase-top">
-                    <span className="rm-phase-num" style={{ color: pc }}>Phase {phase.number}</span>
-                    <span className="rm-phase-chevron"><IconChevron open={isOpen} /></span>
-                  </div>
-                  <div className="rm-phase-name">{phase.name}</div>
-                  <div className="rm-phase-meta" style={{ color: pc }}>
-                    {phaseStatusLabel(phase)}
-                    {phase.plans.length > 0 && ` · ${completedPlans}/${phase.plans.length}`}
-                  </div>
-                </div>
-                <div className="rm-item-actions" onClick={e => {
-                  e.stopPropagation();
-                  setPendingDelete({ label: `Phase ${phase.number}: ${phase.name}`, endpoint: '/api/gsd/phase', body: { cwd, phase: phase.number } });
-                }}>
-                  <button className="rm-delete-btn" title="Delete phase"><IconTrashSm /></button>
-                </div>
-              </div>
+        {!phasesCollapsed && (
+          <div className="rm-timeline">
+            {[...phases].reverse().map((phase, phaseIdx) => {
+              const isOpen = !collapsed.has(phase.number);
+              const isActive = phase.number === activePhaseNum;
+              const pc = phaseColor(phase, isActive);
+              const completedPlans = phase.plans.filter(p => p.completed).length;
+              const isLast = phaseIdx === phases.length - 1;
 
-              {/* Plans list */}
-              {isOpen && (
-                <div className="rm-plans-wrap">
-                  <div className="rm-plans-track">
-                    <div className="rm-plans-line" />
-                  </div>
-                  <div className="rm-plans-list">
-                    {phase.goal && (
-                      <div className="rm-phase-goal">{phase.goal}</div>
-                    )}
-                    {phase.plans.map(plan => (
-                      <div
-                        key={plan.id}
-                        className={`rm-plan-item${plan.planPath ? ' rm-plan-item--link' : ''}${plan.planPath && activeFilePath === plan.planPath ? ' rm-item--active' : ''}`}
-                        onClick={() => openFile(plan.planPath)}
-                        title={plan.planPath ? 'Open plan in editor' : undefined}
-                      >
-                        <span className={`rm-plan-check${plan.completed ? ' rm-plan-check--done' : ''}`}>
-                          {plan.completed ? <IconCheck /> : null}
-                        </span>
-                        <span className="rm-plan-id">{plan.id}</span>
-                        <span className="rm-plan-name">{plan.name}</span>
-                        <div className="rm-item-actions" onClick={e => {
-                          e.stopPropagation();
-                          setPendingDelete({ label: `Plan ${plan.id}`, endpoint: '/api/gsd/plan', body: { cwd, phaseNum: phase.number, planId: plan.id } });
-                        }}>
-                          <button className="rm-delete-btn" title="Delete plan"><IconTrashSm /></button>
-                        </div>
+              return (
+                <div key={phase.number} className={`rm-phase-wrap${isActive ? ' rm-phase-wrap--active' : ''}`}>
+                  <div className="rm-phase-row" onClick={() => toggleCollapse(phase.number)}>
+                    <div className="rm-phase-track">
+                      <div className="rm-phase-dot" style={{ borderColor: pc, background: phase.completed ? pc : isActive ? 'rgba(212,132,90,0.2)' : 'transparent' }}>
+                        {phase.completed && <IconCheck />}
                       </div>
-                    ))}
-                    {phase.researchPath && (
-                      <div className="rm-phase-docs">
-                        <button className={`rm-doc-link${activeFilePath === phase.researchPath ? ' rm-item--active' : ''}`} onClick={() => openFile(phase.researchPath)}>Research</button>
-                        {phase.verificationPath && (
-                          <button className={`rm-doc-link${activeFilePath === phase.verificationPath ? ' rm-item--active' : ''}`} onClick={() => openFile(phase.verificationPath)}>Verification</button>
+                      {!isLast && <div className="rm-phase-line" />}
+                    </div>
+                    <div className="rm-phase-body">
+                      <div className="rm-phase-top">
+                        <span className="rm-phase-num" style={{ color: pc }}>Phase {phase.number}</span>
+                        {isActive && <span className="rm-active-badge">In progress</span>}
+                        <span className="rm-phase-chevron"><IconChevron open={isOpen} /></span>
+                      </div>
+                      <div className="rm-phase-name" style={{ color: phase.completed && !isActive ? '#484f58' : undefined }}>
+                        {phase.name}
+                      </div>
+                      <div className="rm-phase-meta" style={{ color: pc }}>
+                        {phaseStatusLabel(phase)}
+                        {phase.plans.length > 0 && ` · ${completedPlans}/${phase.plans.length}`}
+                      </div>
+                      {isActive && phase.plans.length > 0 && (
+                        <div className="rm-phase-mini-bar">
+                          <div className="rm-phase-mini-fill" style={{ width: `${Math.round((completedPlans / phase.plans.length) * 100)}%` }} />
+                        </div>
+                      )}
+                    </div>
+                    <div className="rm-item-actions" onClick={e => {
+                      e.stopPropagation();
+                      setPendingDelete({ label: `Phase ${phase.number}: ${phase.name}`, endpoint: '/api/gsd/phase', body: { cwd, phase: phase.number } });
+                    }}>
+                      <button className="rm-delete-btn" title="Delete phase"><IconTrashSm /></button>
+                    </div>
+                  </div>
+
+                  {isOpen && (
+                    <div className="rm-plans-wrap">
+                      <div className="rm-plans-track">
+                        <div className="rm-plans-line" />
+                      </div>
+                      <div className="rm-plans-list">
+                        {phase.goal && <div className="rm-phase-goal">{phase.goal}</div>}
+                        {phase.plans.map(plan => (
+                          <div
+                            key={plan.id}
+                            className={`rm-plan-item${plan.planPath ? ' rm-plan-item--link' : ''}${plan.planPath && activeFilePath === plan.planPath ? ' rm-item--active' : ''}`}
+                            onClick={() => openFile(plan.planPath)}
+                            title={plan.planPath ? 'Open plan in editor' : undefined}
+                          >
+                            <span className={`rm-plan-check${plan.completed ? ' rm-plan-check--done' : ''}`}>
+                              {plan.completed ? <IconCheck /> : null}
+                            </span>
+                            <span className="rm-plan-id">{plan.id}</span>
+                            <span className="rm-plan-name">{plan.name}</span>
+                            <div className="rm-item-actions" onClick={e => {
+                              e.stopPropagation();
+                              setPendingDelete({ label: `Plan ${plan.id}`, endpoint: '/api/gsd/plan', body: { cwd, phaseNum: phase.number, planId: plan.id } });
+                            }}>
+                              <button className="rm-delete-btn" title="Delete plan"><IconTrashSm /></button>
+                            </div>
+                          </div>
+                        ))}
+                        {(phase.researchPath || phase.verificationPath) && (
+                          <div className="rm-phase-docs">
+                            {phase.researchPath && (
+                              <button className={`rm-doc-link${activeFilePath === phase.researchPath ? ' rm-item--active' : ''}`} onClick={() => openFile(phase.researchPath)}>Research</button>
+                            )}
+                            {phase.verificationPath && (
+                              <button className={`rm-doc-link${activeFilePath === phase.verificationPath ? ' rm-item--active' : ''}`} onClick={() => openFile(phase.verificationPath)}>Verification</button>
+                            )}
+                          </div>
                         )}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          );
-        })}
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {pendingDelete && (
@@ -364,6 +521,14 @@ export const GsdRoadmap: FC<GsdRoadmapProps> = ({ cwd, onOpenFile, activeFilePat
           onConfirm={handleConfirmDelete}
           onCancel={() => setPendingDelete(null)}
           loading={deleteLoading}
+        />
+      )}
+
+      {addOption && (
+        <GsdAddModal
+          option={addOption}
+          onSubmit={handleAddSubmit}
+          onCancel={() => setAddOption(null)}
         />
       )}
     </div>

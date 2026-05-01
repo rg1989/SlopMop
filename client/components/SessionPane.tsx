@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
 import type { Terminal as XTerminal } from '@xterm/xterm';
 import { useSession } from '../hooks/useSession';
 import type { SessionStatus } from '../hooks/useSessionManager';
@@ -40,6 +40,7 @@ interface SessionPaneProps {
   onExit: (code: number) => void;
   onFirstInput: (sessionId: string, text: string) => void;
   composerRef?: React.RefObject<HTMLTextAreaElement | null>;
+  voiceSlot?: ReactNode;
   brainRefreshTrigger?: () => void;
   ttsEnabled?: boolean;
   onTtsData?: (raw: string) => void;
@@ -60,6 +61,7 @@ export function SessionPane({
   onExit,
   onFirstInput,
   composerRef,
+  voiceSlot,
   brainRefreshTrigger,
   ttsEnabled,
   onTtsData,
@@ -140,6 +142,7 @@ export function SessionPane({
               clearAttachments={session.clearAttachments}
               onAttach={session.addAttachments}
               cwd={cwd}
+              voiceSlot={voiceSlot}
             />
           </div>
         </div>

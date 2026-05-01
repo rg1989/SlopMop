@@ -4,8 +4,10 @@
   "description": "Browser-based Claude CLI terminal with file explorer, voice I/O, and GSD integration",
   "type": "module",
   "scripts": {
+    "setup": "bash scripts/setup.sh",
+    "update-vendor": "bash scripts/update-vendor.sh",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "tsx watch server/index.ts",
+    "server": "PORT=3000 tsx watch server/index.ts",
     "client": "vite",
     "build": "tsc && vite build",
     "test": "vitest run",

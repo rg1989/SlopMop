@@ -475,6 +475,23 @@ export default function App() {
                 onExit={(code) => sessionManager.updateStatus(s.id, code === 0 ? 'done' : 'error')}
                 onFirstInput={(_id, text) => sessionManager.updateName(s.id, text)}
                 composerRef={s.id === sessionManager.activeId ? composerRef : undefined}
+                voiceSlot={s.id === sessionManager.activeId ? (
+                  <VoiceBar
+                    recording={audio.voice.recording}
+                    transcribing={audio.voice.transcribing}
+                    speaking={audio.tts.speaking}
+                    ttsEnabled={ttsEnabled}
+                    micError={audio.voice.micError}
+                    onMicStart={audio.voice.start}
+                    onMicStop={audio.voice.stop}
+                    onTtsToggle={() => setTtsEnabled(e => !e)}
+                    onTtsStop={audio.tts.stop}
+                    supported={audio.voice.supported}
+                    ttsAvailable={audio.tts.piperAvailable}
+                    whisperAvailable={audio.voice.whisperAvailable}
+                    compact
+                  />
+                ) : undefined}
                 ttsEnabled={ttsEnabled}
                 onTtsData={audio.tts.handleData}
                 brainRefreshTrigger={() => setBrainRefreshKey(k => k + 1)}
@@ -499,23 +516,6 @@ export default function App() {
                 }}
               />
             ))}
-          </div>
-
-          <div className="voice-bar-row">
-            <VoiceBar
-              recording={audio.voice.recording}
-              transcribing={audio.voice.transcribing}
-              speaking={audio.tts.speaking}
-              ttsEnabled={ttsEnabled}
-              micError={audio.voice.micError}
-              onMicStart={audio.voice.start}
-              onMicStop={audio.voice.stop}
-              onTtsToggle={() => setTtsEnabled(e => !e)}
-              onTtsStop={audio.tts.stop}
-              supported={audio.voice.supported}
-              ttsAvailable={audio.tts.piperAvailable}
-              whisperAvailable={audio.voice.whisperAvailable}
-            />
           </div>
         </div>
 

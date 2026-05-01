@@ -648,10 +648,7 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
 .voice-bar {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 0;
-  border-top: 1px solid var(--border);
-  background: var(--surface);
+  gap: 6px;
 }
 
 .vb-btn {
@@ -3721,8 +3718,11 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
   display: flex; flex-direction: column;
 }
 
-/* Voice bar row — sits at bottom of main-area */
-.voice-bar-row { flex-shrink: 0; }
+/* Compact mic button — recording state */
+.vb-compact-recording {
+  color: var(--error) !important;
+  animation: vb-blink 1s ease-in-out infinite;
+}
 
 /* ── Rules Modal ─────────────────────────────────────────────────────────────── */
 

@@ -9,18 +9,17 @@ interface ComposerProps {
   clearAttachments?: () => void;
   onAttach?: (paths: string[]) => void;
   cwd?: string | null;
+  voiceSlot?: React.ReactNode;
 }
 
 export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(
-  function Composer({ onSend, disabled = false, attachments, clearAttachments, onAttach, cwd }, ref) {
+  function Composer({ onSend, disabled = false, attachments, clearAttachments, onAttach, cwd, voiceSlot }, ref) {
   const [value, setValue] = useState('');
   const [picking, setPicking] = useState(false);
 
-  // Slash autocomplete state
   const [slashQuery, setSlashQuery] = useState<string | null>(null);
   const [slashAnchor, setSlashAnchor] = useState(0);
   const [menuIndex, setMenuIndex] = useState(0);
-  // Textarea rect for portal positioning
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
 
@@ -40,7 +39,6 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(
     }
   }, [slashQuery, updateMenuRect]);
 
-  // Filtered items — derived, not state
   const menuItems = slashQuery === null
     ? []
     : SLASH_COMMANDS.filter(c =>
@@ -87,7 +85,6 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    // Slash menu keyboard navigation
     if (slashQuery !== null && menuItems.length > 0) {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
@@ -111,7 +108,6 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(
       return;
     }
 
-    // Existing Enter-to-send logic
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       const trimmed = value.trim();
@@ -123,7 +119,6 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(
         setValue('');
       }
     }
-    // Shift+Enter: browser default inserts newline — no handler needed
   };
 
   const handlePaperclip = async () => {
@@ -154,7 +149,6 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(
     setValue('');
   };
 
-  // Merge external ref with internal textareaRef
   const setRefs = useCallback((el: HTMLTextAreaElement | null) => {
     (textareaRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = el;
     if (typeof ref === 'function') ref(el);
@@ -188,7 +182,7 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(
           minHeight: 0,
           fontFamily: 'monospace',
           fontSize: '14px',
-          padding: '8px 36px 8px 8px',
+          padding: '8px 8px 34px 8px',
           boxSizing: 'border-box',
           background: '#161b22',
           color: '#c9d1d9',
@@ -196,12 +190,12 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(
       />
       <div style={{
         position: 'absolute',
-        right: '8px',
-        bottom: '8px',
+        left: '6px',
+        bottom: '6px',
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'row',
         alignItems: 'center',
-        gap: '6px',
+        gap: '2px',
       }}>
         <button
           type="button"
@@ -210,7 +204,7 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(
           disabled={disabled || !value.trim()}
           title="Send message (Enter)"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
             fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="22" y1="2" x2="11" y2="13"/>
             <polygon points="22 2 15 22 11 13 2 9 22 2"/>
@@ -224,12 +218,13 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(
             disabled={picking}
             title="Attach file(s)"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
               fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.41 17.41a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
             </svg>
           </button>
         )}
+        {voiceSlot}
       </div>
     </div>
   );
