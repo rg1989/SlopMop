@@ -2,6 +2,7 @@ import type { ProjectHealth } from '../hooks/useProjectHealth';
 
 interface HealthStatusBarProps {
   health: ProjectHealth;
+  slopExists: boolean | null;
 }
 
 interface DotSpec {
@@ -10,11 +11,11 @@ interface DotSpec {
   status: 'ok' | 'warn' | 'error' | 'loading';
 }
 
-export function HealthStatusBar({ health }: HealthStatusBarProps) {
+export function HealthStatusBar({ health, slopExists }: HealthStatusBarProps) {
   if (health.loading) {
     return (
       <div className="health-bar">
-        {['dir', 'git', 'agent'].map(k => (
+        {['dir', 'git', 'agent', 'slop'].map(k => (
           <span
             key={k}
             className="health-dot health-dot--loading"
@@ -55,6 +56,16 @@ export function HealthStatusBar({ health }: HealthStatusBarProps) {
       key: 'node-modules',
       label: health.hasNodeModules ? 'node_modules present' : 'node_modules missing — run npm install',
       status: health.hasNodeModules ? 'ok' : 'warn',
+    });
+  }
+
+  if (slopExists !== null) {
+    dots.push({
+      key: 'slop-config',
+      label: slopExists
+        ? 'SlopDock config (.slop) present'
+        : 'SlopDock config (.slop) missing — click Get Started',
+      status: slopExists ? 'ok' : 'warn',
     });
   }
 
