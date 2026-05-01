@@ -3960,12 +3960,14 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
   color: var(--txt-dim);
 }
 
-.vault-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.vault-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 1px; }
 .vault-dot--ok { background: var(--success); }
 .vault-dot--warn { background: var(--warning); }
 .vault-dot--grey { background: var(--txt-dim); }
-.vault-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); }
-.vault-row-label { color: var(--txt); font-size: 12px; flex: 1; }
-.vault-row-path { color: var(--txt-dim); font-size: 11px; }
-.vault-row-ts { color: var(--txt-sub); font-size: 11px; }
+.vault-row { display: flex; flex-direction: column; gap: 3px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.vault-row-top { display: flex; align-items: center; gap: 6px; }
+.vault-row-label { color: var(--txt); font-size: 13px; }
+.vault-row-meta { padding-left: 14px; display: flex; flex-direction: column; gap: 1px; }
+.vault-row-path { color: var(--txt-sub); font-size: 11px; }
+.vault-row-ts { color: var(--txt-dim); font-size: 11px; }
 .vault-tab { padding: 4px 0; }

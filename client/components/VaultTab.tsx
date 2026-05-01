@@ -1,5 +1,12 @@
 import { useState, useEffect, type FC } from 'react';
 
+function toRelPath(p: string): string {
+  const home = (globalThis as Record<string, unknown>).__home as string | undefined;
+  if (home && p.startsWith(home)) return '~' + p.slice(home.length);
+  // Fallback: strip common macOS home prefix pattern
+  return p.replace(/^\/Users\/[^/]+/, '~');
+}
+
 interface VaultTarget {
   id: string;
   src: string;
@@ -94,38 +101,39 @@ export const VaultTab: FC = () => {
       <div>
         {targets.map(t => (
           <div key={t.id} className="vault-row">
-            <span className={dotClass(t)} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="vault-row-label">{t.id}</div>
-              <div className="vault-row-path">{t.src}</div>
-              <div className="vault-row-ts">
-                {t.lastBackup
-                  ? new Date(t.lastBackup).toLocaleString()
-                  : 'never'}
+            <div className="vault-row-top">
+              <span className={dotClass(t)} />
+              <span className="vault-row-label">{t.id}</span>
+              <div style={{ display: 'flex', gap: 4, marginLeft: 'auto', flexShrink: 0 }}>
+                <button
+                  className="fp-btn"
+                  onClick={() => backupOne(t.id)}
+                  disabled={busy || !t.sourceExists}
+                >
+                  Backup
+                </button>
+                <button
+                  className="fp-btn"
+                  onClick={() => restoreOne(t.id)}
+                  disabled={busy || !t.backupExists}
+                >
+                  Restore
+                </button>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
-              <button
-                className="fp-btn"
-                onClick={() => backupOne(t.id)}
-                disabled={busy || !t.sourceExists}
-              >
-                Backup
-              </button>
-              <button
-                className="fp-btn"
-                onClick={() => restoreOne(t.id)}
-                disabled={busy || !t.backupExists}
-              >
-                Restore
-              </button>
+            <div className="vault-row-meta">
+              <div className="vault-row-path">{toRelPath(t.src)}</div>
+              <div className="vault-row-ts">
+                {t.lastBackup ? new Date(t.lastBackup).toLocaleString() : 'never backed up'}
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div style={{ marginTop: 16, fontSize: 11, color: 'var(--txt-dim)', lineHeight: 1.5 }}>
-        {'~/.slop/ can be a git repo — run: cd ~/.slop && git init && git add -A && git commit -m \'init\''}
+      <div style={{ marginTop: 16, fontSize: 11, color: 'var(--txt-dim)', lineHeight: 1.6, borderTop: '1px solid var(--border)', paddingTop: 12 }}>
+        <strong style={{ color: 'var(--txt-sub)' }}>Tip:</strong> make ~/.slop/ a private git repo to sync configs across machines:<br />
+        <code style={{ color: 'var(--accent)', fontSize: 11 }}>cd ~/.slop && git init && git add -A && git commit -m "init"</code>
       </div>
     </div>
   );
