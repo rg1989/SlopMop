@@ -116,10 +116,14 @@ Plans:
 
 ### Phase 6: .slop Config Vault
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Settings and onboarding state move from localStorage to per-project .slop/ and global ~/.slop/ on disk; dotfile vault backs up and restores Claude, GSD, git, and SSH configs; two pre-existing bugs (double-spawn, roadmap parser) are fixed.
+**Requirements**: SLOP-01, SLOP-02, SETTINGS-01, RECENT-01, VAULT-01, VAULT-02, VAULT-03, ONBOARD-01, ONBOARD-02, BUG-01, BUG-02
 **Depends on:** Phase 5
-**Plans:** 0 plans
+**Plans:** 5 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 6 to break down)
+- [ ] 06-01-PLAN.md — Wave 0 test stubs + bug fixes (double-spawn dedup, parseRoadmapMd rewrite)
+- [ ] 06-02-PLAN.md — Server config endpoints (slop-status, slop-init, global-settings, recent-paths, vault auto-backup)
+- [ ] 06-03-PLAN.md — HealthStatusBar 6th dot + OnboardingModal rewire to per-project server-driven
+- [ ] 06-04-PLAN.md — Client migration (useSettings server-backed, FolderPicker recents server-backed)
+- [ ] 06-05-PLAN.md — Vault endpoints (status/backup/restore) + VaultTab UI + human checkpoint
