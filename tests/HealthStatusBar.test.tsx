@@ -1,12 +1,11 @@
 import { render } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-
-// @ts-expect-error — module does not exist yet (Wave 0 RED)
 import { HealthStatusBar } from '../client/components/HealthStatusBar';
+import type { ProjectHealth } from '../client/hooks/useProjectHealth';
 
 describe('HealthStatusBar', () => {
   it('HEALTH-03 — renders correct dot classes per health state', () => {
-    const mockHealth = {
+    const mockHealth: ProjectHealth = {
       loading: false,
       dirAccessible: true,
       isGitRepo: false,
@@ -23,12 +22,12 @@ describe('HealthStatusBar', () => {
   });
 
   it('HEALTH-03b — dots have loading class when loading=true', () => {
-    const loadingHealth = {
+    const loadingHealth: ProjectHealth = {
       loading: true,
-      dirAccessible: null,
-      isGitRepo: null,
-      hasClaudeMd: null,
-      agentFound: null,
+      dirAccessible: false,
+      isGitRepo: false,
+      hasClaudeMd: false,
+      agentFound: false,
       agentPath: null,
       hasNodeModules: null,
     };

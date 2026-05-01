@@ -1,7 +1,6 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// @ts-expect-error — module does not exist yet (Wave 0 RED)
 import { useProjectHealth } from '../client/hooks/useProjectHealth';
 
 const mockHealthResponse = {

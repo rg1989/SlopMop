@@ -24,6 +24,8 @@ import { SuperToolsModal } from './components/SuperToolsModal';
 import type { SuperTool } from './components/SuperToolsModal';
 import { RulesModal } from './components/RulesModal';
 import { OnboardingModal } from './components/OnboardingModal';
+import { useProjectHealth } from './hooks/useProjectHealth';
+import { HealthStatusBar } from './components/HealthStatusBar';
 import './App.css';
 
 type SidebarTabId = 'explorer' | 'changes' | 'roadmap' | 'brain';
@@ -128,6 +130,7 @@ export default function App() {
   const [onboardingDone, setOnboardingDone] = useState(false);
 
   const { settings, update: updateSettings } = useSettings();
+  const health = useProjectHealth(cwd, settings.agent.command);
 
   // Drag-resize — sidebar (left) and editor panel (right)
   const sidebarMaxRef = useRef<number>(Infinity);
@@ -238,6 +241,7 @@ export default function App() {
           onRulesOpen={() => setRulesOpen(true)}
         />
       </div>
+      {cwd && <HealthStatusBar health={health} />}
 
       {superToolsOpen && (
         <SuperToolsModal
