@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 04-04-PLAN.md — Phase 4 multi-session-tabs fully verified and complete
-last_updated: "2026-05-01T13:28:15.891Z"
+stopped_at: Completed 05-01-PLAN.md — Wave 0 RED test scaffolds for Phase 5
+last_updated: "2026-05-01T17:51:20.496Z"
 last_activity: "2026-04-30 - Completed quick task 1: add syntax colors and edit mode to file preview panel"
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 4
-  total_plans: 16
-  completed_plans: 16
+  total_plans: 20
+  completed_plans: 17
   percent: 100
 ---
 
@@ -64,6 +64,7 @@ Progress: [██████████] 100% (All Phases)
 | Phase 04-multi-session-tabs P02 | 12min | 2 tasks | 6 files |
 | Phase 04-multi-session-tabs P03 | 8min | 2 tasks | 6 files |
 | Phase 04-multi-session-tabs P04 | 8min | 1 tasks | 4 files |
+| Phase 05-project-onboarding-wizard-and-setup-health-check P01 | 2 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -115,10 +116,12 @@ Recent decisions affecting current work:
 - [Phase 04-multi-session-tabs]: onRegisterActions runs without deps on every render to keep App activeActionsRef current — avoids stale closure bugs on session callbacks
 - [Phase 04-multi-session-tabs]: VoiceBar stays app-level; routes to active session via activeSendInputRef mutable ref — avoids threading audio props through SessionPane
 - [Phase 04-multi-session-tabs]: Pre-existing test/implementation drift in FileTree, FilePreview, usePty, useSessionManager tests fixed inline to unblock checkpoint gate
+- [Phase 05-project-onboarding-wizard-and-setup-health-check]: Wave 0 RED pattern extended to Phase 5 — same @ts-expect-error technique from Phase 02 and 04, import errors confirm modules don't exist yet
 
 ### Roadmap Evolution
 
 - Phase 4 added: Multi-Session Tabs — terminal session tabs with stable UUIDs, live state indicators (working/waiting/error/done), session name from first prompt, session history persisted on close, structured for future full PTY reconnect without client-side changes
+- Phase 5 added: Project Onboarding Wizard and Setup Health Check
 
 ### Pending Todos
 
@@ -137,6 +140,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-01T13:28:15.888Z
-Stopped at: Completed 04-04-PLAN.md — Phase 4 multi-session-tabs fully verified and complete
+Last session: 2026-05-01T17:51:15.140Z
+Stopped at: Completed 05-01-PLAN.md — Wave 0 RED test scaffolds for Phase 5
 Resume file: None
