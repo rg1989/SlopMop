@@ -98,6 +98,30 @@ async function autoBackupVault(): Promise<void> {
   }
 }
 
+type AutoBackupInterval = 'never' | 'launch' | 'hourly' | 'daily';
+const INTERVAL_MS: Record<AutoBackupInterval, number> = {
+  never: 0,
+  launch: 0,
+  hourly: 60 * 60 * 1000,
+  daily: 24 * 60 * 60 * 1000,
+};
+
+let _autoBackupTimer: ReturnType<typeof setInterval> | null = null;
+
+async function setupAutoBackupSchedule(): Promise<void> {
+  if (_autoBackupTimer) { clearInterval(_autoBackupTimer); _autoBackupTimer = null; }
+  let interval: AutoBackupInterval = 'launch';
+  try {
+    const raw = await readFile(SETTINGS_FILE, 'utf-8');
+    const s = JSON.parse(raw) as { vaultAutoBackup?: AutoBackupInterval };
+    if (s.vaultAutoBackup) interval = s.vaultAutoBackup;
+  } catch { /* use default */ }
+  const ms = INTERVAL_MS[interval];
+  if (ms > 0) {
+    _autoBackupTimer = setInterval(() => autoBackupVault().catch(() => {}), ms);
+  }
+}
+
 // Known AI agent CLIs — checked against PATH to power the settings combobox
 const KNOWN_AGENTS = ['claude', 'opencode', 'aider', 'gemini', 'codex', 'hermes', 'goose'];
 
@@ -998,6 +1022,7 @@ app.put('/api/global-settings', async (req, res) => {
   if (!settings) { res.status(400).json({ error: 'settings required' }); return; }
   await mkdir(SLOP_DIR, { recursive: true });
   await atomicWrite(SETTINGS_FILE, JSON.stringify(settings, null, 2));
+  setupAutoBackupSchedule().catch(() => {});
   res.json({ ok: true });
 });
 
@@ -1118,5 +1143,5 @@ server.listen(PORT, () => {
   // Start Piper TTS and probe Whisper STT in background — non-blocking
   initPiper().catch(() => {});
   checkWhisper().catch(() => {});
-  autoBackupVault().catch(() => {});
+  setupAutoBackupSchedule().then(() => autoBackupVault()).catch(() => {});
 });

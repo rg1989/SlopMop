@@ -3874,11 +3874,9 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
   font-family: monospace;
 }
 
-.rules-rendered {
-  padding: 20px 24px;
-}
-.rules-rendered .md-body {
-  font-family: Georgia, serif;
+.rules-shiki {
+  padding: 16px 20px;
+  overflow-x: auto;
 }
 
 .rules-raw {
@@ -3973,3 +3971,7 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
 .vault-tab { padding: 4px 0; }
 .vault-remote-input { flex: 1; background: var(--surface-hi); border: 1px solid var(--border); border-radius: 4px; color: var(--txt); font-family: monospace; font-size: 11px; padding: 4px 8px; outline: none; }
 .vault-remote-input:focus { border-color: var(--accent); }
+.vault-interval-pills { display: flex; gap: 2px; }
+.vault-interval-pill { background: var(--surface-hi); border: 1px solid var(--border); border-radius: 4px; color: var(--txt-sub); font-family: monospace; font-size: 11px; padding: 3px 8px; cursor: pointer; transition: background 0.12s, color 0.12s; }
+.vault-interval-pill:hover { background: var(--surface-hover); color: var(--txt); }
+.vault-interval-pill--active { background: var(--accent); border-color: var(--accent); color: #fff; }

@@ -23,6 +23,14 @@ function dotClass(t: VaultTarget): string {
   return 'vault-dot vault-dot--ok';
 }
 
+type AutoBackupInterval = 'never' | 'launch' | 'hourly' | 'daily';
+const AUTO_BACKUP_OPTIONS: { value: AutoBackupInterval; label: string }[] = [
+  { value: 'never',  label: 'Never'  },
+  { value: 'launch', label: 'On launch' },
+  { value: 'hourly', label: 'Hourly' },
+  { value: 'daily',  label: 'Daily'  },
+];
+
 export const VaultTab: FC = () => {
   const [targets, setTargets] = useState<VaultTarget[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,6 +40,7 @@ export const VaultTab: FC = () => {
   const [gitError, setGitError] = useState<string | null>(null);
   const [remoteUrl, setRemoteUrl] = useState('');
   const [showRemoteInput, setShowRemoteInput] = useState(false);
+  const [autoBackup, setAutoBackup] = useState<AutoBackupInterval>('launch');
 
   async function fetchStatus() {
     setLoading(true);
@@ -44,7 +53,29 @@ export const VaultTab: FC = () => {
     }
   }
 
-  useEffect(() => { fetchStatus(); }, []);
+  useEffect(() => {
+    fetchStatus();
+    fetch('/api/global-settings')
+      .then(r => r.json())
+      .then((d: { settings: { vaultAutoBackup?: AutoBackupInterval } | null }) => {
+        if (d.settings?.vaultAutoBackup) setAutoBackup(d.settings.vaultAutoBackup);
+      })
+      .catch(() => {});
+  }, []);
+
+  async function saveAutoBackup(value: AutoBackupInterval) {
+    setAutoBackup(value);
+    try {
+      const r = await fetch('/api/global-settings');
+      const d = await r.json() as { settings: Record<string, unknown> | null };
+      const current = d.settings ?? {};
+      await fetch('/api/global-settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ settings: { ...current, vaultAutoBackup: value } }),
+      });
+    } catch { /* ignore */ }
+  }
 
   async function backupAll() {
     setBusy(true);
@@ -136,7 +167,24 @@ export const VaultTab: FC = () => {
         ))}
       </div>
 
-      <div style={{ marginTop: 16, borderTop: '1px solid var(--border)', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ marginTop: 16, borderTop: '1px solid var(--border)', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 11, color: 'var(--txt-sub)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Auto-backup</span>
+          <div className="vault-interval-pills">
+            {AUTO_BACKUP_OPTIONS.map(opt => (
+              <button
+                key={opt.value}
+                className={`vault-interval-pill${autoBackup === opt.value ? ' vault-interval-pill--active' : ''}`}
+                onClick={() => saveAutoBackup(opt.value)}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginTop: 8, borderTop: '1px solid var(--border)', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
         <div style={{ fontSize: 11, color: 'var(--txt-sub)', marginBottom: 2 }}>
           Sync across machines — make <code style={{ color: 'var(--accent)', fontSize: 11 }}>~/.slop/</code> a private git repo:
         </div>
