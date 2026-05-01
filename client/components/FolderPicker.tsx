@@ -18,6 +18,12 @@ function addRecentPath(path: string): string[] {
   return updated;
 }
 
+function removeRecentPath(path: string): string[] {
+  const updated = getRecentPaths().filter(p => p !== path);
+  try { localStorage.setItem(RECENT_PATHS_KEY, JSON.stringify(updated)); } catch {}
+  return updated;
+}
+
 function pathParts(p: string) {
   const parts = p.split('/').filter(Boolean);
   const name = parts[parts.length - 1] ?? '';
@@ -30,9 +36,10 @@ interface FolderPickerProps {
   onConnect: (path: string) => void;
   onSettingsOpen?: () => void;
   onSuperToolsOpen?: () => void;
+  onRulesOpen?: () => void;
 }
 
-export function FolderPicker({ cwd, onConnect, onSettingsOpen, onSuperToolsOpen }: FolderPickerProps) {
+export function FolderPicker({ cwd, onConnect, onSettingsOpen, onSuperToolsOpen, onRulesOpen }: FolderPickerProps) {
   const [picking, setPicking] = useState(false);
   const [branch, setBranch] = useState<string | null>(null);
   const [branches, setBranches] = useState<string[]>([]);
@@ -43,10 +50,25 @@ export function FolderPicker({ cwd, onConnect, onSettingsOpen, onSuperToolsOpen 
   const branchDropRef = useRef<HTMLDivElement>(null);
   const recentDropRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    fetch('/api/recent-paths')
+      .then(r => r.json())
+      .then(({ paths }: { paths: string[] }) => {
+        if (paths.length > 0) setRecentPaths(paths);
+      })
+      .catch(() => {});
+  }, []);
+
   // Track this cwd in recent paths
   useEffect(() => {
     if (!cwd) return;
-    setRecentPaths(addRecentPath(cwd));
+    const updated = addRecentPath(cwd);
+    setRecentPaths(updated);
+    fetch('/api/recent-paths', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paths: updated }),
+    }).catch(() => {});
   }, [cwd]);
 
   // Fetch current branch
@@ -117,6 +139,17 @@ export function FolderPicker({ cwd, onConnect, onSettingsOpen, onSuperToolsOpen 
     if (path !== cwd) onConnect(path);
   };
 
+  const handleRemoveRecent = (e: React.MouseEvent, path: string) => {
+    e.stopPropagation();
+    const updated = removeRecentPath(path);
+    setRecentPaths(updated);
+    fetch('/api/recent-paths', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paths: updated }),
+    }).catch(() => {});
+  };
+
   const { name: folderName, parent: parentPath } = cwd ? pathParts(cwd) : { name: '', parent: '' };
 
   return (
@@ -173,6 +206,17 @@ export function FolderPicker({ cwd, onConnect, onSettingsOpen, onSuperToolsOpen 
                     <span className="fp-recent-item-name">{name}</span>
                     <span className="fp-recent-item-parent">{parent}</span>
                   </span>
+                  <span
+                    className="fp-recent-item-remove"
+                    role="button"
+                    aria-label="Remove from recent"
+                    onClick={e => handleRemoveRecent(e, p)}
+                  >
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"/>
+                      <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </span>
                 </button>
               );
             })}
@@ -226,6 +270,18 @@ export function FolderPicker({ cwd, onConnect, onSettingsOpen, onSuperToolsOpen 
           <button className="fp-supertools-btn" onClick={onSuperToolsOpen} title="Super Tools">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+          </button>
+        )}
+
+        {onRulesOpen && (
+          <button className="fp-rules-btn" onClick={onRulesOpen} title="Rules">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="8" y1="13" x2="16" y2="13"/>
+              <line x1="8" y1="17" x2="16" y2="17"/>
+              <line x1="8" y1="9" x2="10" y2="9"/>
             </svg>
           </button>
         )}

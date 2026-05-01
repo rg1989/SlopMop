@@ -85,11 +85,10 @@ describe('useSettings', () => {
       );
     });
 
-    const putCall = (fetch as ReturnType<typeof vi.fn>).mock.calls.find(
-      ([url, opts]: [string, RequestInit]) => url === '/api/global-settings' && opts?.method === 'PUT'
-    );
+    const allCalls = (fetch as ReturnType<typeof vi.fn>).mock.calls as [string, RequestInit][];
+    const putCall = allCalls.find(c => c[0] === '/api/global-settings' && c[1]?.method === 'PUT');
     expect(putCall).toBeDefined();
-    const body = JSON.parse(putCall[1].body as string);
+    const body = JSON.parse((putCall as [string, RequestInit])[1].body as string);
     expect(body.settings.recordingMode).toBe('hold');
   });
 
@@ -111,12 +110,10 @@ describe('useSettings', () => {
     renderHook(() => useSettings());
 
     await waitFor(() => {
-      const calls = (fetch as ReturnType<typeof vi.fn>).mock.calls;
-      const putCall = calls.find(
-        ([url, opts]: [string, RequestInit]) => url === '/api/global-settings' && opts?.method === 'PUT'
-      );
+      const allCalls = (fetch as ReturnType<typeof vi.fn>).mock.calls as [string, RequestInit][];
+      const putCall = allCalls.find(c => c[0] === '/api/global-settings' && c[1]?.method === 'PUT');
       expect(putCall).toBeDefined();
-      const body = JSON.parse(putCall[1].body as string);
+      const body = JSON.parse((putCall as [string, RequestInit])[1].body as string);
       expect(body.settings.typeIndicatorSize).toBe(11);
     });
   });
