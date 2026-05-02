@@ -17,6 +17,12 @@ Open a browser. Select a folder. Start building.
 
 ---
 
+> I built this for myself. I looked for a tool that fit this exact gap and couldn't find one, so I made it. It solves my problem — every feature in here exists because I needed it. If it solves yours too, that's genuinely great. If you want to expand on it, fork it, or just steal the idea as a foundation for something better — all of that is good. If you find it useful, a star goes a long way. And whatever you build with it: don't get too sloppy.
+
+---
+
+---
+
 ## The gap nobody filled
 
 Claude Code is excellent. So is Codex CLI, Aider, OpenCode, Gemini CLI. Every major lab now ships a terminal-based coding agent, and the intelligence behind them is genuinely impressive.
