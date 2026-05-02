@@ -38,8 +38,14 @@ Plans:
 **Goal:** Remove Live Canvas from sidebar tabs and mount it as a persistent, always-visible resizable panel in the right column — split vertically from the editor panel. Includes toolbar toggle, per-direction resize handle, and localStorage persistence for show/hide state and split height.
 
 **Depends on:** Phase 10
-**Requirements:** TBD
-**Plans:** TBD — pending /gsd:plan-phase
+**Requirements:** CANVAS-01, CANVAS-02, CANVAS-03, CANVAS-04, CANVAS-05
+**Plans:** 4 plans
+
+Plans:
+- [ ] 11-01-PLAN.md — Wave 0 RED test stubs for all 5 canvas behaviors (sidebar tab removal, visibility toggle, localStorage persistence)
+- [ ] 11-02-PLAN.md — App.tsx restructure: remove sidebar canvas tab, add canvas column state/hooks/JSX
+- [ ] 11-03-PLAN.md — CSS: canvas-column, canvas-column-header, canvas-column-label, canvas-toggle-btn classes in App.css
+- [ ] 11-04-PLAN.md — FolderPicker toolbar toggle button + human verify
 
 ### Phase 12: bottom-panel-shell
 
@@ -65,6 +71,6 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1–9. v1.0 Foundation | 25/25 | ✅ Complete | 2026-05-02 |
 | 10. PTY Session Persistence | 3/3 | Complete    | 2026-05-02 |
-| 11. Canvas Panel Extraction | 0/? | Planned | — |
+| 11. Canvas Panel Extraction | 0/4 | Planned | — |
 | 12. Bottom Panel Shell | 0/? | Planned | — |
 | 13. Raw Terminal Sessions | 0/? | Planned | — |
