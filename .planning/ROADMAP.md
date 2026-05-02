@@ -26,7 +26,7 @@ Phases 1–9 — PTY terminal, file explorer, voice I/O, multi-session tabs, onb
 
 **Depends on:** Phase 9 (v1.0 complete)
 **Requirements:** PTY-01, PTY-02, PTY-03, PTY-04, PTY-05 (defined in REQUIREMENTS.md)
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 - [ ] 10-01-PLAN.md — Wave 0 RED test stubs for all 5 requirements (usePty, useSessionManager, SessionTabBar)
@@ -64,7 +64,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1–9. v1.0 Foundation | 25/25 | ✅ Complete | 2026-05-02 |
-| 10. PTY Session Persistence | 1/3 | In Progress|  |
+| 10. PTY Session Persistence | 2/3 | In Progress|  |
 | 11. Canvas Panel Extraction | 0/? | Planned | — |
 | 12. Bottom Panel Shell | 0/? | Planned | — |
 | 13. Raw Terminal Sessions | 0/? | Planned | — |

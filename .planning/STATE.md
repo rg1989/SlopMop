@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Foundation ✅ SHIPPED 2026-05-02
 status: completed
-stopped_at: Completed 10-01-PLAN.md — Wave 0 RED tests for PTY session persistence
-last_updated: "2026-05-02T19:01:39.311Z"
+stopped_at: Completed 10-02-PLAN.md — Client hook wiring for PTY session reconnect
+last_updated: "2026-05-02T19:04:15.037Z"
 last_activity: "2026-04-30 - Completed quick task 1: add syntax colors and edit mode to file preview panel"
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
   percent: 100
 ---
 
@@ -75,6 +75,7 @@ Progress: [██████████] 100% (All Phases)
 | Phase 06-slop-config-vault P04 | 6min | 2 tasks | 4 files |
 | Phase 06-slop-config-vault P05 | 4min | 2 tasks | 5 files |
 | Phase 10-pty-session-persistence P01 | 2min | 4 tasks | 5 files |
+| Phase 10-pty-session-persistence P02 | 5min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -143,6 +144,9 @@ Recent decisions affecting current work:
 - [Phase 06-slop-config-vault]: VaultTab is self-contained fetching /api/vault-status on mount — no props from SettingsModal
 - [Phase 06-slop-config-vault]: Sync dot: inSync=true→ok, !backupExists||!inSync→warn, !sourceExists→grey
 - [Phase 10-01]: Export SessionRegistry class (not just singleton) to allow isolated instances in tests — non-architectural auto-fix
+- [Phase 10-02]: SessionStatus 'reconnecting' exported from both useSessionManager.ts and usePty.ts independently — avoids circular imports, both copies kept in sync
+- [Phase 10-02]: session-ready handler in usePty sets 'waiting' unconditionally — works for fresh connections and reconnects without special-casing
+- [Phase 10-02]: sessionId in usePty effect deps is the minimal change for re-running effect on restore; overrideSessionIdRef logic for exit/fresh-spawn path untouched
 
 ### Roadmap Evolution
 
@@ -167,6 +171,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-02T19:01:39.308Z
-Stopped at: Completed 10-01-PLAN.md — Wave 0 RED tests for PTY session persistence
+Last session: 2026-05-02T19:04:15.035Z
+Stopped at: Completed 10-02-PLAN.md — Client hook wiring for PTY session reconnect
 Resume file: None
