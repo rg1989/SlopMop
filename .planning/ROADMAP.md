@@ -52,8 +52,12 @@ Plans:
 **Goal:** Add a bottom panel zone below the main session area, separated by a horizontal resize handle. Includes collapse toggle, tab bar scaffold (for future terminal tabs), and localStorage persistence for height and open/closed state.
 
 **Depends on:** Phase 11
-**Requirements:** TBD
-**Plans:** TBD — pending /gsd:plan-phase
+**Requirements:** BPANEL-01, BPANEL-02, BPANEL-03, BPANEL-04, BPANEL-05
+**Plans:** 2 plans
+
+Plans:
+- [ ] 12-01-PLAN.md — Wave 0 RED test stubs + App.tsx state/hooks/JSX + App.css styles (BPANEL-01..05)
+- [ ] 12-02-PLAN.md — Human verify: drag resize, localStorage restore, visual style
 
 ### Phase 13: raw-terminal-sessions
 
@@ -72,5 +76,5 @@ Plans:
 | 1–9. v1.0 Foundation | 25/25 | ✅ Complete | 2026-05-02 |
 | 10. PTY Session Persistence | 3/3 | Complete    | 2026-05-02 |
 | 11. Canvas Panel Extraction | 4/4 | Complete    | 2026-05-02 |
-| 12. Bottom Panel Shell | 0/? | Planned | — |
+| 12. Bottom Panel Shell | 0/2 | Planned | — |
 | 13. Raw Terminal Sessions | 0/? | Planned | — |
