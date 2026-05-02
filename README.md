@@ -11,6 +11,8 @@
 
 Open a browser. Select a folder. Start building.
 
+*Yes, the name is intentional. AI generates slop. SlopDock is where you dock it, manage it, review it, and ship the parts that aren't.*
+
 </div>
 
 ---
