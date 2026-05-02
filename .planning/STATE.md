@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Foundation ✅ SHIPPED 2026-05-02
 status: completed
-stopped_at: Completed 13-01-PLAN.md
-last_updated: "2026-05-02T22:27:38.683Z"
+stopped_at: Completed 13-02-PLAN.md
+last_updated: "2026-05-02T22:38:29.137Z"
 last_activity: "2026-04-30 - Completed quick task 1: add syntax colors and edit mode to file preview panel"
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 12
-  completed_plans: 10
+  completed_plans: 11
   percent: 100
 ---
 
@@ -84,6 +84,7 @@ Progress: [██████████] 100% (All Phases)
 | Phase 12-bottom-panel-shell P01 | 4min | 2 tasks | 3 files |
 | Phase 12-bottom-panel-shell P02 | 5min | 1 tasks | 1 files |
 | Phase 13-raw-terminal-sessions P01 | 2min | 2 tasks | 2 files |
+| Phase 13-raw-terminal-sessions P02 | 8min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -171,6 +172,8 @@ Recent decisions affecting current work:
 - [Phase 12-02]: Chevron direction was inverted at checkpoint — up when closed, down when open; fixed in d124851 before human approval
 - [Phase 13-01]: useRawSessionManager accepts cwd: string | null — add() is a no-op when null, keeping hook safe before project connection
 - [Phase 13-01]: No localStorage persistence for raw sessions — ephemeral by design, simpler than useSessionManager
+- [Phase 13-02]: Test mock refactored to vi.hoisted() mockRawState — inner vi.mock() inside test bodies is unreliable for already-resolved modules in Vitest
+- [Phase 13-02]: Auto-seed useEffect excludes rawAdd from deps — changes every render and would cause infinite seed loop
 
 ### Roadmap Evolution
 
@@ -195,6 +198,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-02T22:27:38.680Z
-Stopped at: Completed 13-01-PLAN.md
+Last session: 2026-05-02T22:38:29.134Z
+Stopped at: Completed 13-02-PLAN.md
 Resume file: None

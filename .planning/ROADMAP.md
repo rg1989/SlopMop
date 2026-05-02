@@ -65,7 +65,7 @@ Plans:
 
 **Depends on:** Phase 12
 **Requirements:** RAWTERM-01, RAWTERM-02, RAWTERM-03, RAWTERM-04, RAWTERM-05, RAWTERM-06
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 - [ ] 13-01-PLAN.md — Wave 0 RED test stubs (RAWTERM-01..06) + useRawSessionManager hook
@@ -82,4 +82,4 @@ Plans:
 | 10. PTY Session Persistence | 3/3 | Complete    | 2026-05-02 |
 | 11. Canvas Panel Extraction | 4/4 | Complete    | 2026-05-02 |
 | 12. Bottom Panel Shell | 2/2 | Complete    | 2026-05-02 |
-| 13. Raw Terminal Sessions | 1/3 | In Progress|  |
+| 13. Raw Terminal Sessions | 2/3 | In Progress|  |
