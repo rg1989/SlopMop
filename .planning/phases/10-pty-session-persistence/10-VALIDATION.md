@@ -2,7 +2,7 @@
 phase: 10
 slug: pty-session-persistence
 status: draft
-nyquist_compliant: false
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-05-02
 ---
@@ -38,10 +38,14 @@ created: 2026-05-02
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 10-01-01 | 01 | 1 | PTY-persist | unit | `npm run test -- --run` | ⬜ W0 | ⬜ pending |
-| 10-01-02 | 01 | 1 | PTY-reconnect | unit | `npm run test -- --run` | ⬜ W0 | ⬜ pending |
-| 10-02-01 | 02 | 2 | PTY-scrollback | integration | `npm run test -- --run` | ⬜ W0 | ⬜ pending |
-| 10-02-02 | 02 | 2 | PTY-status | unit | `npm run test -- --run` | ⬜ W0 | ⬜ pending |
+| 10-01-T1 | 01 | 1 | PTY-01, PTY-05 | unit (RED stubs) | `npm run test -- --run --reporter=verbose tests/usePty.test.ts` | ⬜ W0 | ⬜ pending |
+| 10-01-T2 | 01 | 1 | PTY-04 | unit (RED stubs) | `npm run test -- --run --reporter=verbose tests/useSessionManager.test.ts` | ⬜ W0 | ⬜ pending |
+| 10-01-T3 | 01 | 1 | PTY-04 | unit (RED stubs) | `npm run test -- --run --reporter=verbose tests/SessionTabBar.test.tsx` | ⬜ W0 | ⬜ pending |
+| 10-01-T4 | 01 | 1 | PTY-02, PTY-03 | unit (GREEN) | `npm run test -- --run tests/session-registry.test.ts` | ⬜ W0 | ⬜ pending |
+| 10-02-T1 | 02 | 2 | PTY-01, PTY-04, PTY-05 | unit | `npm run test -- --run` | ⬜ W0 | ⬜ pending |
+| 10-02-T2 | 02 | 2 | PTY-02 | unit | `npm run test -- --run` | ⬜ W0 | ⬜ pending |
+| 10-03-T1 | 03 | 3 | PTY-03 | unit | `npm run test -- --run` | ⬜ W0 | ⬜ pending |
+| 10-03-T2 | 03 | 3 | all | checkpoint | manual — see Manual-Only Verifications below | n/a | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -49,8 +53,10 @@ created: 2026-05-02
 
 ## Wave 0 Requirements
 
-- [ ] `tests/pty-session-persistence.test.ts` — stubs for reconnect + scrollback replay
-- [ ] Existing `tests/` infrastructure covers framework setup
+- [ ] `tests/usePty.test.ts` — RED stubs for PTY-01 (sessionId prop change re-opens WS) and PTY-05 (session-ready→waiting and exit→done on reconnect)
+- [ ] `tests/useSessionManager.test.ts` — RED stubs for PTY-04 (restoreForCwd sets reconnecting status)
+- [ ] `tests/SessionTabBar.test.tsx` — RED stubs for PTY-04 (status--reconnecting CSS class)
+- [ ] `tests/session-registry.test.ts` — GREEN verification tests for PTY-02 (buffer replay) and PTY-03 (TTL cleanup)
 
 ---
 
@@ -66,11 +72,11 @@ created: 2026-05-02
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 20s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 20s
+- [x] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** pending
