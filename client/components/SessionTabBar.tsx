@@ -12,11 +12,12 @@ export interface SessionTabBarProps {
 }
 
 const STATUS_CLASS: Record<SessionStatus, string> = {
-  connecting: 'status--connecting',
-  waiting:    'status--waiting',
-  working:    'status--working',
-  done:       'status--done',
-  error:      'status--error',
+  connecting:   'status--connecting',
+  reconnecting: 'status--reconnecting',
+  waiting:      'status--waiting',
+  working:      'status--working',
+  done:         'status--done',
+  error:        'status--error',
 };
 
 export function SessionTabBar({ sessions, activeId, canSpawn, onSetActive, onClose, onSpawn, onOpenHistory }: SessionTabBarProps) {
