@@ -199,14 +199,10 @@ describe('CANVAS-05: canvas column width restored from localStorage', () => {
   it('canvas-column element is present in the document when cwd is set', async () => {
     const { container } = render(<App />);
 
-    await waitFor(() => {
-      const appBody = container.querySelector('.app-body');
-      expect(appBody).not.toBeNull();
-    });
-
     // CANVAS-05: a .canvas-column element should exist (rendered outside sidebar)
-    // Fails RED because canvas-column does not exist yet in the codebase
-    const canvasColumn = container.querySelector('.canvas-column');
-    expect(canvasColumn).not.toBeNull();
+    await waitFor(() => {
+      const canvasColumn = container.querySelector('.canvas-column');
+      expect(canvasColumn).not.toBeNull();
+    });
   });
 });

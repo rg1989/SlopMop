@@ -4190,6 +4190,21 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
   color: var(--accent);
 }
 
+.fp-canvas-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--txt-dim);
+  padding: 3px 5px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  transition: color 0.12s, background 0.12s;
+}
+.fp-canvas-btn:hover { color: var(--txt); background: var(--surface-hover); }
+.fp-canvas-btn--active { color: var(--accent); }
+.fp-canvas-btn--active:hover { color: var(--accent-hover); background: var(--surface-hover); }
+
 /* ── Health Status Bar ──────────────────────────────────────────────────── */
 .health-bar {
   display: flex;

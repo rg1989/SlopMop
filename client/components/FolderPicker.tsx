@@ -37,9 +37,11 @@ interface FolderPickerProps {
   onSettingsOpen?: () => void;
   onSuperToolsOpen?: () => void;
   onRulesOpen?: () => void;
+  onCanvasToggle?: () => void;
+  isCanvasVisible?: boolean;
 }
 
-export function FolderPicker({ cwd, onConnect, onSettingsOpen, onSuperToolsOpen, onRulesOpen }: FolderPickerProps) {
+export function FolderPicker({ cwd, onConnect, onSettingsOpen, onSuperToolsOpen, onRulesOpen, onCanvasToggle, isCanvasVisible }: FolderPickerProps) {
   const [picking, setPicking] = useState(false);
   const [branch, setBranch] = useState<string | null>(null);
   const [branches, setBranches] = useState<string[]>([]);
@@ -274,6 +276,19 @@ export function FolderPicker({ cwd, onConnect, onSettingsOpen, onSuperToolsOpen,
           <button className="fp-supertools-btn" onClick={onSuperToolsOpen} title="Super Tools">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+          </button>
+        )}
+
+        {onCanvasToggle && (
+          <button
+            className={`fp-canvas-btn${isCanvasVisible ? ' fp-canvas-btn--active' : ''}`}
+            onClick={onCanvasToggle}
+            title={isCanvasVisible ? 'Hide canvas' : 'Show canvas'}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <path d="M9 9h6v6H9z"/>
             </svg>
           </button>
         )}

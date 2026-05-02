@@ -350,6 +350,8 @@ export default function App() {
           onSettingsOpen={() => setSettingsOpen(true)}
           onSuperToolsOpen={() => setSuperToolsOpen(true)}
           onRulesOpen={() => setRulesOpen(true)}
+          onCanvasToggle={toggleCanvas}
+          isCanvasVisible={isCanvasVisible}
         />
       </div>
       {cwd && <HealthStatusBar health={health} slopExists={slopExists} />}
