@@ -231,7 +231,11 @@ export function FolderPicker({ cwd, onConnect, onSettingsOpen, onSuperToolsOpen,
         )}
       </div>
 
-      <img src="/logo.png" className="fp-logo" alt="" draggable={false} onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+      <div className="fp-logo">
+        <span className="fp-logo-slop">SLOP</span>
+        <img src="/mop.png" className="fp-logo-mop-img" alt="" draggable={false} />
+        <span className="fp-logo-mop">MOP</span>
+      </div>
 
       <div className="fp-right">
         {branch && (

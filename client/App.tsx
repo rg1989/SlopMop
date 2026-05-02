@@ -564,6 +564,12 @@ export default function App() {
           </>
         )}
       </div>
+      <footer className="app-footer">
+        developed by{' '}
+        <a href="https://github.com/rg1989" target="_blank" rel="noreferrer">
+          rg1989
+        </a>
+      </footer>
     </div>
   );
 }

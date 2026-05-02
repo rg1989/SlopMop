@@ -25,10 +25,29 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  height: 30px;
-  width: auto;
+  display: flex;
+  align-items: center;
+  gap: 0px;
   pointer-events: none;
   user-select: none;
+  white-space: nowrap;
+}
+.fp-logo-slop {
+  font-family: monospace;
+  font-size: 16px;
+  color: var(--txt-sub);
+  margin-right: -10px;
+}
+.fp-logo-mop {
+  font-family: monospace;
+  font-size: 16px;
+  color: var(--accent);
+  margin-left: -10px;
+}
+.fp-logo-mop-img {
+  height: 60px;
+  width: auto;
+  margin-top: 5px;
 }
 
 .terminal-area { flex: 1; overflow: hidden; padding: 0; }
@@ -87,6 +106,22 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
   display: flex;
   flex: 1;
   overflow: hidden;
+}
+
+.app-footer {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: var(--txt-dim);
+  border-top: 1px solid var(--border);
+  text-align: right;
+}
+.app-footer a {
+  color: var(--txt-sub);
+  text-decoration: none;
+}
+.app-footer a:hover {
+  color: var(--accent);
 }
 
 .sidebar {
