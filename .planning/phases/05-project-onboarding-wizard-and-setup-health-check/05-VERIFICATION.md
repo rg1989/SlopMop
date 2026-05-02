@@ -6,19 +6,19 @@ score: 6/6 must-haves verified
 re_verification: false
 human_verification:
   - test: "OnboardingModal appears on first load with no saved folder"
-    expected: "'Welcome to SlopDock' modal visible with 3 bullet points and Get Started button"
+    expected: "'Welcome to SlopMop' modal visible with 3 bullet points and Get Started button"
     why_human: "Requires clearing localStorage and loading browser — automated tests confirm logic but not browser render"
   - test: "Dismiss persists across reloads"
     expected: "After clicking Get Started and reloading, modal does not appear again"
     why_human: "localStorage persistence across reload cannot be verified in jsdom test environment"
   - test: "Modal is skipped when a folder is already saved"
-    expected: "Clear only slopdock_onboarded (keep slopdock_last_folder) — reload — modal must not appear"
+    expected: "Clear only slopmop_onboarded (keep slopmop_last_folder) — reload — modal must not appear"
     why_human: "Requires real browser + localStorage state manipulation"
   - test: "Health bar shows colored dots for a project missing git and CLAUDE.md"
     expected: "Slim bar with amber/red dots and 'setup issues' label appears below folder picker"
     why_human: "Requires connecting a real directory in a running browser session"
   - test: "Health bar collapses when all checks pass"
-    expected: "Connect SlopDock project folder — health bar disappears entirely"
+    expected: "Connect SlopMop project folder — health bar disappears entirely"
     why_human: "Requires real filesystem checks against a live server"
   - test: "PTY spawns normally regardless of health check state"
     expected: "Terminal opens and accepts input even when health dots are red/amber"
@@ -40,9 +40,9 @@ human_verification:
 
 | # | Truth | Status | Evidence |
 |---|-------|--------|----------|
-| 1 | OnboardingModal appears on first load when no folder is saved | VERIFIED | `OnboardingModal.tsx` gates on `initialPath === null && !localStorage.getItem('slopdock_onboarded')` — ONBOARD-01 test GREEN |
+| 1 | OnboardingModal appears on first load when no folder is saved | VERIFIED | `OnboardingModal.tsx` gates on `initialPath === null && !localStorage.getItem('slopmop_onboarded')` — ONBOARD-01 test GREEN |
 | 2 | OnboardingModal does NOT appear when initialPath is non-null | VERIFIED | `useState(() => initialPath === null && ...)` returns false, `if (!visible) return null` — ONBOARD-02 test GREEN |
-| 3 | Clicking Get Started sets localStorage key and hides the modal | VERIFIED | `handleDismiss` sets `'slopdock_onboarded' = '1'` and calls `onDismiss` — ONBOARD-03 test GREEN |
+| 3 | Clicking Get Started sets localStorage key and hides the modal | VERIFIED | `handleDismiss` sets `'slopmop_onboarded' = '1'` and calls `onDismiss` — ONBOARD-03 test GREEN |
 | 4 | Health hook starts loading:true, resolves, resets to loading on cwd change | VERIFIED | `useProjectHealth` uses `setTimeout(100ms)` debounce, sets `loading: true` on cwd change — HEALTH-01 + HEALTH-02 tests GREEN |
 | 5 | Health dots correctly indicate ok/warn/error/loading states | VERIFIED | `HealthStatusBar` maps each field to `health-dot--{status}` class — HEALTH-03 + HEALTH-03b tests GREEN |
 | 6 | Health bar collapses entirely when all checks pass | VERIFIED | `const allGreen = dots.every(d => d.status === 'ok'); if (allGreen) return null` — confirmed in source |
@@ -73,7 +73,7 @@ human_verification:
 | From | To | Via | Status | Details |
 |------|----|-----|--------|---------|
 | `client/App.tsx` | `OnboardingModal.tsx` | `useState(getInitialPath)` + `{!onboardingDone && <OnboardingModal initialPath={initialPath} ...>}` | WIRED | Line 228-233, uses stable `initialPath` not live `cwd` |
-| `OnboardingModal` dismiss button | `localStorage.setItem('slopdock_onboarded', '1')` | `handleDismiss` callback | WIRED | Confirmed in source, ONBOARD-03 test exercises this path |
+| `OnboardingModal` dismiss button | `localStorage.setItem('slopmop_onboarded', '1')` | `handleDismiss` callback | WIRED | Confirmed in source, ONBOARD-03 test exercises this path |
 | `client/App.tsx` | `useProjectHealth` hook | `const health = useProjectHealth(cwd, settings.agent.command)` | WIRED | Line 133, passes agent command from settings |
 | `client/App.tsx` | `HealthStatusBar.tsx` | `{cwd && <HealthStatusBar health={health} />}` | WIRED | Line 244, cwd-gated |
 | `useProjectHealth` hook | `GET /api/project-health` | `fetch('/api/project-health?cwd=...&agent=...')` with `encodeURIComponent` | WIRED | Line 38 in hook |
@@ -86,9 +86,9 @@ human_verification:
 
 | Requirement | Source Plan | Description | Status | Evidence |
 |-------------|------------|-------------|--------|----------|
-| ONBOARD-01 | 05-01, 05-02 | Modal renders when no saved folder and not yet onboarded | SATISFIED | OnboardingModal gates on `initialPath === null && !localStorage.getItem('slopdock_onboarded')` — test GREEN |
+| ONBOARD-01 | 05-01, 05-02 | Modal renders when no saved folder and not yet onboarded | SATISFIED | OnboardingModal gates on `initialPath === null && !localStorage.getItem('slopmop_onboarded')` — test GREEN |
 | ONBOARD-02 | 05-01, 05-02 | Modal suppressed when initialPath is non-null | SATISFIED | `useState` returns false immediately, `if (!visible) return null` — test GREEN |
-| ONBOARD-03 | 05-01, 05-02 | Dismiss sets localStorage key | SATISFIED | `localStorage.setItem('slopdock_onboarded', '1')` in handleDismiss — test GREEN |
+| ONBOARD-03 | 05-01, 05-02 | Dismiss sets localStorage key | SATISFIED | `localStorage.setItem('slopmop_onboarded', '1')` in handleDismiss — test GREEN |
 | HEALTH-01 | 05-01, 05-03 | Hook returns loading:true initially, resolves with health data | SATISFIED | `setHealth(prev => ({ ...prev, loading: true }))` then fetch resolves — test GREEN |
 | HEALTH-02 | 05-01, 05-03 | Hook resets to loading when cwd changes | SATISFIED | useEffect dep array `[cwd, agentCommand]` triggers reset and 100ms debounce — test GREEN |
 | HEALTH-03 | 05-01, 05-04 | Dots render correct class per health state | SATISFIED | All 4 checks mapped to ok/warn/error, loading path renders health-dot--loading — test GREEN |
@@ -125,12 +125,12 @@ Phase 5 tests: 7/7 GREEN.
 
 ### Human Verification Required
 
-The automated suite passes all 7 Phase 5 tests. The following scenarios require browser verification with a running dev server (`npm run dev` at `/Users/rgv250cc/Documents/Projects/SlopDock`, visit http://localhost:5173):
+The automated suite passes all 7 Phase 5 tests. The following scenarios require browser verification with a running dev server (`npm run dev` at `/Users/rgv250cc/Documents/Projects/SlopMop`, visit http://localhost:5173):
 
 #### 1. Onboarding Modal First Load
 
-**Test:** DevTools → Application → Local Storage → clear `slopdock_onboarded` and `slopdock_last_folder`, then reload
-**Expected:** "Welcome to SlopDock" modal appears with 3 bullet points and "Get Started" button
+**Test:** DevTools → Application → Local Storage → clear `slopmop_onboarded` and `slopmop_last_folder`, then reload
+**Expected:** "Welcome to SlopMop" modal appears with 3 bullet points and "Get Started" button
 **Why human:** jsdom test environment cannot verify real browser render / localStorage interaction across reload
 
 #### 2. Dismiss Persists Across Reload
@@ -141,7 +141,7 @@ The automated suite passes all 7 Phase 5 tests. The following scenarios require 
 
 #### 3. Modal Skipped When Folder Is Saved
 
-**Test:** Clear `slopdock_onboarded` only (keep `slopdock_last_folder`), reload
+**Test:** Clear `slopmop_onboarded` only (keep `slopmop_last_folder`), reload
 **Expected:** Modal does not appear — folder was already saved
 **Why human:** Requires real localStorage state with a specific key combination
 
@@ -153,7 +153,7 @@ The automated suite passes all 7 Phase 5 tests. The following scenarios require 
 
 #### 5. Health Bar Collapses When All Green
 
-**Test:** Connect the SlopDock project folder itself
+**Test:** Connect the SlopMop project folder itself
 **Expected:** Health bar disappears (all checks pass)
 **Why human:** Requires live server health checks against a real directory
 

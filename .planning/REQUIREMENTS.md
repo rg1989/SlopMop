@@ -1,4 +1,4 @@
-# Requirements: SlopDock v1.1
+# Requirements: SlopMop v1.1
 
 **Defined:** 2026-05-02
 **Core Value:** Terminal sessions survive browser reloads — close the tab, reopen it, pick up exactly where you left off.

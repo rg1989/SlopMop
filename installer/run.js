@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Thin npx wrapper — downloads and runs install.sh from the SlopDock repo.
+// Thin npx wrapper — downloads and runs install.sh from the SlopMop repo.
 // Zero dependencies: only uses Node.js built-ins.
 
 import { execSync } from 'child_process';
@@ -12,7 +12,7 @@ import { tmpdir } from 'os';
 import { randomBytes } from 'crypto';
 
 const INSTALL_SH_URL =
-  'https://raw.githubusercontent.com/rg1989/SlopDock/main/scripts/install.sh';
+  'https://raw.githubusercontent.com/rg1989/SlopMop/main/scripts/install.sh';
 
 // If run from within a cloned repo (e.g. bash installer/run.js), use the
 // local copy of install.sh rather than downloading.
@@ -39,7 +39,7 @@ async function main() {
   if (existsSync(LOCAL_SCRIPT)) {
     script = LOCAL_SCRIPT;
   } else {
-    const tmp = join(tmpdir(), `slopdock-install-${randomBytes(4).toString('hex')}.sh`);
+    const tmp = join(tmpdir(), `slopmop-install-${randomBytes(4).toString('hex')}.sh`);
     process.stdout.write('Downloading installer...\n');
     await download(INSTALL_SH_URL, tmp);
     script = tmp;

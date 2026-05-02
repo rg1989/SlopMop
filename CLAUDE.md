@@ -1,4 +1,4 @@
-# SlopDock — Project Rules
+# SlopMop — Project Rules
 
 @.slop/ai-guardian.md
 

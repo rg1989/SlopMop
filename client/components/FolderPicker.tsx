@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 
-const RECENT_PATHS_KEY = 'slopdock_recent_paths';
+const RECENT_PATHS_KEY = 'slopmop_recent_paths';
 const MAX_RECENT = 10;
 
 function getRecentPaths(): string[] {

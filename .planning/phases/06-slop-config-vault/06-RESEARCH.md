@@ -16,18 +16,18 @@
 - Presence of `.slop/` (not just `config.json`) is the onboarding marker
 - New endpoint: `GET /api/slop-status?cwd=` → `{ exists: bool, config: {...} | null }`
 - New endpoint: `POST /api/slop-init` → body `{ cwd, projectName? }` → creates `.slop/config.json`
-- `.slop/config.json` becomes health check #6 — label "SlopDock config", missing = amber warning (not red error)
+- `.slop/config.json` becomes health check #6 — label "SlopMop config", missing = amber warning (not red error)
 - OnboardingModal trigger: call `GET /api/slop-status` whenever `cwd` changes; show modal if `exists === false`
 - On "Get Started": call `POST /api/slop-init` → then dismiss modal
-- Remove `localStorage.getItem('slopdock_onboarded')` gate entirely
+- Remove `localStorage.getItem('slopmop_onboarded')` gate entirely
 - Per-project agent override: if `.slop/config.json` has `agent`, it overrides global settings
 
 **Tier 2: Global `~/.slop/`**
 - `~/.slop/settings.json` holds all user prefs (recordingMode, pttKey, sidebarTabsOrientation, showHiddenFiles, typeIndicatorSize)
 - `~/.slop/recents.json` holds recently opened project paths
 - New endpoints: `GET/PUT /api/global-settings`, `GET/PUT /api/recent-paths`
-- Migration: on startup, if `~/.slop/settings.json` missing but `slopdock_settings` in localStorage → migrate transparently, delete localStorage key
-- `slopdock_last_folder` stays in localStorage
+- Migration: on startup, if `~/.slop/settings.json` missing but `slopmop_settings` in localStorage → migrate transparently, delete localStorage key
+- `slopmop_last_folder` stays in localStorage
 
 **Tier 3: `~/.slop/backups/` Vault**
 - Backup targets (locked list): `~/.claude/settings.json`, `~/.claude/settings.local.json`, `~/.claude/CLAUDE.md`, `~/.claude/keybindings.json`, `~/.claude/get-shit-done/config.json`, `~/.gitconfig`, `~/.ssh/config`
@@ -62,7 +62,7 @@ Phase 6 is a pure Node.js + React wiring phase — no new npm dependencies requi
 
 The `useSettings` hook is a standalone 82-line file with a clean `load()`/`save()` pair. Migration to server-backed I/O means converting `load()` to an async fetch and `save()` to a `PUT /api/global-settings`. The hook needs an async init phase, which means the calling pattern in App.tsx changes from synchronous `useState(load)` to an async effect with a loading state. The simplest approach: keep synchronous localStorage as an immediate-read fallback, then overwrite with server data once it arrives (migration path included free of charge).
 
-The `SettingsModal` already has a three-tab system (`display | audio | agent`) implemented via a `SettingsTab` union type — adding `vault` is a four-line change. The Vault tab body can be a new self-contained component. The `OnboardingModal` currently gates on `initialPath === null && !localStorage.getItem('slopdock_onboarded')` — the entire gate must be replaced with a server-driven `slopExists` flag managed in App.tsx, with the modal becoming a pure prop-driven presentational component.
+The `SettingsModal` already has a three-tab system (`display | audio | agent`) implemented via a `SettingsTab` union type — adding `vault` is a four-line change. The Vault tab body can be a new self-contained component. The `OnboardingModal` currently gates on `initialPath === null && !localStorage.getItem('slopmop_onboarded')` — the entire gate must be replaced with a server-driven `slopExists` flag managed in App.tsx, with the modal becoming a pure prop-driven presentational component.
 
 **Primary recommendation:** Build in three waves: (1) server endpoints + bug fixes, (2) useSettings migration + onboarding rewire, (3) Vault UI tab. This ordering means each wave is independently testable.
 
@@ -242,7 +242,7 @@ Current `useSettings.ts` uses synchronous `localStorage.getItem/setItem`. The mi
 
 1. On hook init: immediately read localStorage (for instant render, no flash)
 2. Then async: `GET /api/global-settings`
-   - If server returns settings: overwrite state with server data, delete `slopdock_settings` from localStorage (migration done)
+   - If server returns settings: overwrite state with server data, delete `slopmop_settings` from localStorage (migration done)
    - If server returns null: run migration — write current localStorage value to server, then continue
 3. On `update()`: call `PUT /api/global-settings` in addition to (or instead of) localStorage
 
@@ -294,7 +294,7 @@ export function useSettings() {
 
 ### Pattern 7: OnboardingModal Rewire
 
-**Current state (OnboardingModal.tsx):** The `visible` state is computed once on mount using `initialPath` and `localStorage.getItem('slopdock_onboarded')`. The component is stateful and self-gating.
+**Current state (OnboardingModal.tsx):** The `visible` state is computed once on mount using `initialPath` and `localStorage.getItem('slopmop_onboarded')`. The component is stateful and self-gating.
 
 **Required state (Phase 6):** The modal must show whenever `cwd` changes to a folder without `.slop/`. The gate must move to App.tsx:
 
@@ -425,7 +425,7 @@ export function parseRoadmapMd(content: string): PhaseDraft[] {
 A. Add `slopExists` to `ProjectHealth` interface + `/api/project-health` endpoint response  
 B. Pass `slopExists` as a separate prop to `HealthStatusBar`
 
-**Recommended: Option B** — keeps the health endpoint focused on project env checks, not SlopDock-specific state. `slopExists` is already fetched in App.tsx for the onboarding modal trigger. Pass it through:
+**Recommended: Option B** — keeps the health endpoint focused on project env checks, not SlopMop-specific state. `slopExists` is already fetched in App.tsx for the onboarding modal trigger. Pass it through:
 
 ```typescript
 // HealthStatusBar.tsx — add prop
@@ -439,8 +439,8 @@ if (slopExists !== null) {
   dots.push({
     key: 'slop-config',
     label: slopExists
-      ? 'SlopDock config (.slop) present'
-      : 'SlopDock config (.slop) missing — click Get Started',
+      ? 'SlopMop config (.slop) present'
+      : 'SlopMop config (.slop) missing — click Get Started',
     status: slopExists ? 'ok' : 'warn',
   });
 }
@@ -541,9 +541,9 @@ const VAULT_TARGETS = [
 
 ### Pitfall 7: Recent Paths localStorage Key Name
 
-**What goes wrong:** The CONTEXT.md says `slopdock_recent_paths` is migrated. This key is not visible in the current codebase — it may not have been implemented yet in Phase 5.
-**What we know:** Only `slopdock_last_folder` and `slopdock_settings` are confirmed localStorage keys in the current code. `slopdock_recent_paths` may be unused.
-**How to avoid:** When implementing `GET/PUT /api/recent-paths`, the migration step should check for `slopdock_recent_paths` in localStorage — if absent, treat as empty array. Do not error.
+**What goes wrong:** The CONTEXT.md says `slopmop_recent_paths` is migrated. This key is not visible in the current codebase — it may not have been implemented yet in Phase 5.
+**What we know:** Only `slopmop_last_folder` and `slopmop_settings` are confirmed localStorage keys in the current code. `slopmop_recent_paths` may be unused.
+**How to avoid:** When implementing `GET/PUT /api/recent-paths`, the migration step should check for `slopmop_recent_paths` in localStorage — if absent, treat as empty array. Do not error.
 
 ---
 
@@ -596,7 +596,7 @@ async function autoBackupVault(): Promise<void> {
 
 // In server listen callback:
 server.listen(PORT, () => {
-  console.log(`SlopDock server listening on :${PORT}`);
+  console.log(`SlopMop server listening on :${PORT}`);
   initPiper().catch(() => {});
   checkWhisper().catch(() => {});
   autoBackupVault().catch(() => {}); // NEW
@@ -620,9 +620,9 @@ Note: `atomicWrite` above takes a string — for binary files, use `writeFile` d
 
 ## Open Questions
 
-1. **`slopdock_recent_paths` localStorage key**
-   - What we know: The CONTEXT.md says to migrate this key, but it's not visible in the current codebase (`useSessionManager.ts` uses `slopdock_sessions_*` keys, not `recent_paths`)
-   - What's unclear: Was `slopdock_recent_paths` ever implemented? If not, the migration step is a no-op
+1. **`slopmop_recent_paths` localStorage key**
+   - What we know: The CONTEXT.md says to migrate this key, but it's not visible in the current codebase (`useSessionManager.ts` uses `slopmop_sessions_*` keys, not `recent_paths`)
+   - What's unclear: Was `slopmop_recent_paths` ever implemented? If not, the migration step is a no-op
    - Recommendation: Implement `GET/PUT /api/recent-paths` endpoint and `recents.json` on server side. On migration, check localStorage for the key — if empty/absent, start with empty array. No error path needed.
 
 2. **VaultTab `readFile` for binary config files**
@@ -674,7 +674,7 @@ Note: `atomicWrite` above takes a string — for binary files, use `writeFile` d
 ### Primary (HIGH confidence)
 - Direct code reading of `server/index.ts` — all import patterns, endpoint patterns, startup hooks
 - Direct code reading of `server/gsd.ts` — parser bug confirmed line-by-line
-- Direct code reading of `client/hooks/useSettings.ts` — localStorage key `slopdock_settings`, `load()`/`save()` shape
+- Direct code reading of `client/hooks/useSettings.ts` — localStorage key `slopmop_settings`, `load()`/`save()` shape
 - Direct code reading of `client/hooks/useSessionManager.ts` — `spawn()` dedup gap confirmed lines 83–106
 - Direct code reading of `client/components/SettingsModal.tsx` — tab union type, tab bar render pattern
 - Direct code reading of `client/components/OnboardingModal.tsx` — localStorage gate confirmed line 10
@@ -696,7 +696,7 @@ Note: `atomicWrite` above takes a string — for binary files, use `writeFile` d
 - Standard stack: HIGH — all primitives verified in existing code or live Node.js calls
 - Architecture: HIGH — patterns derived directly from reading existing server/client code
 - Pitfalls: HIGH — most derived from direct code reading (spawn() dedup gap, parser gate, localStorage race)
-- Open questions: LOW — one uncertainty around `slopdock_recent_paths` key existence
+- Open questions: LOW — one uncertainty around `slopmop_recent_paths` key existence
 
 **Research date:** 2026-05-01
 **Valid until:** 2026-06-01 (Node.js stdlib stable; no framework dependencies on fast-moving libs)

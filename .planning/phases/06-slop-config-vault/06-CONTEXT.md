@@ -7,7 +7,7 @@
 <domain>
 ## Phase Boundary
 
-Phase 6 replaces all SlopDock localStorage usage (except `slopdock_last_folder`) with
+Phase 6 replaces all SlopMop localStorage usage (except `slopmop_last_folder`) with
 on-disk config files, adds a vault backup/restore system for third-party tool configs,
 fixes two pre-existing bugs (double-tab spawn, roadmap parser), and rewires the
 OnboardingModal to trigger per-project (based on `.slop/` presence) rather than once globally.
@@ -28,10 +28,10 @@ Three tiers:
 - Presence of `.slop/` (not just `config.json`) is the onboarding marker
 - New endpoint: `GET /api/slop-status?cwd=` → `{ exists: bool, config: {...} | null }`
 - New endpoint: `POST /api/slop-init` → body `{ cwd, projectName? }` → creates `.slop/config.json`
-- `.slop/config.json` becomes health check #6 — label "SlopDock config", missing = amber warning (not red error)
+- `.slop/config.json` becomes health check #6 — label "SlopMop config", missing = amber warning (not red error)
 - OnboardingModal trigger: call `GET /api/slop-status` whenever `cwd` changes; show modal if `exists === false`
 - On "Get Started": call `POST /api/slop-init` → then dismiss modal
-- Remove `localStorage.getItem('slopdock_onboarded')` gate entirely
+- Remove `localStorage.getItem('slopmop_onboarded')` gate entirely
 - Per-project agent override: if `.slop/config.json` has `agent`, it overrides global settings
 
 ### Tier 2: Global `~/.slop/`
@@ -39,8 +39,8 @@ Three tiers:
 - `~/.slop/settings.json` holds all user prefs (recordingMode, pttKey, sidebarTabsOrientation, showHiddenFiles, typeIndicatorSize)
 - `~/.slop/recents.json` holds recently opened project paths
 - New endpoints: `GET/PUT /api/global-settings`, `GET/PUT /api/recent-paths`
-- Migration: on startup, if `~/.slop/settings.json` missing but `slopdock_settings` in localStorage → migrate transparently, delete localStorage key
-- `slopdock_last_folder` stays in localStorage (needed before server is reachable at app boot)
+- Migration: on startup, if `~/.slop/settings.json` missing but `slopmop_settings` in localStorage → migrate transparently, delete localStorage key
+- `slopmop_last_folder` stays in localStorage (needed before server is reachable at app boot)
 
 ### Tier 3: `~/.slop/backups/` Vault
 
@@ -82,7 +82,7 @@ Three tiers:
 - `GET /api/slop-status` must be fast (single `fs.access` call) — called on every cwd change
 - `POST /api/slop-init` creates the directory with `mkdir -p` then writes `config.json`
 - Restore flow: show a simple diff list of what will be overwritten, user clicks "Restore All" or per-file "Restore"
-- Health check #6 label: "SlopDock config (.slop)" — amber warning with tooltip "Run /api/slop-init or click 'Get Started'"
+- Health check #6 label: "SlopMop config (.slop)" — amber warning with tooltip "Run /api/slop-init or click 'Get Started'"
 - `useSettings` hook needs to be refactored to load/save via `GET/PUT /api/global-settings` instead of localStorage
 
 </specifics>

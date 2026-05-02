@@ -23,7 +23,7 @@
 
 ## Summary
 
-The codebase is explicitly pre-wired for multi-session. `useSession` has a top-of-file comment: *"When SlopDock grows to support multiple concurrent sessions, App renders an array of these — one per session."* The `EditorTabBar`/`useEditorTabs` infrastructure for file preview tabs is already in place and demonstrates the exact tab-management pattern to replicate. The `usePty` hook creates one WebSocket + one PTY per invocation, so multiple concurrent sessions need only multiple hook instances — no server-side multiplexer is needed in v1.
+The codebase is explicitly pre-wired for multi-session. `useSession` has a top-of-file comment: *"When SlopMop grows to support multiple concurrent sessions, App renders an array of these — one per session."* The `EditorTabBar`/`useEditorTabs` infrastructure for file preview tabs is already in place and demonstrates the exact tab-management pattern to replicate. The `usePty` hook creates one WebSocket + one PTY per invocation, so multiple concurrent sessions need only multiple hook instances — no server-side multiplexer is needed in v1.
 
 The key design question is **where session state lives**. The cleanest answer, consistent with the existing architecture, is a new `useSessionManager` hook that owns an array of `SessionEntry` objects (id, name, status, PTY handle, editor tabs, attachments). `App` renders the active session's `<Terminal>` and passes all per-session props through. Inactive sessions stay mounted but invisible (display:none) so xterm.js state is preserved; or they are unmounted and restored from a scrollback snapshot when re-activated.
 
@@ -41,7 +41,7 @@ Status detection is the trickiest requirement. The heuristic used by terminals l
 |---------|---------|---------|--------------|
 | `crypto.randomUUID()` | Web API | Stable session UUIDs | Built into modern browsers; no dependency |
 | React `useState`/`useRef`/`useCallback` | React 19 | Session array management | Project standard |
-| `localStorage` | Web API | Session history persistence | Already used for `slopdock_ui_{cwd}` |
+| `localStorage` | Web API | Session history persistence | Already used for `slopmop_ui_{cwd}` |
 | `node-pty` | 1.1.0 | PTY per session | Already installed |
 | WebSocket (`ws`) | 8.17.0 | One WS per session | Already installed |
 
@@ -212,12 +212,12 @@ export type ServerMessage =
 
 ### Pattern 7: localStorage Persistence for Session History
 
-**What:** Closed sessions written to `slopdock_sessions_{cwd}` key. Max 20 entries (ring-buffer).
+**What:** Closed sessions written to `slopmop_sessions_{cwd}` key. Max 20 entries (ring-buffer).
 **When to use:** `close()` in `useSessionManager` triggers a write.
 
 ```typescript
-// Source: consistent with existing slopdock_ui_{cwd} pattern in App.tsx
-const HISTORY_KEY = (cwd: string) => `slopdock_sessions_${cwd}`;
+// Source: consistent with existing slopmop_ui_{cwd} pattern in App.tsx
+const HISTORY_KEY = (cwd: string) => `slopmop_sessions_${cwd}`;
 const MAX_HISTORY = 20;
 
 function saveSessionHistory(cwd: string, entry: PersistedSession) {
@@ -278,9 +278,9 @@ function saveSessionHistory(cwd: string, entry: PersistedSession) {
 **How to avoid:** Use 1200ms debounce (matches Claude CLI's ~1s prompt redraw cycle). Test with rapid output: status should stay "working" until output stops for 1.2s.
 
 ### Pitfall 5: localStorage Key Collision on cwd Switch
-**What goes wrong:** Session history for `/path/a` is written under `slopdock_sessions_/path/a`; if user switches cwd, history from old cwd shows under new cwd.
+**What goes wrong:** Session history for `/path/a` is written under `slopmop_sessions_/path/a`; if user switches cwd, history from old cwd shows under new cwd.
 **Why it happens:** Key includes cwd already — this is fine. The pitfall is only if key is global (no cwd suffix).
-**How to avoid:** Always key by cwd: `slopdock_sessions_${cwd}`. Load on cwd change (same pattern as existing `slopdock_ui_${cwd}`).
+**How to avoid:** Always key by cwd: `slopmop_sessions_${cwd}`. Load on cwd change (same pattern as existing `slopmop_ui_${cwd}`).
 
 ### Pitfall 6: Protocol Backward Compatibility
 **What goes wrong:** Adding `sessionId` to `start` message breaks existing `ws-handler.ts` if it validates the message shape strictly.

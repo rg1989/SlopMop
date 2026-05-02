@@ -1,6 +1,6 @@
-# SlopDock
+# SlopMop
 
-SlopDock is a local browser-based workspace for AI-assisted development. It wraps a configurable agent CLI in a unified UI alongside file browsing, git integration, voice I/O, and planning tools — eliminating the need to hop between apps to stay on top of work.
+SlopMop is a local browser-based workspace for AI-assisted development. It wraps a configurable agent CLI in a unified UI alongside file browsing, git integration, voice I/O, and planning tools — eliminating the need to hop between apps to stay on top of work.
 
 ## Language
 
@@ -11,11 +11,11 @@ A working directory the user connects to. All panels, sessions, and file state a
 _Avoid_: project, folder, cwd
 
 **Session**:
-A single running agent process together with its associated editor tabs and attachments. The unit of interaction with an agent. SlopDock currently shows one session per workspace; multiple sessions per workspace are a planned extension.
+A single running agent process together with its associated editor tabs and attachments. The unit of interaction with an agent. SlopMop currently shows one session per workspace; multiple sessions per workspace are a planned extension.
 _Avoid_: terminal, instance, connection
 
 **Agent**:
-The CLI tool spawned inside a session's PTY (e.g. `claude`, `aider`, `hermes`). SlopDock is agent-agnostic — nothing in the UI assumes a specific agent.
+The CLI tool spawned inside a session's PTY (e.g. `claude`, `aider`, `hermes`). SlopMop is agent-agnostic — nothing in the UI assumes a specific agent.
 _Avoid_: model, AI, Claude (as a generic term)
 
 **AgentConfig**:
@@ -95,5 +95,5 @@ _Avoid_: voice input, mic, Whisper (as a generic term)
 ## Flagged ambiguities
 
 - **"terminal"** is used for both the xterm.js UI component (`<Terminal>`) and the underlying PTY process. In code, prefer `TerminalComponent` for the UI and `PTY`/`ptyProcess` for the process. In speech, qualify: "terminal UI" vs "PTY process."
-- **"agent"** can mean the CLI tool (correct in SlopDock) or the underlying AI model (avoid — models are an implementation detail of the agent CLI, not a SlopDock concept).
+- **"agent"** can mean the CLI tool (correct in SlopMop) or the underlying AI model (avoid — models are an implementation detail of the agent CLI, not a SlopMop concept).
 - **"tab"** is overloaded: sidebar tabs (Panels) vs editor tabs (part of Session state). Use **Panel** for the former and **editor tab** for the latter.

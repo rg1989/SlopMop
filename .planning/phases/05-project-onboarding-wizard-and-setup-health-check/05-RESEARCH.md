@@ -6,7 +6,7 @@
 
 ## Summary
 
-Phase 5 adds two interlocking capabilities: (1) a first-time onboarding wizard that guides a new user through connecting their first project folder and understanding SlopDock's key features, and (2) an ongoing health check panel that surfaces whether the active project has the prerequisites Claude Code needs to work well — git repo, CLAUDE.md, node_modules, agent CLI in PATH.
+Phase 5 adds two interlocking capabilities: (1) a first-time onboarding wizard that guides a new user through connecting their first project folder and understanding SlopMop's key features, and (2) an ongoing health check panel that surfaces whether the active project has the prerequisites Claude Code needs to work well — git repo, CLAUDE.md, node_modules, agent CLI in PATH.
 
 The project's existing infrastructure already provides all primitives needed: `/api/which` checks if a command is on PATH, `/api/git-branch` tells us if a folder is a git repo, `/api/rules` loads CLAUDE.md files, and `fs.access` on the server can check whether files/directories exist. No new server-side libraries are required. The only new endpoints needed are a health-check aggregator and possibly a CLAUDE.md bootstrap writer.
 
@@ -61,12 +61,12 @@ tests/
 ```
 
 ### Pattern 1: One-Time Onboarding Modal
-**What:** A modal gated by `localStorage.getItem('slopdock_onboarding_done')`. Shown when the app loads and `cwd` is null (no saved folder). Dismissed permanently on "Get Started" click.
+**What:** A modal gated by `localStorage.getItem('slopmop_onboarding_done')`. Shown when the app loads and `cwd` is null (no saved folder). Dismissed permanently on "Get Started" click.
 **When to use:** First app load with no saved folder path.
 
 ```typescript
 // OnboardingModal.tsx — simplified shape
-const ONBOARDING_KEY = 'slopdock_onboarding_done';
+const ONBOARDING_KEY = 'slopmop_onboarding_done';
 
 export function useOnboardingVisible(cwd: string | null): [boolean, () => void] {
   const [visible, setVisible] = useState(
@@ -174,7 +174,7 @@ Status color mapping:
 - Red (`--error`): blocking (agent CLI not found, directory inaccessible)
 
 ### Anti-Patterns to Avoid
-- **Full multi-step wizard with page routing:** SlopDock has no router; modals are the established pattern. Don't introduce react-router.
+- **Full multi-step wizard with page routing:** SlopMop has no router; modals are the established pattern. Don't introduce react-router.
 - **Polling health on a timer:** Check once per `cwd` change. Continuous polling is noisy and unnecessary for file-system state.
 - **Blocking the terminal spawn on health checks:** Health is informational only. Claude Code sessions spawn regardless of health state. Never gate PTY spawn on health results.
 - **Writing CLAUDE.md automatically without user confirmation:** Auto-creation of project files is surprising. At most, offer a "Create CLAUDE.md" button that shows a template in a modal for the user to confirm.
@@ -233,7 +233,7 @@ Verified patterns from the existing codebase:
 <div className="modal-overlay" onClick={onClose}>
   <div className="modal-panel" onClick={e => e.stopPropagation()}>
     <div className="modal-header">
-      <span className="modal-title">Welcome to SlopDock</span>
+      <span className="modal-title">Welcome to SlopMop</span>
     </div>
     <div className="modal-body">
       {/* content */}
@@ -273,7 +273,7 @@ Verified patterns from the existing codebase:
 ### localStorage-gated one-time modal
 ```typescript
 // Source: established pattern from FolderPicker.tsx (RECENT_PATHS_KEY)
-const HAS_ONBOARDED_KEY = 'slopdock_onboarded';
+const HAS_ONBOARDED_KEY = 'slopmop_onboarded';
 
 function hasOnboarded(): boolean {
   return !!localStorage.getItem(HAS_ONBOARDED_KEY);

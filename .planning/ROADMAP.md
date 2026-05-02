@@ -1,4 +1,4 @@
-# Roadmap: SlopDock
+# Roadmap: SlopMop
 
 ## Overview
 

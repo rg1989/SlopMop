@@ -1,6 +1,6 @@
 <div align="center">
 
-# SlopDock
+# SlopMop
 
 **The workspace the AI CLI tools forgot to build.**
 
@@ -11,7 +11,7 @@
 
 Open a browser. Select a folder. Start building.
 
-*Yes, the name is intentional. AI generates slop. SlopDock is where you dock it, manage it, review it, and ship the parts that aren't.*
+*Yes, the name is intentional. AI generates slop. SlopMop is where you dock it, manage it, review it, and ship the parts that aren't.*
 
 </div>
 
@@ -37,7 +37,7 @@ None of the CLI tools give you any of that. They expect you to stitch it togethe
 
 The heavy IDEs (Cursor, Windsurf) went the other direction: replace everything, enforce their own editor, make you adopt their opinions about what a workspace should look like. That works for some people. It doesn't work if you've already invested in your CLI setup, your Claude Code skills and slash commands, your GSD workflow, your personal CLAUDE.md. It doesn't work if you want to open a browser tab on a remote machine over VPN and just be there.
 
-SlopDock is the thing in between: a **lightweight, browser-based workspace that wraps your CLI of choice** and gives it the environment it always should have had. The workspace knows what project you're in, keeps your plan visible, tracks what changed, handles your git operations, remembers your architectural decisions, and surfaces the tools you always forget to use — all without getting in the way or replacing anything you already rely on.
+SlopMop is the thing in between: a **lightweight, browser-based workspace that wraps your CLI of choice** and gives it the environment it always should have had. The workspace knows what project you're in, keeps your plan visible, tracks what changed, handles your git operations, remembers your architectural decisions, and surfaces the tools you always forget to use — all without getting in the way or replacing anything you already rely on.
 
 ---
 
@@ -91,23 +91,23 @@ SlopDock is the thing in between: a **lightweight, browser-based workspace that 
 
 ---
 
-## Why SlopDock specifically
+## Why SlopMop specifically
 
 ### It's project-centric, not session-centric
 
-Every other tool treats the terminal as the unit of organization. SlopDock treats the **project folder** as the unit. When you open a folder, you get a complete workspace scoped to that project: its own file tree, its own git state, its own roadmap, its own Second Brain, its own config and AI Guardian rules. Open four tabs for four projects — each one is self-contained, no confusion between them. This is how developers actually think about their work.
+Every other tool treats the terminal as the unit of organization. SlopMop treats the **project folder** as the unit. When you open a folder, you get a complete workspace scoped to that project: its own file tree, its own git state, its own roadmap, its own Second Brain, its own config and AI Guardian rules. Open four tabs for four projects — each one is self-contained, no confusion between them. This is how developers actually think about their work.
 
 ### It makes the invisible visible
 
-A skilled developer working with Claude Code knows that `/ultrareview`, `/tdd`, `/full-feature`, and a dozen other skills exist — but in the middle of a session, under deadline pressure, they don't get invoked because they're not visible. SlopDock puts them in a launcher. The tools you already have become the tools you actually use.
+A skilled developer working with Claude Code knows that `/ultrareview`, `/tdd`, `/full-feature`, and a dozen other skills exist — but in the middle of a session, under deadline pressure, they don't get invoked because they're not visible. SlopMop puts them in a launcher. The tools you already have become the tools you actually use.
 
 ### It keeps the plan in the room
 
-If you use [GSD](https://github.com/gsd-build/gsd-2) — or any structured planning approach — the biggest risk is losing orientation. Which phase are we in? What's the acceptance criterion for this plan? What changed in the last session? SlopDock renders all of that inline, live, without you having to open a file or switch windows. The plan stays in the room the entire time.
+If you use [GSD](https://github.com/gsd-build/gsd-2) — or any structured planning approach — the biggest risk is losing orientation. Which phase are we in? What's the acceptance criterion for this plan? What changed in the last session? SlopMop renders all of that inline, live, without you having to open a file or switch windows. The plan stays in the room the entire time.
 
 ### It closes the git loop
 
-The AI agent writes code. You need to verify it, stage it, and commit it. Right now that means opening a git GUI or running commands in a separate terminal. SlopDock brings the full diff — staged, unstaged, color-coded, per-file — into the sidebar. Stage and commit without leaving your session. The loop closes in one place.
+The AI agent writes code. You need to verify it, stage it, and commit it. Right now that means opening a git GUI or running commands in a separate terminal. SlopMop brings the full diff — staged, unstaged, color-coded, per-file — into the sidebar. Stage and commit without leaving your session. The loop closes in one place.
 
 ### It gives you your voice back
 
@@ -115,11 +115,11 @@ Push-to-talk or toggle mode. Speak your prompt, transcribed locally by Whisper. 
 
 ### It travels with you
 
-Run SlopDock on a remote server — a powerful cloud machine, a workstation at the office, anything accessible over VPN. Open your browser on any device. Your entire development environment is there. No extensions to install, no sync to set up, no credentials on the thin client. The browser is your terminal.
+Run SlopMop on a remote server — a powerful cloud machine, a workstation at the office, anything accessible over VPN. Open your browser on any device. Your entire development environment is there. No extensions to install, no sync to set up, no credentials on the thin client. The browser is your terminal.
 
 ### It's yours
 
-SlopDock wraps your own Claude Code subscription. It has no telemetry, no cloud component, no account. All features except the agent CLI itself run fully offline. You are not a user of SlopDock's platform — you are running your own copy, with your own configuration, against your own projects. The `.slop/` directory in each project lets you define project-specific rules and AI Guardian instructions that guide the agent exactly the way you want for that codebase.
+SlopMop wraps your own Claude Code subscription. It has no telemetry, no cloud component, no account. All features except the agent CLI itself run fully offline. You are not a user of SlopMop's platform — you are running your own copy, with your own configuration, against your own projects. The `.slop/` directory in each project lets you define project-specific rules and AI Guardian instructions that guide the agent exactly the way you want for that codebase.
 
 ---
 
@@ -171,7 +171,7 @@ SlopDock wraps your own Claude Code subscription. It has no telemetry, no cloud 
 
 **One-liner:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rg1989/SlopDock/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/rg1989/SlopMop/main/scripts/install.sh | bash
 ```
 
 **Manual:**
@@ -211,7 +211,7 @@ brew install ffmpeg
 
 **Piper TTS:** download a pre-built binary and voice model from the [Piper releases page](https://github.com/rhasspy/piper/releases). Place the binary in `PATH` and set the model path in **Settings → Audio**.
 
-SlopDock reports voice setup status in the bar at the bottom of the terminal area.
+SlopMop reports voice setup status in the bar at the bottom of the terminal area.
 
 ---
 
@@ -232,7 +232,7 @@ The GSD panel is read-only by design; writes go through the GSD CLI in the termi
 ## Project structure
 
 ```
-slopdock/
+slopmop/
 ├── client/                   # React 19 + Vite frontend
 │   ├── components/           # All UI components
 │   ├── hooks/                # Custom React hooks
@@ -286,7 +286,7 @@ slopdock/
 | Recording mode | Hold (while key held) / Toggle (press on, press off) |
 
 ### Agent & Tools
-Configure which CLI agent to spawn. SlopDock auto-detects installed agents (`claude`, `opencode`, `aider`, `gemini`, `codex`, `hermes`, `goose`). Each entry has a **command**, optional **args**, and a **label**.
+Configure which CLI agent to spawn. SlopMop auto-detects installed agents (`claude`, `opencode`, `aider`, `gemini`, `codex`, `hermes`, `goose`). Each entry has a **command**, optional **args**, and a **label**.
 
 ### Vault
 Backs up dotfiles to `~/.slop/backups/` on a configurable schedule. Optional git remote sync for cross-machine portability.

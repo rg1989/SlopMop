@@ -63,8 +63,8 @@ export function HealthStatusBar({ health, slopExists }: HealthStatusBarProps) {
     dots.push({
       key: 'slop-config',
       label: slopExists
-        ? 'SlopDock config (.slop) present'
-        : 'SlopDock config (.slop) missing — click Get Started',
+        ? 'SlopMop config (.slop) present'
+        : 'SlopMop config (.slop) missing — click Get Started',
       status: slopExists ? 'ok' : 'warn',
     });
   }

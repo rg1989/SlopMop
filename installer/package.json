@@ -1,12 +1,12 @@
 {
-  "name": "slopdock-install",
+  "name": "slopmop-install",
   "version": "1.0.0",
-  "description": "Installer for SlopDock — Claude Code terminal UI with GSD and second-brain",
+  "description": "Installer for SlopMop — Claude Code terminal UI with GSD and second-brain",
   "type": "module",
   "bin": {
-    "slopdock-install": "./run.js"
+    "slopmop-install": "./run.js"
   },
-  "keywords": ["claude", "claude-code", "slopdock", "gsd"],
+  "keywords": ["claude", "claude-code", "slopmop", "gsd"],
   "license": "MIT",
   "engines": {
     "node": ">=20"

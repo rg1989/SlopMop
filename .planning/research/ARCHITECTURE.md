@@ -463,5 +463,5 @@ This is a single-user local tool. Scaling is not a concern. Notes are relevant f
 
 ---
 
-*Architecture research for: SlopDock — browser-based Claude CLI terminal wrapper*
+*Architecture research for: SlopMop — browser-based Claude CLI terminal wrapper*
 *Researched: 2026-04-30*

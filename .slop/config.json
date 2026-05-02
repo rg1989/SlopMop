@@ -1,7 +1,7 @@
 {
   "version": "1",
   "created": "2026-05-01T19:55:18.222Z",
-  "projectName": "SlopDock",
+  "projectName": "SlopMop",
   "agent": {
     "command": "claude",
     "args": [],

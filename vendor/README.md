@@ -1,9 +1,9 @@
 # vendor/
 
-Vendored third-party tools bundled with SlopDock so installation works offline
+Vendored third-party tools bundled with SlopMop so installation works offline
 and without fetching from external registries.
 
-**Nothing in this directory is part of the SlopDock app itself.**
+**Nothing in this directory is part of the SlopMop app itself.**
 The app source lives in `client/`, `server/`, and `shared/`.
 
 ---

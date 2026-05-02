@@ -1,4 +1,4 @@
-# SlopDock Architecture
+# SlopMop Architecture
 
 This document describes the runtime architecture, key data flows, state model, and design decisions. Read this before making structural changes.
 
@@ -6,7 +6,7 @@ This document describes the runtime architecture, key data flows, state model, a
 
 ## Overview
 
-SlopDock is a local web app with two Node.js processes connected through a WebSocket:
+SlopMop is a local web app with two Node.js processes connected through a WebSocket:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐

@@ -1,6 +1,6 @@
 ---
 name: "Architecture Overview"
-description: "High-level system architecture of SlopDock"
+description: "High-level system architecture of SlopMop"
 type: "context"
 tags: ["architecture", "system-design"]
 created: "2026-05-01"
@@ -8,7 +8,7 @@ created: "2026-05-01"
 
 ## System Architecture
 
-SlopDock is a browser-based developer shell that wraps AI agent CLIs in a rich IDE-like interface.
+SlopMop is a browser-based developer shell that wraps AI agent CLIs in a rich IDE-like interface.
 
 The three main layers are the **client** (React + Vite), the **server** (Express + node-pty), and the **agent process** (any CLI like `claude`, `aider`, etc.).
 

@@ -890,7 +890,7 @@ app.post('/api/fs/file', async (req, res) => {
 // ── GSD Super Tool tracking ──────────────────────────────────────────────────
 
 const GSD_TOOLS = path.join(os.homedir(), '.claude/get-shit-done/bin/gsd-tools.cjs');
-const PENDING_PHASE_FILE = path.join(os.homedir(), '.config/slopdock/pending-phase.json');
+const PENDING_PHASE_FILE = path.join(os.homedir(), '.config/slopmop/pending-phase.json');
 
 app.post('/api/gsd-track-phase', async (req, res) => {
   const { cwd, name, description } = req.body as {
@@ -1237,7 +1237,7 @@ attachWebSocketServer(server);
 
 const PORT = Number(process.env.PORT ?? 3000);
 server.listen(PORT, () => {
-  console.log(`SlopDock server listening on :${PORT}`);
+  console.log(`SlopMop server listening on :${PORT}`);
   // Start Piper TTS and probe Whisper STT in background — non-blocking
   initPiper().catch(() => {});
   checkWhisper().catch(() => {});

@@ -5,23 +5,23 @@ import { OnboardingModal } from '../client/components/OnboardingModal';
 
 describe('OnboardingModal', () => {
   beforeEach(() => {
-    localStorage.removeItem('slopdock_onboarded');
+    localStorage.removeItem('slopmop_onboarded');
   });
 
   it('ONBOARD-01 — renders when no saved folder + not yet onboarded', () => {
     render(<OnboardingModal initialPath={null} onDismiss={vi.fn()} />);
-    expect(screen.getByText('Welcome to SlopDock')).toBeInTheDocument();
+    expect(screen.getByText('Welcome to SlopMop')).toBeInTheDocument();
   });
 
   it('ONBOARD-02 — does NOT render when initialPath is set', () => {
     render(<OnboardingModal initialPath="/some/path" onDismiss={vi.fn()} />);
-    expect(screen.queryByText('Welcome to SlopDock')).toBeNull();
+    expect(screen.queryByText('Welcome to SlopMop')).toBeNull();
   });
 
   it('ONBOARD-03 — dismissing modal sets localStorage key', () => {
     render(<OnboardingModal initialPath={null} onDismiss={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: /get started/i }));
-    expect(localStorage.getItem('slopdock_onboarded')).toBe('1');
+    expect(localStorage.getItem('slopmop_onboarded')).toBe('1');
   });
 });
 
@@ -39,7 +39,7 @@ describe('Phase 6 — prop-driven modal', () => {
 
   it('renders when passed cwd prop without internal gating', () => {
     render(<OnboardingModal cwd="/test/project" onInit={vi.fn()} />);
-    expect(screen.getByText('Welcome to SlopDock')).toBeInTheDocument();
+    expect(screen.getByText('Welcome to SlopMop')).toBeInTheDocument();
   });
 
   it('Get Started button calls POST /api/slop-init with body {cwd}', async () => {

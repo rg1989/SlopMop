@@ -1,5 +1,5 @@
 {
-  "name": "slopdock",
+  "name": "slopmop",
   "version": "1.0.0",
   "description": "Browser-based Claude CLI terminal with file explorer, voice I/O, and GSD integration",
   "type": "module",

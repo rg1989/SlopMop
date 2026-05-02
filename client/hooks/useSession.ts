@@ -8,7 +8,7 @@ import type { UseEditorTabsReturn } from './useEditorTabs';
 import type { FilePreviewData } from '../components/FilePreview';
 
 // Everything a single agent session owns.
-// When SlopDock grows to support multiple concurrent sessions,
+// When SlopMop grows to support multiple concurrent sessions,
 // App renders an array of these — one per session.
 
 export interface UseSessionOptions {

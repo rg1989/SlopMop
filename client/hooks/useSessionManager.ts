@@ -31,8 +31,8 @@ export interface UseSessionManagerReturn {
   restoreForCwd: (cwd: string) => void;
 }
 
-const HISTORY_KEY = (cwd: string) => `slopdock_sessions_${cwd}`;
-const ACTIVE_KEY = (cwd: string) => `slopdock_active:${encodeURIComponent(cwd)}`;
+const HISTORY_KEY = (cwd: string) => `slopmop_sessions_${cwd}`;
+const ACTIVE_KEY = (cwd: string) => `slopmop_active:${encodeURIComponent(cwd)}`;
 const MAX_HISTORY = 20;
 const MAX_SESSIONS = 8;
 
@@ -95,8 +95,8 @@ export function useSessionManager(): UseSessionManagerReturn {
     try {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith('slopdock_sessions_')) {
-          const cwd = key.replace('slopdock_sessions_', '');
+        if (key && key.startsWith('slopmop_sessions_')) {
+          const cwd = key.replace('slopmop_sessions_', '');
           allHistory.push(...loadHistory(cwd));
         }
       }

@@ -66,4 +66,4 @@ Implement OnboardingModal component and wire it into App.tsx. The modal appears 
 - client/App.css (.health-bar): FOUND
 - Commit bb4b348: FOUND
 - Commit bfb3527: FOUND
-- slopdock_onboarded localStorage key in OnboardingModal: FOUND
+- slopmop_onboarded localStorage key in OnboardingModal: FOUND

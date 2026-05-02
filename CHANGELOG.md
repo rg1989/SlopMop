@@ -81,4 +81,4 @@ First complete milestone. Six phases shipped.
 - Agent-agnostic slash command palette
 - Terminal session reconnect on server restart
 
-[1.0.0]: https://github.com/rg1989/SlopDock/releases/tag/v1.0.0
+[1.0.0]: https://github.com/rg1989/SlopMop/releases/tag/v1.0.0

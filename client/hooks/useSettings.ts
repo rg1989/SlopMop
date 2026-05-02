@@ -44,7 +44,7 @@ const DEFAULTS: AppSettings = {
   typeIndicatorSize: 14,
 };
 
-const STORAGE_KEY = 'slopdock_settings';
+const STORAGE_KEY = 'slopmop_settings';
 
 function load(): AppSettings {
   try {

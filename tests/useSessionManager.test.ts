@@ -95,7 +95,7 @@ describe('useSessionManager', () => {
       expect(result.current.sessions).toHaveLength(0);
     });
 
-    it('writes PersistedSession to localStorage under slopdock_sessions_${cwd}', () => {
+    it('writes PersistedSession to localStorage under slopmop_sessions_${cwd}', () => {
       const { result } = renderHook(() => useSessionManager());
 
       let id = '';
@@ -107,7 +107,7 @@ describe('useSessionManager', () => {
         result.current.close(id);
       });
 
-      const raw = localStorage.getItem('slopdock_sessions_/home/user/project');
+      const raw = localStorage.getItem('slopmop_sessions_/home/user/project');
       expect(raw).not.toBeNull();
       const history = JSON.parse(raw!);
       expect(Array.isArray(history)).toBe(true);
@@ -241,7 +241,7 @@ describe('useSessionManager', () => {
           closedAt: Date.now() - 1000,
         },
       ];
-      localStorage.setItem(`slopdock_sessions_${cwd}`, JSON.stringify(preExisting));
+      localStorage.setItem(`slopmop_sessions_${cwd}`, JSON.stringify(preExisting));
 
       const { result } = renderHook(() => useSessionManager());
 

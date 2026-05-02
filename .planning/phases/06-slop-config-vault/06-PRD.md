@@ -2,14 +2,14 @@
 
 ## What We're Building
 
-Two-tier config architecture that moves SlopDock off localStorage and onto disk,
+Two-tier config architecture that moves SlopMop off localStorage and onto disk,
 plus a dotfile backup/restore system for configs we don't control.
 
 ---
 
 ## Tier 1: Project-local `.slop/`
 
-A hidden folder created inside each project directory when SlopDock onboards it.
+A hidden folder created inside each project directory when SlopMop onboards it.
 Its presence is the onboarding marker. No `.slop/` = show wizard. `.slop/` exists = skip wizard.
 
 ### `.slop/config.json`
@@ -31,10 +31,10 @@ If `agent` is present in `.slop/config.json`, it overrides `~/.slop/settings.jso
 
 ### Health check addition
 `.slop/config.json` existence becomes health check #6 (joining the existing 5).
-Label: "SlopDock config". Missing = warning (amber), not error — it can be created.
+Label: "SlopMop config". Missing = warning (amber), not error — it can be created.
 
 ### Onboarding modal fix
-- Remove the `localStorage.getItem('slopdock_onboarded')` gate
+- Remove the `localStorage.getItem('slopmop_onboarded')` gate
 - Replace with: call `GET /api/slop-status?cwd=` when a folder is connected
 - Show OnboardingModal if `exists === false`
 - On "Get Started": call `POST /api/slop-init` then dismiss
@@ -48,7 +48,7 @@ Label: "SlopDock config". Missing = warning (amber), not error — it can be cre
 User-level config that persists across browser reinstalls and survives cache clears.
 
 ### `~/.slop/settings.json`
-Migrates `slopdock_settings` from localStorage:
+Migrates `slopmop_settings` from localStorage:
 ```json
 {
   "version": "1",
@@ -62,13 +62,13 @@ Migrates `slopdock_settings` from localStorage:
 Agent default lives here too (overridden per-project by `.slop/config.json`).
 
 ### `~/.slop/recents.json`
-Migrates `slopdock_recent_paths` from localStorage:
+Migrates `slopmop_recent_paths` from localStorage:
 ```json
 { "version": "1", "paths": ["/path/to/project1", "/path/to/project2"] }
 ```
 
 ### Migration strategy
-On startup: if `~/.slop/settings.json` doesn't exist but `slopdock_settings` does
+On startup: if `~/.slop/settings.json` doesn't exist but `slopmop_settings` does
 in localStorage, read localStorage and write to disk, then delete the localStorage key.
 One-time migration, transparent to user.
 
@@ -103,8 +103,8 @@ Backup and restore configs from tools we don't own.
 - Browser passwords or cookies
 
 ### Backup modes
-- **Manual:** "Backup Now" button in SlopDock settings panel
-- **Auto:** On SlopDock startup, if any source file is newer than its backup, copy it
+- **Manual:** "Backup Now" button in SlopMop settings panel
+- **Auto:** On SlopMop startup, if any source file is newer than its backup, copy it
 
 ### Restore flow
 - "Restore" button shows a diff: backup vs. current (what would change)
@@ -143,7 +143,7 @@ use the overview list only for `completed` status (checkbox state).
 
 ## What stays in localStorage
 
-Only one key: `slopdock_last_folder` — which project to reopen on app start.
+Only one key: `slopmop_last_folder` — which project to reopen on app start.
 This is app-launch state (needed before any server call can be made), not config.
 
 ---

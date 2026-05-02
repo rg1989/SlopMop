@@ -6,7 +6,7 @@
 
 ## Summary
 
-Phase 2 adds a VSCode-style file explorer sidebar to the existing SlopDock app. The codebase is a React 19 + Vite client with an Express/TypeScript server that already has REST endpoints (pick-folder, homedir, health) and a WebSocket layer for PTY. Phase 2 extends the server with new REST endpoints (file tree, file read, git status) and adds new React components (FileTree, FilePreviewPanel, attachment state in Composer).
+Phase 2 adds a VSCode-style file explorer sidebar to the existing SlopMop app. The codebase is a React 19 + Vite client with an Express/TypeScript server that already has REST endpoints (pick-folder, homedir, health) and a WebSocket layer for PTY. Phase 2 extends the server with new REST endpoints (file tree, file read, git status) and adds new React components (FileTree, FilePreviewPanel, attachment state in Composer).
 
 The key architectural insight is that the file tree data lives on the server (Node.js has filesystem access; the browser does not), so all file/git operations are server-side REST calls. The client renders the tree from JSON and manages attachment/preview state locally. The @path syntax for FILE-04 requires prepending attached file paths to the message text before sending to the PTY — no library is needed, it's string concatenation.
 
@@ -404,7 +404,7 @@ export function useFileTree(cwd: string | null) {
 2. **Should hidden dotfiles be shown?**
    - What we know: .env, .gitignore etc. are frequently referenced in Claude sessions
    - What's unclear: User preference — VSCode hides dot-items by default in some modes
-   - Recommendation: Show dotfiles in tree by default (users of SlopDock are developers); skip .git dir itself.
+   - Recommendation: Show dotfiles in tree by default (users of SlopMop are developers); skip .git dir itself.
 
 ## Validation Architecture
 

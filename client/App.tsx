@@ -63,17 +63,17 @@ const SIDEBAR_TABS: { id: SidebarTabId; label: string; Icon: () => JSX.Element }
 ];
 
 // ── Layout constants ──────────────────────────────────────────────────────────
-const STORAGE_KEY = 'slopdock_last_folder';
+const STORAGE_KEY = 'slopmop_last_folder';
 const SIDEBAR_MIN = 180;
 const SIDEBAR_DEFAULT = 240;
 const RESIZE_HANDLE_WIDTH = 4;
 
 // ── UI state persistence ──────────────────────────────────────────────────────
 const UI = {
-  sidebarTab:   'slopdock_ui:sidebar_tab',
-  sidebarWidth: 'slopdock_ui:sidebar_width',
-  editorWidth:  'slopdock_ui:editor_width',
-  editorTabs:   (cwd: string) => `slopdock_ui:editor_tabs:${cwd}`,
+  sidebarTab:   'slopmop_ui:sidebar_tab',
+  sidebarWidth: 'slopmop_ui:sidebar_width',
+  editorWidth:  'slopmop_ui:editor_width',
+  editorTabs:   (cwd: string) => `slopmop_ui:editor_tabs:${cwd}`,
 } as const;
 
 function uiRead<T>(key: string, fallback: T): T {

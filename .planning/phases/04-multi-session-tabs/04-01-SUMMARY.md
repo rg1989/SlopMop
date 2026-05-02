@@ -34,7 +34,7 @@ key-decisions:
   - "Wave 0 RED tests import non-existent modules via @ts-expect-error so Vitest runs RED without TypeScript blocking compilation"
   - "SessionTabBar tests use data-session-id attribute selectors to find specific tab elements by ID"
   - "updateName idempotency after first call is explicitly tested — second call must not change the name"
-  - "localStorage key slopdock_sessions_${cwd} established as the per-cwd session history key"
+  - "localStorage key slopmop_sessions_${cwd} established as the per-cwd session history key"
 
 patterns-established:
   - "Wave 0 scaffold: write tests against @ts-expect-error imports before any implementation exists"
@@ -80,7 +80,7 @@ completed: 2026-05-01
 
 - `SessionTabBar` tests use `data-session-id` attribute as selector anchor — implementation must include this attribute on tab elements
 - `updateName` idempotency: the test explicitly asserts second call does NOT change the name (this is the contract Wave 1 must honor)
-- localStorage key format `slopdock_sessions_${cwd}` is locked in by the tests — consistent with existing `slopdock_ui_${cwd}` pattern
+- localStorage key format `slopmop_sessions_${cwd}` is locked in by the tests — consistent with existing `slopmop_ui_${cwd}` pattern
 
 ## Deviations from Plan
 

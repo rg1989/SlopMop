@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useSettings } from '../client/hooks/useSettings';
 
-const STORAGE_KEY = 'slopdock_settings';
+const STORAGE_KEY = 'slopmop_settings';
 
 describe('useSettings', () => {
   beforeEach(() => {

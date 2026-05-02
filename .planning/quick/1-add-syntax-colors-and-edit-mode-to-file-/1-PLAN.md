@@ -40,7 +40,7 @@ must_haves:
 <objective>
 Add syntax highlighting (token-level, by file extension) and an edit/save mode to the file preview panel.
 
-Purpose: Power users need to read and edit files without leaving SlopDock. Syntax colors reduce cognitive load when scanning code.
+Purpose: Power users need to read and edit files without leaving SlopMop. Syntax colors reduce cognitive load when scanning code.
 Output: FilePreview shows colored tokens for text files; an Edit button unlocks a textarea; Save writes changes to disk via a new PUT endpoint.
 </objective>
 
@@ -257,7 +257,7 @@ Also update `.file-preview` to use flexbox so toolbar + content stack properly:
 (Remove the old `padding: 12px` from `.file-preview` since padding moves into `.fp-text`.)
   </action>
   <verify>
-    <automated>cd /Users/rgv250cc/Documents/Projects/SlopDock && npm run build 2>&1 | tail -5</automated>
+    <automated>cd /Users/rgv250cc/Documents/Projects/SlopMop && npm run build 2>&1 | tail -5</automated>
   </verify>
   <done>
 - TypeScript build passes (no errors)

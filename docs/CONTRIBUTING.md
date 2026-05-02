@@ -1,13 +1,13 @@
-# Contributing to SlopDock
+# Contributing to SlopMop
 
-Thanks for your interest. SlopDock is a personal productivity tool, so the bar for new features is "does this make the core workflow faster or less distracting?" — not "is this generally useful software."
+Thanks for your interest. SlopMop is a personal productivity tool, so the bar for new features is "does this make the core workflow faster or less distracting?" — not "is this generally useful software."
 
 ---
 
 ## Before you start
 
 - **Bug fixes and small improvements** — open a PR directly, no issue required.
-- **New features** — open an issue first to discuss. SlopDock is intentionally lean; new features need a clear reason to exist.
+- **New features** — open an issue first to discuss. SlopMop is intentionally lean; new features need a clear reason to exist.
 - **New dependencies** — discuss first. The bundle is small on purpose. Most things can be implemented without new packages.
 
 ---
@@ -15,8 +15,8 @@ Thanks for your interest. SlopDock is a personal productivity tool, so the bar f
 ## Development setup
 
 ```bash
-git clone https://github.com/rg1989/SlopDock.git
-cd SlopDock
+git clone https://github.com/rg1989/SlopMop.git
+cd SlopMop
 npm install
 npm run setup   # verifies Node 20+, Claude CLI, optional voice tools
 npm run dev

@@ -25,13 +25,13 @@ export function OnboardingModal(props: OnboardingModalProps) {
 
 function LegacyModal({ initialPath, onDismiss }: { initialPath: string | null; onDismiss: () => void }) {
   const [visible] = useState(
-    () => initialPath === null && !localStorage.getItem('slopdock_onboarded')
+    () => initialPath === null && !localStorage.getItem('slopmop_onboarded')
   );
 
   if (!visible) return null;
 
   function handleDismiss() {
-    localStorage.setItem('slopdock_onboarded', '1');
+    localStorage.setItem('slopmop_onboarded', '1');
     onDismiss();
   }
 
@@ -39,7 +39,7 @@ function LegacyModal({ initialPath, onDismiss }: { initialPath: string | null; o
     <div className="modal-overlay">
       <div className="modal-panel" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <span className="modal-title">Welcome to SlopDock</span>
+          <span className="modal-title">Welcome to SlopMop</span>
         </div>
         <div className="modal-body">
           <p style={{ color: 'var(--txt-sub)', marginTop: 0 }}>
@@ -79,7 +79,7 @@ function PropDrivenModal({ cwd, onInit }: { cwd: string; onInit: () => void }) {
     <div className="modal-overlay">
       <div className="modal-panel" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <span className="modal-title">Welcome to SlopDock</span>
+          <span className="modal-title">Welcome to SlopMop</span>
         </div>
         <div className="modal-body">
           <p style={{ color: 'var(--txt-sub)', marginTop: 0 }}>

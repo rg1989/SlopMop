@@ -204,5 +204,5 @@ Key observation: No existing tool combines all five (PTY terminal + file explore
 
 ---
 
-*Feature research for: Browser-based Claude CLI wrapper (SlopDock)*
+*Feature research for: Browser-based Claude CLI wrapper (SlopMop)*
 *Researched: 2026-04-30*

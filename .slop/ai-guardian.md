@@ -9,7 +9,7 @@ If `aiGuardian.enabled` is `false`, skip everything below and work normally.
 
 ## What this is
 
-SlopDock projects are structured around a living roadmap (`.planning/`), GSD phases, and a second brain
+SlopMop projects are structured around a living roadmap (`.planning/`), GSD phases, and a second brain
 (`second-brain/memory/`). This file gives Claude standing instructions to keep all three in sync and
 to surface alignment problems before they compound.
 

@@ -178,5 +178,5 @@ In dev mode only, use `concurrently` to run Vite (HMR) and `tsx watch` (backend)
 
 ---
 
-*Stack research for: SlopDock — Browser-based Claude CLI wrapper*
+*Stack research for: SlopMop — Browser-based Claude CLI wrapper*
 *Researched: 2026-04-30*

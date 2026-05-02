@@ -23,7 +23,7 @@
 
 ## Summary
 
-Phase 3 adds voice input and TTS output to SlopDock using exclusively browser-native APIs — no external services, no new npm packages. Voice input uses the **Web Speech API `SpeechRecognition`** interface (available in Chrome/Edge via `window.webkitSpeechRecognition`; partial Safari support). TTS output uses **`window.speechSynthesis`** (broadly supported in all major browsers). Both APIs are zero-install, zero-cost, and work offline for synthesis (recognition requires an internet connection on Chrome's default mode).
+Phase 3 adds voice input and TTS output to SlopMop using exclusively browser-native APIs — no external services, no new npm packages. Voice input uses the **Web Speech API `SpeechRecognition`** interface (available in Chrome/Edge via `window.webkitSpeechRecognition`; partial Safari support). TTS output uses **`window.speechSynthesis`** (broadly supported in all major browsers). Both APIs are zero-install, zero-cost, and work offline for synthesis (recognition requires an internet connection on Chrome's default mode).
 
 The architecture is a client-only feature. The server (Express/WebSocket) does not change. A `useVoiceInput` hook manages the microphone lifecycle; a `useTts` hook manages speech synthesis and listens to PTY data events from `usePty`'s `onData` callback extension. The two hooks coordinate via a shared "active mode" ref so they are mutually exclusive. The Composer and App.tsx wire the hooks into existing UI buttons.
 
