@@ -25,7 +25,36 @@ Phases 1–9 — PTY terminal, file explorer, voice I/O, multi-session tabs, onb
 **Goal:** Terminal sessions survive browser reloads — closing and reopening the tab reconnects to the live PTY process exactly where you left off, including full output scrollback, using a tmux/screen-style server-side session registry.
 
 **Depends on:** Phase 9 (v1.0 complete)
-**Requirements:** (defined in REQUIREMENTS.md)
+**Requirements:** PTY-01, PTY-02, PTY-03, PTY-04, PTY-05 (defined in REQUIREMENTS.md)
+**Plans:** 3 plans
+
+Plans:
+- [ ] 10-01-PLAN.md — Wave 0 RED test stubs for all 5 requirements (usePty, useSessionManager, SessionTabBar)
+- [ ] 10-02-PLAN.md — Core hooks: add 'reconnecting' status, fix restoreForCwd, wire session-ready handler in usePty
+- [ ] 10-03-PLAN.md — Visual layer: status--reconnecting chip in SessionTabBar + App.css, human verify
+
+### Phase 11: canvas-panel-extraction
+
+**Goal:** Remove Live Canvas from sidebar tabs and mount it as a persistent, always-visible resizable panel in the right column — split vertically from the editor panel. Includes toolbar toggle, per-direction resize handle, and localStorage persistence for show/hide state and split height.
+
+**Depends on:** Phase 10
+**Requirements:** TBD
+**Plans:** TBD — pending /gsd:plan-phase
+
+### Phase 12: bottom-panel-shell
+
+**Goal:** Add a bottom panel zone below the main session area, separated by a horizontal resize handle. Includes collapse toggle, tab bar scaffold (for future terminal tabs), and localStorage persistence for height and open/closed state.
+
+**Depends on:** Phase 11
+**Requirements:** TBD
+**Plans:** TBD — pending /gsd:plan-phase
+
+### Phase 13: raw-terminal-sessions
+
+**Goal:** Populate the bottom panel with plain PTY terminal sessions — no Claude agent, just a raw shell. Supports multiple tabs with add/close, each tab is an independent PTY process. Reuses existing usePty infrastructure.
+
+**Depends on:** Phase 12
+**Requirements:** TBD
 **Plans:** TBD — pending /gsd:plan-phase
 
 ---
@@ -35,4 +64,7 @@ Phases 1–9 — PTY terminal, file explorer, voice I/O, multi-session tabs, onb
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1–9. v1.0 Foundation | 25/25 | ✅ Complete | 2026-05-02 |
-| 10. PTY Session Persistence | 0/? | Planning | — |
+| 10. PTY Session Persistence | 0/3 | In Progress | — |
+| 11. Canvas Panel Extraction | 0/? | Planned | — |
+| 12. Bottom Panel Shell | 0/? | Planned | — |
+| 13. Raw Terminal Sessions | 0/? | Planned | — |
