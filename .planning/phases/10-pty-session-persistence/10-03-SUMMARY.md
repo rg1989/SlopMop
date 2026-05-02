@@ -46,8 +46,8 @@ completed: 2026-05-02
 
 - **Duration:** 2 min
 - **Started:** 2026-05-02T19:05:24Z
-- **Completed:** 2026-05-02T19:07:00Z
-- **Tasks:** 1 of 2 (Task 2 is checkpoint:human-verify — awaiting user)
+- **Completed:** 2026-05-02T22:21:00Z
+- **Tasks:** 2 of 2 (Task 1 code, Task 2 human-verified)
 - **Files modified:** 1
 
 ## Accomplishments
@@ -61,6 +61,7 @@ completed: 2026-05-02
 Each task was committed atomically:
 
 1. **Task 1: Add reconnecting to STATUS_CLASS and App.css** - `72c6570` (feat)
+2. **Task 2: Human verify — browser reload reconnects to live PTY** - human-verified (approved)
 
 ## Files Created/Modified
 - `client/App.css` - Added .status--reconnecting rule and @keyframes pulse
@@ -92,8 +93,9 @@ None beyond the missing keyframe noted above.
 None - no external service configuration required.
 
 ## Next Phase Readiness
-- Task 2 (checkpoint:human-verify) requires user to open browser, reload a session, and confirm amber pulsing chip appears during reconnect and scrollback replays correctly
-- After human approval, Phase 10 PTY session persistence is fully delivered
+- Phase 10 PTY session persistence is fully delivered and human-verified
+- User confirmed: session tab reappeared after reload, previous chat text loaded, amber pulsing reconnecting chip visible
+- All 158 tests pass, full suite green
 
 ---
 *Phase: 10-pty-session-persistence*
