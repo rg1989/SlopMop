@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import type { AppSettings, PttCombo, AgentConfig, TypeIndicatorSize } from '../hooks/useSettings';
 import { pttComboToLabel, DEFAULT_AGENT } from '../hooks/useSettings';
 import { VaultTab } from './VaultTab';
+import { TelegramSettingsTab } from './TelegramSettingsTab';
 
 const ShieldIcon: FC = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -187,7 +188,7 @@ const AgentCommandInput: FC<{
   );
 };
 
-type SettingsTab = 'display' | 'audio' | 'agent' | 'vault' | 'ai';
+type SettingsTab = 'display' | 'audio' | 'agent' | 'vault' | 'ai' | 'telegram';
 
 export const SettingsModal: FC<SettingsModalProps> = ({ settings, onUpdate, onClose, cwd }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab>('display');
@@ -304,7 +305,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({ settings, onUpdate, onCl
       ref={overlayRef}
       onMouseDown={(e) => { if (e.target === overlayRef.current) onClose(); }}
     >
-      <div className="modal-panel" role="dialog" aria-modal="true" aria-label="Settings">
+      <div className="modal-panel modal-panel--settings-wide" role="dialog" aria-modal="true" aria-label="Settings">
 
         {/* Header */}
         <div className="modal-header">
@@ -318,13 +319,13 @@ export const SettingsModal: FC<SettingsModalProps> = ({ settings, onUpdate, onCl
 
         {/* Tab bar */}
         <div className="settings-tab-bar">
-          {(['display', 'audio', 'agent', 'vault', 'ai'] as SettingsTab[]).map(tab => (
+          {(['display', 'audio', 'agent', 'vault', 'ai', 'telegram'] as SettingsTab[]).map(tab => (
             <button
               key={tab}
               className={`settings-tab${activeTab === tab ? ' settings-tab--active' : ''}`}
               onClick={() => setActiveTab(tab)}
             >
-              {tab === 'display' ? 'Display' : tab === 'audio' ? 'Audio' : tab === 'agent' ? 'Agent & Tools' : tab === 'vault' ? 'Vault' : 'AI Guardian'}
+              {tab === 'display' ? 'Display' : tab === 'audio' ? 'Audio' : tab === 'agent' ? 'Agent & Tools' : tab === 'vault' ? 'Vault' : tab === 'ai' ? 'AI Guardian' : 'Telegram'}
             </button>
           ))}
         </div>
@@ -438,6 +439,9 @@ export const SettingsModal: FC<SettingsModalProps> = ({ settings, onUpdate, onCl
 
           {/* Vault tab */}
           {activeTab === 'vault' && <VaultTab />}
+
+          {/* Telegram tab */}
+          {activeTab === 'telegram' && <TelegramSettingsTab />}
 
           {/* AI Guardian tab */}
           {activeTab === 'ai' && (

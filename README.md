@@ -134,6 +134,7 @@ SlopMop wraps your own Claude Code subscription. It has no telemetry, no cloud c
 ## Feature overview
 
 ### Terminal and sessions
+- **Telegram transport (optional)** — private Telegram chats can drive the same persistent Claude CLI PTY as the browser (`TELEGRAM_BOT_TOKEN` + `~/.slop/telegram.json`); see [Telegram transport](#telegram-transport-optional) and [docs/extensibility/telegram-bridge.md](docs/extensibility/telegram-bridge.md)
 - **Full PTY fidelity** — real pseudo-terminal via node-pty. ANSI color, interactive prompts, resize, scroll, and every keyboard shortcut work exactly as in a native terminal
 - **Multiple sessions per workspace** — open separate agent tabs for separate contexts within the same project. Each gets its own PTY, editor tabs, and file attachments. Live status indicators show working / waiting / idle
 - **Session persistence** — reload the browser and the session reconnects. The PTY keeps running in the background
@@ -143,6 +144,7 @@ SlopMop wraps your own Claude Code subscription. It has no telemetry, no cloud c
 - **File explorer** — collapsible tree, per-type icons, fuzzy search, hidden-file toggle, inline new-file and new-folder
 - **Syntax-highlighted editor** — view and edit any file via Shiki (`one-dark-pro` theme). Preview tabs promote to permanent on first edit
 - **File sharing with the agent** — attach any file to the current session as context without typing a path
+- **Live Canvas** — optional **Live Canvas** sidebar tab shows agent-authored HTML (`.slop/live-canvas.html`) in a sandboxed iframe for dashboards, tables, and charts; see [docs/extensibility/live-canvas.md](docs/extensibility/live-canvas.md) and the [extensibility index](docs/extensibility/README.md)
 
 ### Git
 - **Staged / unstaged diff viewer** — full unified diff, color-coded, per-file
@@ -223,6 +225,36 @@ SlopMop reports voice setup status in the bar at the bottom of the terminal area
 
 ---
 
+## Telegram transport (optional)
+
+Private chats only: one **persistent PTY per Telegram user**, same model as the browser WebSocket path (`server/ws-handler.ts`). Inference stays **your Claude CLI** from `~/.slop/settings.json` (`agent.command` / `agent.args`).
+
+**Full documentation:** [docs/extensibility/telegram-bridge.md](docs/extensibility/telegram-bridge.md) (configuration, voice, files, outbound message splitting, commands, troubleshooting).
+
+**Easiest setup:** open **Settings → Telegram** in the app: paste the bot token (stored in **`~/.slop/telegram-secrets.json`**, file mode `600`), set **project roots** and **allowed user IDs**, then save (the server restarts the Telegram bot automatically).
+
+Manual alternative:
+
+1. Copy [`docs/telegram.example.json`](docs/telegram.example.json) to **`~/.slop/telegram.json`** and set `projectRoots` plus your numeric **`allowedUserIds`** (from [@userinfobot](https://t.me/userinfobot) or similar).
+2. Set the bot token: either export **`TELEGRAM_BOT_TOKEN`** (from [@BotFather](https://t.me/BotFather)), or save it via Settings → Telegram (writes `telegram-secrets.json`). Then start the server (`npm run server` / `npm run dev`).
+3. Message format — first line sets the folder **name** (must resolve uniquely under `projectRoots`), then your prompt:
+
+   ```
+   PROJECT=myrepo
+
+   Explain src/foo.ts
+   ```
+
+   After that, you can omit `PROJECT=` until `/reset`. Commands: `/doctor`, `/reset`, `/help`.
+
+**Voice:** send a voice note; the server downloads it, runs **local Whisper** (same as browser voice — needs `openai-whisper` + `ffmpeg`), and sends the transcript to your CLI.
+
+**Photos & files:** send a photo or document; the bot saves it under **`~/.slop/telegram-inbound/<your-chat-id>/`** and forwards to Claude in the same shape as the browser composer (`@/absolute/path` lines plus your caption). Large replies from the agent are split on paragraph/word boundaries where possible (Telegram’s 4096-character limit).
+
+Optional env overrides: **`TELEGRAM_PROJECT_ROOTS`** (comma-separated paths), **`TELEGRAM_ALLOWED_USER_IDS`** (comma-separated numeric ids).
+
+---
+
 ## GSD integration
 
 If your workspace has a `.planning/` directory from [GSD](https://github.com/gsd-build/gsd-2), the roadmap panel renders it live with no configuration:
@@ -242,13 +274,17 @@ The GSD panel is read-only by design; writes go through the GSD CLI in the termi
 ```
 slopmop/
 ├── client/                   # React 19 + Vite frontend
-│   ├── components/           # All UI components
+│   ├── components/           # All UI components (incl. LiveCanvasPanel)
 │   ├── hooks/                # Custom React hooks
 │   ├── App.tsx               # Root layout and wiring
 │   └── theme.css             # Single-source color palette (CSS custom properties)
 ├── server/                   # Express + node-pty backend
 │   ├── index.ts              # HTTP API endpoints (~40 routes)
 │   ├── ws-handler.ts         # WebSocket PTY handler
+│   ├── telegram-transport.ts # Optional Telegram → PTY bridge
+│   ├── telegram-media.ts     # Telegram file download + inbound paths
+│   ├── telegram-chunk.ts     # Outbound message splitting for Telegram
+│   ├── live-canvas.ts        # .slop/live-canvas.html read/write helpers
 │   ├── gsd.ts                # GSD roadmap parser (pure functions)
 │   ├── file-api.ts           # File tree + git helpers
 │   ├── piper-tts.ts          # Local Piper TTS integration
@@ -257,7 +293,9 @@ slopmop/
 │   └── protocol.ts           # WebSocket message types
 ├── tests/                    # Vitest unit tests
 ├── docs/
+│   ├── extensibility/        # Telegram bridge + Live Canvas (detailed guides)
 │   ├── adr/                  # Architecture Decision Records
+│   ├── telegram.example.json # Template for ~/.slop/telegram.json
 │   └── screenshots/          # App screenshots
 └── scripts/
     ├── setup.sh              # Idempotent dependency checker

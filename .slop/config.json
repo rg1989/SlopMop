@@ -8,6 +8,6 @@
     "label": "Claude"
   },
   "aiGuardian": {
-    "enabled": true
+    "enabled": false
   }
 }

@@ -12,6 +12,8 @@ interface ManagedSession {
   buffer: string[];
   sendFn: SendFn | null;
   cleanupTimer: ReturnType<typeof setTimeout> | null;
+  /** When true, WebSocket detach does not clear delivery or start TTL (e.g. Telegram-backed sessions). */
+  persistent: boolean;
 }
 
 const BUFFER_MAX = 5000;
@@ -20,12 +22,14 @@ const SESSION_TTL_MS = 30 * 60 * 1000; // 30 minutes
 class SessionRegistry {
   private sessions = new Map<string, ManagedSession>();
 
-  create(id: string, ptyProcess: pty.IPty, cwd: string, sendFn: SendFn): void {
+  create(id: string, ptyProcess: pty.IPty, cwd: string, sendFn: SendFn, options?: { persistent?: boolean }): void {
     const existing = this.sessions.get(id);
     if (existing?.cleanupTimer) clearTimeout(existing.cleanupTimer);
+    const persistent = options?.persistent === true;
     this.sessions.set(id, {
       id, pty: ptyProcess, cwd, status: 'alive',
       buffer: [], sendFn, cleanupTimer: null,
+      persistent,
     });
   }
 
@@ -46,6 +50,7 @@ class SessionRegistry {
   detach(id: string): void {
     const session = this.sessions.get(id);
     if (!session) return;
+    if (session.persistent) return;
     session.sendFn = null;
     if (session.cleanupTimer) clearTimeout(session.cleanupTimer);
     session.cleanupTimer = setTimeout(() => {

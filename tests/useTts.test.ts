@@ -42,9 +42,9 @@ describe('useTts', () => {
 
     await waitFor(() => {
       const calls = (fetchMock as ReturnType<typeof vi.fn>).mock.calls;
-      const ttsCalls = calls.filter(([url]: [string]) => url === '/api/tts');
+      const ttsCalls = calls.filter((call) => call[0] === '/api/tts');
       expect(ttsCalls.length).toBeGreaterThanOrEqual(1);
-      const body = JSON.parse(ttsCalls[0][1].body);
+      const body = JSON.parse((ttsCalls[0]![1] as { body: string }).body);
       expect(body.text).toBe('Hello world.');
     });
   });
@@ -59,8 +59,9 @@ describe('useTts', () => {
       result.current.handleData('Hello world. ');
     });
 
-    const ttsCalls = (fetchMock as ReturnType<typeof vi.fn>).mock.calls
-      .filter(([url]: [string]) => url === '/api/tts');
+    const ttsCalls = (fetchMock as ReturnType<typeof vi.fn>).mock.calls.filter(
+      (call) => call[0] === '/api/tts',
+    );
     expect(ttsCalls).toHaveLength(0);
   });
 
@@ -74,28 +75,31 @@ describe('useTts', () => {
       result.current.handleData('Hello');
     });
 
-    const ttsCalls = (fetchMock as ReturnType<typeof vi.fn>).mock.calls
-      .filter(([url]: [string]) => url === '/api/tts');
+    const ttsCalls = (fetchMock as ReturnType<typeof vi.fn>).mock.calls.filter(
+      (call) => call[0] === '/api/tts',
+    );
     expect(ttsCalls).toHaveLength(0);
   });
 
   it('TTS-02: stop() aborts in-flight fetch and clears speaking state', async () => {
     let abortCalled = false;
-    vi.stubGlobal('fetch', vi.fn((url: string) => {
-      if (url.includes('/api/tts/status')) {
-        return Promise.resolve({ ok: true, json: () => Promise.resolve({ available: true }) });
-      }
-      return new Promise((_, reject) => {
-        // Simulate a slow request that respects AbortSignal
-        const signal = arguments[1]?.signal;
-        if (signal) {
-          signal.addEventListener('abort', () => {
-            abortCalled = true;
-            reject(new DOMException('Aborted', 'AbortError'));
-          });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url: string, init?: RequestInit) => {
+        if (url.includes('/api/tts/status')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ available: true }) });
         }
-      });
-    }));
+        return new Promise((_, reject) => {
+          const signal = init?.signal;
+          if (signal) {
+            signal.addEventListener('abort', () => {
+              abortCalled = true;
+              reject(new DOMException('Aborted', 'AbortError'));
+            });
+          }
+        });
+      }),
+    );
 
     const { result } = renderHook(() => useTts({ enabled: true }));
 

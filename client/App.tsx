@@ -12,6 +12,7 @@ import { SourceControl } from './components/SourceControl';
 import { SettingsModal } from './components/SettingsModal';
 import { GsdRoadmap } from './components/GsdRoadmap';
 import { BrainPanel } from './components/BrainPanel';
+import { LiveCanvasPanel } from './components/LiveCanvasPanel';
 import { SessionTabBar } from './components/SessionTabBar';
 import { SessionPane } from './components/SessionPane';
 import { SessionHistoryModal } from './components/SessionHistoryModal';
@@ -29,7 +30,7 @@ import { useProjectHealth } from './hooks/useProjectHealth';
 import { HealthStatusBar } from './components/HealthStatusBar';
 import './App.css';
 
-type SidebarTabId = 'explorer' | 'changes' | 'roadmap' | 'brain';
+type SidebarTabId = 'explorer' | 'changes' | 'roadmap' | 'brain' | 'canvas';
 
 const IconExplorer = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -54,12 +55,19 @@ const IconBrain = () => (
     <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3z"/>
   </svg>
 );
+const IconCanvas = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+    <path d="M9 9h6v6H9z"/>
+  </svg>
+);
 
 const SIDEBAR_TABS: { id: SidebarTabId; label: string; Icon: () => JSX.Element }[] = [
   { id: 'explorer', label: 'Explorer', Icon: IconExplorer },
   { id: 'changes', label: 'Source Control', Icon: IconChanges },
   { id: 'roadmap', label: 'GSD Roadmap', Icon: IconRoadmap },
   { id: 'brain', label: 'Second Brain', Icon: IconBrain },
+  { id: 'canvas', label: 'Live Canvas', Icon: IconCanvas },
 ];
 
 // ── Layout constants ──────────────────────────────────────────────────────────
@@ -127,7 +135,7 @@ export default function App() {
   const [rulesOpen, setRulesOpen] = useState(false);
   const [sidebarTab, setSidebarTabRaw] = useState<SidebarTabId>(() => {
     const saved = uiRead<string>(UI.sidebarTab, 'explorer');
-    const valid: SidebarTabId[] = ['explorer', 'changes', 'roadmap', 'brain'];
+    const valid: SidebarTabId[] = ['explorer', 'changes', 'roadmap', 'brain', 'canvas'];
     return valid.includes(saved as SidebarTabId) ? (saved as SidebarTabId) : 'explorer';
   });
   const [sidebarSearch, setSidebarSearch] = useState('');
@@ -238,16 +246,29 @@ export default function App() {
     sessionManager.spawn(normalized, { initial: true });
   }, [sessionManager]);
 
-  // Auto-connect from saved path on first load
+  // Auto-connect from saved path on first load — validates the path still exists first
   useEffect(() => {
-    if (initialPath && !initialSpawnedRef.current) {
-      initialSpawnedRef.current = true;
-      const normalized = initialPath.replace(/\/+$/, '');
-      persistPath(normalized);
-      setCwd(normalized);
-      sessionManager.restoreForCwd(normalized);
-      sessionManager.spawn(normalized, { initial: true });
-    }
+    if (!initialPath || initialSpawnedRef.current) return;
+    initialSpawnedRef.current = true;
+    const normalized = initialPath.replace(/\/+$/, '');
+    fetch(`/api/dir-exists?path=${encodeURIComponent(normalized)}`)
+      .then(r => r.json())
+      .then(({ exists }: { exists: boolean }) => {
+        if (!exists) {
+          localStorage.removeItem(STORAGE_KEY);
+          const url = new URL(window.location.href);
+          url.searchParams.delete('cwd');
+          window.history.replaceState(null, '', url.toString());
+          return;
+        }
+        persistPath(normalized);
+        setCwd(normalized);
+        sessionManager.restoreForCwd(normalized);
+        sessionManager.spawn(normalized, { initial: true });
+      })
+      .catch(() => {
+        localStorage.removeItem(STORAGE_KEY);
+      });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -338,6 +359,7 @@ export default function App() {
           settings={settings}
           onUpdate={updateSettings}
           onClose={() => setSettingsOpen(false)}
+          cwd={cwd}
         />
       )}
 
@@ -429,7 +451,7 @@ export default function App() {
                     activeFilePath={activeFilePath}
                     onSendCommand={(cmd) => activeActionsRef.current?.sendInput('\x15' + cmd + '\r')}
                   />
-                ) : (
+                ) : sidebarTab === 'brain' ? (
                   <BrainPanel
                     cwd={cwd}
                     onOpenEntry={handleSidebarBrainEntry}
@@ -437,6 +459,8 @@ export default function App() {
                     refreshKey={brainRefreshKey}
                     activeEntryId={activeBrainTabId?.startsWith('brain:') ? activeBrainTabId.slice(6) : undefined}
                   />
+                ) : (
+                  <LiveCanvasPanel cwd={cwd} />
                 )}
               </div>
             </div>

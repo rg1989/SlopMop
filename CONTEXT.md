@@ -27,8 +27,14 @@ The pseudo-terminal process backing a session. The PTY is a server-side concept;
 _Avoid_: terminal (when referring to the process), shell
 
 **Panel**:
-A sidebar tab view. Current panels: Explorer, Source Control, GSD Roadmap, Second Brain. Panels are app-scoped — they are shared context, not per-session.
+A sidebar tab view. Current panels: Explorer, Source Control, GSD Roadmap, Second Brain, Live Canvas. Panels are app-scoped — they are shared context, not per-session.
 _Avoid_: tab (overloaded), sidebar item, view
+
+**Live Canvas (artifact)**:
+The file `.slop/live-canvas.html` in the workspace root: a full HTML document rendered in the **Live Canvas** panel (sandboxed iframe). Updated by the agent or via `PUT /api/live-canvas`. Detailed behavior: `docs/extensibility/live-canvas.md`.
+
+**Telegram bridge (optional)**:
+When configured, private Telegram chats drive a separate persistent PTY (`tg:<chatId>`) using the same AgentConfig as the browser; not the same PTY as any browser session. Full behavior: `docs/extensibility/telegram-bridge.md`.
 
 **Attachment**:
 A file path staged for inclusion in the next Composer message. Attachments are session-scoped and cleared after each send.

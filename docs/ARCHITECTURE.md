@@ -2,6 +2,8 @@
 
 This document describes the runtime architecture, key data flows, state model, and design decisions. Read this before making structural changes.
 
+**See also:** [CONTEXT.md](../CONTEXT.md) for domain vocabulary; [extensibility/README.md](extensibility/README.md) for optional Telegram and Live Canvas behavior; [FEATURE_ADDITIONS_OVERVIEW.md](FEATURE_ADDITIONS_OVERVIEW.md) for a concise feature-oriented map of those additions.
+
 ---
 
 ## Overview
@@ -51,30 +53,47 @@ The frontend and backend are separate processes:
 
 In development, Vite proxies `/api/*` and `/ws` to `localhost:3000`. In production, Express serves the built `client/dist/` directly and there is no Vite process.
 
+Optional **Telegram** inbound chat is handled by `telegram-transport.ts` (long polling) when `TELEGRAM_BOT_TOKEN` is set; it shares `session-registry.ts` and `pty-manager.ts` with the WebSocket path.
+
 ---
 
 ## WebSocket protocol
 
-The PTY connection uses a single WebSocket at `/ws`. Messages are newline-delimited JSON defined in `shared/protocol.ts`.
+The PTY connection uses a single WebSocket at `/ws`. Each frame is one JSON object (`shared/protocol.ts`). After `start`, the server remembers **`sessionId` for this socket** — `input`, `resize`, and `kill` apply to that session only (payload does not repeat `sessionId`).
 
 **Client → Server:**
 
 | Message | Payload | Description |
 |---|---|---|
-| `spawn` | `{ cwd, sessionId, command, args }` | Spawn a new PTY |
-| `input` | `{ sessionId, data }` | Send raw keystrokes to the PTY |
-| `resize` | `{ sessionId, cols, rows }` | Resize the terminal |
-| `kill` | `{ sessionId }` | Kill the PTY process |
+| `start` | `{ sessionId, cwd, cols, rows, agentCommand, agentArgs }` | Spawn PTY or reconnect and replay buffer |
+| `input` | `{ data }` | Raw bytes to PTY stdin |
+| `resize` | `{ cols, rows }` | Terminal geometry |
+| `kill` | _(none)_ | Kill the current session’s PTY |
 
 **Server → Client:**
 
 | Message | Payload | Description |
 |---|---|---|
-| `output` | `{ sessionId, data }` | PTY stdout/stderr chunk |
-| `exit` | `{ sessionId, code }` | PTY process exited |
-| `error` | `{ sessionId, message }` | PTY error |
+| `session-ready` | `{ sessionId }` | Session attached |
+| `data` | `{ data }` | PTY stdout/stderr chunk |
+| `exit` | `{ code }` | PTY exited |
+| `error` | `{ message }` | Setup or runtime error |
 
-Each session has a stable UUID assigned by the client at spawn time. The server maps session IDs to PTY processes.
+Each browser session uses a stable UUID for `sessionId`. The server maps session IDs to PTY processes.
+
+---
+
+## Telegram transport (optional)
+
+When enabled, **private chats only**: Telegram user messages are serialized per chat, resolved to a **project directory** by folder name under configured roots (`~/.slop/telegram.json`), then written to a **persistent** PTY (`sessionId` prefix `tg:<chatId>`). Registry entries use `persistent: true` so WebSocket-style detach/TTL does not tear down the PTY when no browser is involved.
+
+Outbound PTY data is ANSI-stripped, debounced, and split under Telegram’s message size limit. This path does **not** embed a separate LLM — it uses the same **`agent.command` / `agent.args`** read from `~/.slop/settings.json`. Bot token and roots are editable in **Settings → Telegram** (`GET`/`PUT /api/telegram-settings`, `PUT /api/telegram-token`). See [README § Telegram transport](../README.md#telegram-transport-optional) and the detailed guide [extensibility/telegram-bridge.md](extensibility/telegram-bridge.md).
+
+---
+
+## Live Canvas (optional UI)
+
+Per workspace folder, the sidebar can render **`.slop/live-canvas.html`** (full HTML document) in a sandboxed iframe (`GET`/`PUT /api/live-canvas`). The panel polls for changes so agent-written dashboards refresh without reloading the app. See [extensibility/live-canvas.md](extensibility/live-canvas.md).
 
 ---
 

@@ -27,7 +27,7 @@ export interface SuperTool {
   directCommand: string;
   steps: ToolStep[];
   meta: ToolMeta;
-  Icon: () => JSX.Element;
+  Icon: FC;
 }
 
 /* ── Tooltip components ── */
@@ -109,6 +109,13 @@ const IconSecurity: FC = () => (
 const IconFeature: FC = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+  </svg>
+);
+
+const IconLiveCanvas: FC = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+    <path d="M3 15h6l3-3 4 4 5-5v6H3z"/>
   </svg>
 );
 
@@ -199,6 +206,28 @@ export const SUPER_TOOLS: SuperTool[] = [
     meta: {
       source: 'Claude Code skill',
       skillId: 'full-feature',
+    },
+  },
+  {
+    id: 'live-canvas',
+    name: 'Live Canvas (HTML dashboard)',
+    phaseName: 'Live Canvas',
+    phaseDescription:
+      'Produces a self-contained HTML5 page at .slop/live-canvas.html: tables, layout, and optional client-side charts for the current task. The user views it in the Live Canvas sidebar tab; the UI polls the file about every 2s so saves show up shortly after.',
+    description:
+      'Agent writes a full HTML5 dashboard to .slop/live-canvas.html so you can read dense results in a real page instead of chat. Open the Live Canvas tab after it saves.',
+    directCommand:
+      'Create or update .slop/live-canvas.html with a complete, valid HTML5 document: a visual summary of our current work (use layout, tables, CSS, and optional inline or CDN chart JS as needed). After saving, tell me to open the Live Canvas tab in the SlopMop sidebar to view it.',
+    Icon: IconLiveCanvas,
+    steps: [
+      { label: 'Scope', detail: 'Decide what figures, tables, or flows belong on the page — not a wall of chat text.' },
+      { label: 'Build', detail: 'Write one self-contained HTML file with <style> and <script> as needed.' },
+      { label: 'Save', detail: 'Persist to .slop/live-canvas.html under the project root (create .slop if missing).' },
+      { label: 'View', detail: 'Direct the user to the Live Canvas sidebar tab; it polls ~every 2s so the iframe picks up file changes.' },
+    ],
+    meta: {
+      source: 'SlopMop workspace',
+      skillId: 'live-canvas',
     },
   },
 ];

@@ -83,6 +83,8 @@ describe('useResize', () => {
     onResize = vi.fn();
 
     const el = document.createElement('div');
+    Object.defineProperty(el, 'clientWidth', { value: 800, configurable: true });
+    Object.defineProperty(el, 'clientHeight', { value: 600, configurable: true });
     containerRef = { current: el } as React.RefObject<HTMLDivElement | null>;
   });
 
@@ -142,9 +144,9 @@ describe('useResize', () => {
     resizeObserverCallback!([], {} as ResizeObserver);
     vi.advanceTimersByTime(100);
     resizeObserverCallback!([], {} as ResizeObserver);
-    vi.advanceTimersByTime(150);
+    // Last schedule: +150ms from final callback → need 350ms total after first fire
+    vi.advanceTimersByTime(350);
 
-    // Should only have been called once (debounced)
     expect(onResize).toHaveBeenCalledTimes(1);
   });
 

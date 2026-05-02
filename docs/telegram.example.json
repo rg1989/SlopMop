@@ -1,0 +1,5 @@
+{
+  "projectRoots": ["/Users/you/Projects", "/Users/you/Documents/Projects"],
+  "allowedUserIds": [123456789],
+  "maxSearchDepth": 8
+}

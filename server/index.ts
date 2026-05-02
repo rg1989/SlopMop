@@ -9,10 +9,18 @@ import { readFile, writeFile, access as fsAccess, readdir, rm, mkdir, rename, st
 import { isBinaryFile } from 'isbinaryfile';
 import { createHighlighter, type Highlighter } from 'shiki';
 import { attachWebSocketServer } from './ws-handler.js';
+import { startTelegramTransport, stopTelegramTransport, restartTelegramTransport } from './telegram-transport.js';
+import { readTelegramUiState, saveTelegramPublicConfig, saveTelegramBotToken } from './telegram-persist.js';
 import { buildFileTree, getGitChangedPaths, getGitStatus } from './file-api.js';
 import { initPiper, getPiperStatus, synthesize } from './piper-tts.js';
 import { checkWhisper, getWhisperStatus, transcribe } from './whisper-stt.js';
 import { parseRoadmapMd, parseStateMd, patchRoadmapRemovePlan, parseMilestonesMd, parseArchivedRoadmapMd, parseCurrentMilestoneFromRoadmap } from './gsd.js';
+import { readLiveCanvas, writeLiveCanvas } from './live-canvas.js';
+import {
+  registerLiveCanvasSseClient,
+  notifyLiveCanvasUpdated,
+  isProjectRelativeLiveCanvasPath,
+} from './live-canvas-sse.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -231,6 +239,18 @@ app.get('/api/homedir', (_req, res) => {
   res.json({ path: os.homedir() });
 });
 
+// GET /api/dir-exists?path=... — lightweight check for whether a directory exists
+app.get('/api/dir-exists', async (req, res) => {
+  const { path: dirPath } = req.query as { path?: string };
+  if (!dirPath) { res.status(400).json({ error: 'path required' }); return; }
+  try {
+    const stat = await import('fs/promises').then(m => m.stat(path.resolve(dirPath)));
+    res.json({ exists: stat.isDirectory() });
+  } catch {
+    res.json({ exists: false });
+  }
+});
+
 // GET /api/files — return a nested JSON tree of files and directories
 app.get('/api/files', async (req, res) => {
   const { cwd } = req.query as { cwd?: string };
@@ -398,9 +418,69 @@ app.put('/api/file', async (req, res) => {
 
   try {
     await writeFile(absPath, content, 'utf-8');
+    if (isProjectRelativeLiveCanvasPath(relPath)) {
+      try {
+        const st = await stat(absPath);
+        notifyLiveCanvasUpdated(resolvedCwd, st.mtimeMs);
+      } catch {
+        /* ignore */
+      }
+    }
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: String(err) });
+  }
+});
+
+// GET /api/live-canvas/events?cwd= — SSE push when .slop/live-canvas.html changes
+app.get('/api/live-canvas/events', async (req, res) => {
+  const { cwd } = req.query as { cwd?: string };
+  if (!cwd) {
+    res.status(400).end('cwd required');
+    return;
+  }
+  const resolved = path.resolve(cwd);
+  let initialMtime: number | null = null;
+  try {
+    const data = await readLiveCanvas(resolved);
+    initialMtime = data.mtimeMs;
+  } catch {
+    initialMtime = null;
+  }
+  registerLiveCanvasSseClient(resolved, req, res, initialMtime);
+});
+
+// GET /api/live-canvas?cwd= — HTML artifact at .slop/live-canvas.html (agent-generated dashboards / viz)
+app.get('/api/live-canvas', async (req, res) => {
+  const { cwd } = req.query as { cwd?: string };
+  if (!cwd) {
+    res.status(400).json({ error: 'cwd required' });
+    return;
+  }
+  try {
+    const data = await readLiveCanvas(path.resolve(cwd));
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
+app.put('/api/live-canvas', async (req, res) => {
+  const { cwd, html } = req.body as { cwd?: string; html?: string };
+  if (!cwd || typeof html !== 'string') {
+    res.status(400).json({ error: 'cwd and html required' });
+    return;
+  }
+  try {
+    const r = await writeLiveCanvas(path.resolve(cwd), html);
+    res.json({ ok: true, relPath: r.relPath, mtimeMs: r.mtimeMs });
+  } catch (err) {
+    const msg = String(err);
+    if (msg.includes('exceeds')) {
+      res.status(413).json({ error: msg });
+      return;
+    }
+    res.status(500).json({ error: msg });
   }
 });
 
@@ -495,7 +575,10 @@ async function resolvePhaseFiles(
   phase: { number: number; name: string; goal: string },
   planningDir: string,
   phaseDirs: string[],
+  resolvedCwd: string,
 ) {
+  const rel = (abs: string) => path.relative(resolvedCwd, abs);
+
   const numStr = String(Math.floor(phase.number)).padStart(2, '0');
   const dirName = phaseDirs.find(d => d.startsWith(numStr + '-')) ?? '';
   const absPhaseDir = dirName ? path.join(planningDir, 'phases', dirName) : null;
@@ -507,17 +590,17 @@ async function resolvePhaseFiles(
       const planFiles = entries.filter(f => f.endsWith('-PLAN.md')).sort();
       for (const planFile of planFiles) {
         const planId = planFile.replace('-PLAN.md', '');
-        const planPath = path.join(absPhaseDir, planFile);
-        const summaryPath = path.join(absPhaseDir, planFile.replace('-PLAN.md', '-SUMMARY.md'));
+        const absPlanPath = path.join(absPhaseDir, planFile);
+        const absSummaryPath = path.join(absPhaseDir, planFile.replace('-PLAN.md', '-SUMMARY.md'));
         let completed = false;
         let planName = planId;
-        try { await fsAccess(summaryPath); completed = true; } catch { /* not done */ }
+        try { await fsAccess(absSummaryPath); completed = true; } catch { /* not done */ }
         try {
-          const content = await readFile(planPath, 'utf-8');
+          const content = await readFile(absPlanPath, 'utf-8');
           const m = content.match(/<objective>\s*\n([^\n<]+)/);
           if (m) planName = m[1].trim();
         } catch { /* use id as fallback */ }
-        plans.push({ id: planId, name: planName, completed, planPath, summaryPath });
+        plans.push({ id: planId, name: planName, completed, planPath: rel(absPlanPath), summaryPath: rel(absSummaryPath) });
       }
     } catch { /* phase dir unreadable */ }
   }
@@ -527,8 +610,8 @@ async function resolvePhaseFiles(
   if (absPhaseDir) {
     const rFile = path.join(absPhaseDir, `${numStr}-RESEARCH.md`);
     const vFile = path.join(absPhaseDir, `${numStr}-VERIFICATION.md`);
-    try { await fsAccess(rFile); researchPath = rFile; } catch { /* not present */ }
-    try { await fsAccess(vFile); verificationPath = vFile; } catch { /* not present */ }
+    try { await fsAccess(rFile); researchPath = rel(rFile); } catch { /* not present */ }
+    try { await fsAccess(vFile); verificationPath = rel(vFile); } catch { /* not present */ }
   }
 
   return {
@@ -579,6 +662,8 @@ app.get('/api/gsd-roadmap', async (req, res) => {
       .sort((a, b) => parseInt(a) - parseInt(b));
   } catch { /* quick dir may not exist */ }
 
+  const rel = (abs: string) => path.relative(resolvedCwd, abs);
+
   const phases = await Promise.all(parsedPhases.map(async p => {
     const numStr = String(Math.floor(p.number)).padStart(2, '0');
     const dirName = phaseDirs.find(d => d.startsWith(numStr + '-')) ?? '';
@@ -587,19 +672,19 @@ app.get('/api/gsd-roadmap', async (req, res) => {
     const plans = await Promise.all(p.plans.map(async plan => {
       const planId = plan.file.replace('-PLAN.md', '');
       const summaryFile = plan.file.replace('-PLAN.md', '-SUMMARY.md');
-      const summaryPath = absPhaseDir ? path.join(absPhaseDir, summaryFile) : null;
-      const planFilePath = absPhaseDir ? path.join(absPhaseDir, plan.file) : null;
+      const absSummaryPath = absPhaseDir ? path.join(absPhaseDir, summaryFile) : null;
+      const absPlanPath = absPhaseDir ? path.join(absPhaseDir, plan.file) : null;
       // When a phase dir exists, SUMMARY.md presence is authoritative (both ways)
       let completed = plan.completed;
-      if (summaryPath) {
-        try { await fsAccess(summaryPath); completed = true; } catch { completed = false; }
+      if (absSummaryPath) {
+        try { await fsAccess(absSummaryPath); completed = true; } catch { completed = false; }
       }
       return {
         id: planId,
         name: plan.name,
         completed,
-        planPath: planFilePath,
-        summaryPath,
+        planPath: absPlanPath ? rel(absPlanPath) : null,
+        summaryPath: absSummaryPath ? rel(absSummaryPath) : null,
       };
     }));
 
@@ -612,8 +697,8 @@ app.get('/api/gsd-roadmap', async (req, res) => {
     if (absPhaseDir) {
       const rFile = path.join(absPhaseDir, `${numStr}-RESEARCH.md`);
       const vFile = path.join(absPhaseDir, `${numStr}-VERIFICATION.md`);
-      try { await fsAccess(rFile); researchPath = rFile; } catch { /* not present */ }
-      try { await fsAccess(vFile); verificationPath = vFile; } catch { /* not present */ }
+      try { await fsAccess(rFile); researchPath = rel(rFile); } catch { /* not present */ }
+      try { await fsAccess(vFile); verificationPath = rel(vFile); } catch { /* not present */ }
     }
 
     return {
@@ -644,17 +729,17 @@ app.get('/api/gsd-roadmap', async (req, res) => {
       date: stateTask?.date ?? '',
       completed,
       dirName,
-      planPath: hasPlan ? planFile : null,
+      planPath: hasPlan ? rel(planFile) : null,
     };
   }));
 
   // Collect optional planning doc paths that exist
-  const roadmapPath = path.join(planningDir, 'ROADMAP.md');
-  const statePath = path.join(planningDir, 'STATE.md');
+  const roadmapPath = rel(path.join(planningDir, 'ROADMAP.md'));
+  const statePath = rel(path.join(planningDir, 'STATE.md'));
   let projectPath: string | null = null;
   let requirementsPath: string | null = null;
-  try { await fsAccess(path.join(planningDir, 'PROJECT.md')); projectPath = path.join(planningDir, 'PROJECT.md'); } catch { /* optional */ }
-  try { await fsAccess(path.join(planningDir, 'REQUIREMENTS.md')); requirementsPath = path.join(planningDir, 'REQUIREMENTS.md'); } catch { /* optional */ }
+  try { await fsAccess(path.join(planningDir, 'PROJECT.md')); projectPath = rel(path.join(planningDir, 'PROJECT.md')); } catch { /* optional */ }
+  try { await fsAccess(path.join(planningDir, 'REQUIREMENTS.md')); requirementsPath = rel(path.join(planningDir, 'REQUIREMENTS.md')); } catch { /* optional */ }
 
   // Load past milestones from MILESTONES.md + archived roadmaps, resolve file paths from disk
   const pastMilestones: { version: string; name: string; shipped: string; phases: Awaited<ReturnType<typeof resolvePhaseFiles>>[] }[] = [];
@@ -666,7 +751,7 @@ app.get('/api/gsd-roadmap', async (req, res) => {
       try {
         const archivedContent = await readFile(path.join(planningDir, 'milestones', `${entry.version}-ROADMAP.md`), 'utf-8');
         const archivedStructure = parseArchivedRoadmapMd(archivedContent);
-        resolvedPhases = await Promise.all(archivedStructure.map(p => resolvePhaseFiles(p, planningDir, phaseDirs)));
+        resolvedPhases = await Promise.all(archivedStructure.map(p => resolvePhaseFiles(p, planningDir, phaseDirs, resolvedCwd)));
       } catch { /* archived roadmap may not exist */ }
       pastMilestones.push({ ...entry, phases: resolvedPhases });
     }
@@ -1232,6 +1317,55 @@ app.post('/api/vault-git', async (req, res) => {
   }
 });
 
+// Telegram settings (Settings modal → Telegram tab)
+app.get('/api/telegram-settings', async (_req, res) => {
+  try {
+    const state = await readTelegramUiState();
+    res.json(state);
+  } catch (e) {
+    res.status(500).json({ error: String(e) });
+  }
+});
+
+app.put('/api/telegram-settings', async (req, res) => {
+  const body = req.body as { projectRootsText?: string; allowedUserIdsText?: string; maxSearchDepth?: number };
+  try {
+    await saveTelegramPublicConfig({
+      projectRootsText: typeof body.projectRootsText === 'string' ? body.projectRootsText : '',
+      allowedUserIdsText: typeof body.allowedUserIdsText === 'string' ? body.allowedUserIdsText : '',
+      maxSearchDepth: body.maxSearchDepth,
+    });
+    await restartTelegramTransport();
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: String(e) });
+  }
+});
+
+app.put('/api/telegram-token', async (req, res) => {
+  const body = req.body as { botToken?: string | null };
+  try {
+    if (!Object.prototype.hasOwnProperty.call(body, 'botToken')) {
+      res.status(400).json({ error: 'botToken required (use empty string to clear saved token)' });
+      return;
+    }
+    await saveTelegramBotToken(body.botToken ?? '');
+    await restartTelegramTransport();
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: String(e) });
+  }
+});
+
+app.post('/api/telegram-restart', async (_req, res) => {
+  try {
+    await restartTelegramTransport();
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: String(e) });
+  }
+});
+
 // Attach WebSocket server
 attachWebSocketServer(server);
 
@@ -1242,6 +1376,7 @@ server.listen(PORT, () => {
   initPiper().catch(() => {});
   checkWhisper().catch(() => {});
   setupAutoBackupSchedule().then(() => autoBackupVault()).catch(() => {});
+  startTelegramTransport().catch((err) => console.error('[telegram] failed to start:', err));
 });
 
 let shuttingDown = false;
@@ -1249,10 +1384,12 @@ function shutdown(signal: string): void {
   if (shuttingDown) return;
   shuttingDown = true;
   console.log(`[server] ${signal} received, shutting down`);
-  // Close all sockets first so HTTP+WS upgrades don't keep the loop alive
-  server.closeAllConnections?.();
-  server.close(() => process.exit(0));
-  setTimeout(() => process.exit(0), 1500).unref();
+  void (async () => {
+    await stopTelegramTransport();
+    server.closeAllConnections?.();
+    server.close(() => process.exit(0));
+    setTimeout(() => process.exit(0), 1500).unref();
+  })();
 }
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));

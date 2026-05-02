@@ -1136,6 +1136,125 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
   color: var(--txt);
 }
 
+/* Settings modal: wider body + wrapping tabs so Telegram + Agent fit without clipping */
+.modal-panel--settings-wide {
+  width: min(680px, calc(100vw - 32px));
+}
+
+.modal-panel--settings-wide .settings-tab-bar {
+  flex-wrap: wrap;
+  row-gap: 4px;
+  padding-bottom: 6px;
+}
+
+.settings-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 100px;
+  padding: 10px 12px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--txt);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  resize: vertical;
+  line-height: 1.45;
+}
+.settings-textarea::placeholder {
+  color: var(--border-muted);
+}
+.settings-textarea:focus {
+  outline: none;
+  border-color: rgba(var(--accent-rgb), 0.5);
+}
+
+.telegram-settings-tab {
+  min-width: 0;
+}
+
+.telegram-settings-banner {
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.55;
+  margin-bottom: 6px;
+}
+.telegram-settings-banner--info {
+  background: rgba(var(--accent-rgb), 0.08);
+  border: 1px solid rgba(var(--accent-rgb), 0.35);
+  color: var(--txt);
+}
+.telegram-settings-banner--ok {
+  background: rgba(126, 231, 135, 0.08);
+  border: 1px solid rgba(126, 231, 135, 0.35);
+  color: var(--success);
+}
+.telegram-settings-banner--err {
+  background: rgba(var(--error-rgb), 0.1);
+  border: 1px solid rgba(var(--error-rgb), 0.45);
+  color: var(--error);
+}
+
+.telegram-settings-code {
+  font-size: 12px;
+  color: var(--txt-bright);
+  background: var(--surface-hi);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.telegram-settings-link {
+  color: var(--syn-link);
+  text-decoration: none;
+}
+.telegram-settings-link:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+.telegram-settings-token-row {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+.telegram-settings-token-input {
+  flex: 1;
+  min-width: min(100%, 220px);
+}
+
+.telegram-settings-token-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  margin-top: 10px;
+}
+
+.telegram-settings-depth-row .settings-section-label {
+  flex-shrink: 0;
+}
+.telegram-settings-depth-input {
+  width: 72px;
+  flex-shrink: 0;
+}
+
+.telegram-settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.telegram-settings-help {
+  margin-top: 8px;
+}
+
+.telegram-settings-loading {
+  padding: 10px 0;
+}
+
 .modal-header {
   display: flex;
   align-items: center;
@@ -4069,3 +4188,101 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
 .vault-interval-pill { background: var(--surface-hi); border: 1px solid var(--border); border-radius: 4px; color: var(--txt-sub); font-family: monospace; font-size: 11px; padding: 3px 8px; cursor: pointer; transition: background 0.12s, color 0.12s; }
 .vault-interval-pill:hover { background: var(--surface-hover); color: var(--txt); }
 .vault-interval-pill--active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ============================================================
+   Live Canvas — sidebar HTML artifact (.slop/live-canvas.html)
+   ============================================================ */
+
+.live-canvas-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 8px 10px;
+}
+
+.live-canvas-panel--loading {
+  padding: 16px 12px;
+  color: var(--txt-sub);
+  font-size: 12px;
+}
+
+.live-canvas-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.live-canvas-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--border-muted);
+}
+
+.live-canvas-refresh {
+  font-size: 11px !important;
+  padding: 3px 8px !important;
+}
+
+.live-canvas-hint {
+  font-size: 11px;
+  color: var(--txt-dim);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.live-canvas-code {
+  font-size: 10px;
+  background: rgba(139, 148, 158, 0.12);
+  padding: 1px 4px;
+  border-radius: 3px;
+  color: var(--txt-sub);
+}
+
+.live-canvas-error {
+  font-size: 11px;
+  color: #f85149;
+  margin-bottom: 8px;
+  line-height: 1.45;
+}
+
+.live-canvas-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+  padding: 12px 8px;
+  text-align: center;
+  color: var(--txt-sub);
+  font-size: 12px;
+}
+
+.live-canvas-empty-sub {
+  font-size: 11px;
+  color: var(--txt-dim);
+  line-height: 1.55;
+}
+
+.live-canvas-frame-wrap {
+  flex: 1;
+  min-height: 120px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #0d1117;
+}
+
+.live-canvas-iframe {
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+  border: 0;
+  display: block;
+  background: #fff;
+}
