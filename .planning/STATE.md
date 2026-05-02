@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.0
-milestone_name: milestone
+milestone_name: Foundation ✅ SHIPPED 2026-05-02
 status: completed
-stopped_at: Completed 06-05-PLAN.md — vault endpoints + VaultTab UI (checkpoint pending)
-last_updated: "2026-05-01T19:54:01.374Z"
+stopped_at: Completed 10-01-PLAN.md — Wave 0 RED tests for PTY session persistence
+last_updated: "2026-05-02T19:01:39.311Z"
 last_activity: "2026-04-30 - Completed quick task 1: add syntax colors and edit mode to file preview panel"
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 25
-  completed_plans: 25
+  total_phases: 4
+  completed_phases: 0
+  total_plans: 3
+  completed_plans: 1
   percent: 100
 ---
 
@@ -74,6 +74,7 @@ Progress: [██████████] 100% (All Phases)
 | Phase 06-slop-config-vault P03 | 5min | 2 tasks | 5 files |
 | Phase 06-slop-config-vault P04 | 6min | 2 tasks | 4 files |
 | Phase 06-slop-config-vault P05 | 4min | 2 tasks | 5 files |
+| Phase 10-pty-session-persistence P01 | 2min | 4 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -141,6 +142,7 @@ Recent decisions affecting current work:
 - [Phase 06-slop-config-vault]: TS type narrowing via cast-after-find pattern (putCall as [string, RequestInit]) — avoids broken overload on find() callback with destructured args
 - [Phase 06-slop-config-vault]: VaultTab is self-contained fetching /api/vault-status on mount — no props from SettingsModal
 - [Phase 06-slop-config-vault]: Sync dot: inSync=true→ok, !backupExists||!inSync→warn, !sourceExists→grey
+- [Phase 10-01]: Export SessionRegistry class (not just singleton) to allow isolated instances in tests — non-architectural auto-fix
 
 ### Roadmap Evolution
 
@@ -165,6 +167,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-01T19:54:01.366Z
-Stopped at: Completed 06-05-PLAN.md — vault endpoints + VaultTab UI (checkpoint pending)
+Last session: 2026-05-02T19:01:39.308Z
+Stopped at: Completed 10-01-PLAN.md — Wave 0 RED tests for PTY session persistence
 Resume file: None

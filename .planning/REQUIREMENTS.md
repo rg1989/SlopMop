@@ -7,11 +7,11 @@
 
 ### PTY Session Persistence
 
-- [ ] **PTY-01**: When a user refreshes or closes and reopens the browser, active PTY sessions are still alive on the server and the browser reconnects to them automatically
-- [ ] **PTY-02**: On reconnect, the terminal replays the last N lines of scrollback so the user sees output history (no blank screen)
-- [ ] **PTY-03**: Sessions that have had no browser connection for more than 30 minutes are automatically cleaned up (PTY killed, memory freed)
-- [ ] **PTY-04**: The session tab bar correctly reflects which sessions are "reconnecting" vs "live" vs "expired" after a reload
-- [ ] **PTY-05**: A session that has already exited (Claude CLI quit) is shown as "done" on reconnect — not attempted to be relaunched
+- [x] **PTY-01**: When a user refreshes or closes and reopens the browser, active PTY sessions are still alive on the server and the browser reconnects to them automatically
+- [x] **PTY-02**: On reconnect, the terminal replays the last N lines of scrollback so the user sees output history (no blank screen)
+- [x] **PTY-03**: Sessions that have had no browser connection for more than 30 minutes are automatically cleaned up (PTY killed, memory freed)
+- [x] **PTY-04**: The session tab bar correctly reflects which sessions are "reconnecting" vs "live" vs "expired" after a reload
+- [x] **PTY-05**: A session that has already exited (Claude CLI quit) is shown as "done" on reconnect — not attempted to be relaunched
 
 ## Out of Scope for v1.1
 
