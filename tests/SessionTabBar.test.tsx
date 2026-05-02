@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 
 import { SessionTabBar } from '../client/components/SessionTabBar';
 
-type SessionStatus = 'connecting' | 'waiting' | 'working' | 'done' | 'error';
+type SessionStatus = 'connecting' | 'reconnecting' | 'waiting' | 'working' | 'done' | 'error';
 
 interface SessionEntry {
   id: string;
@@ -170,5 +170,27 @@ describe('SessionTabBar', () => {
     // Status chip for session-1 should have status--working class
     const statusChip = container.querySelector('.status--working');
     expect(statusChip).not.toBeNull();
+  });
+});
+
+describe('reconnecting status', () => {
+  it('renders status--reconnecting chip for reconnecting session (PTY-04)', () => {
+    const sessions: SessionEntry[] = [
+      { id: 'session-1', name: 'Session 1', status: 'reconnecting', cwd: '/tmp', createdAt: Date.now() },
+      { id: 'session-2', name: 'Session 2', status: 'waiting', cwd: '/tmp', createdAt: Date.now() },
+    ];
+
+    const { container } = render(
+      <SessionTabBar
+        sessions={sessions}
+        activeId="session-1"
+        canSpawn={true} onSetActive={vi.fn()}
+        onClose={vi.fn()}
+        onSpawn={vi.fn()}
+        onOpenHistory={vi.fn()}
+      />
+    );
+
+    expect(container.querySelector('.status--reconnecting')).not.toBeNull();
   });
 });
