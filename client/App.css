@@ -1235,7 +1235,7 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
 .telegram-settings-depth-row .settings-section-label {
   flex-shrink: 0;
 }
-.telegram-settings-depth-input {
+.telegram-settings-depth-row .telegram-settings-depth-input {
   width: 72px;
   flex-shrink: 0;
 }
@@ -1289,6 +1289,7 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
   flex-direction: column;
   gap: 14px;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .modal-footer {
@@ -3860,9 +3861,11 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
 .session-tab:hover:not(.active) { background: var(--surface-hover); color: var(--txt); }
 .status-chip { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .status--connecting, .status--waiting { background: var(--txt-sub); }
+.status--reconnecting { background: var(--warning); animation: pulse 1s infinite; }
 .status--working { background: var(--accent); }
 .status--done { background: #3fb950; }
 .status--error { background: var(--error); }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 .session-tab-actions { display: flex; align-items: center; gap: 3px; padding: 0 4px; flex-shrink: 0; }
 .session-spawn-btn {
   flex-shrink: 0; width: 26px; height: 26px;
