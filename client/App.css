@@ -3944,6 +3944,51 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
   display: flex; flex-direction: column;
 }
 
+/* Canvas column — persistent right panel (Phase 11) */
+.canvas-column {
+  flex-shrink: 0;
+  overflow: hidden;
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.canvas-column-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.canvas-column-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--border-muted);
+}
+
+.canvas-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--txt-dim);
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: color 0.12s, background 0.12s;
+}
+.canvas-toggle-btn:hover {
+  color: var(--txt);
+  background: var(--surface-hover);
+}
+
 /* Compact mic button — recording state */
 .vb-compact-recording {
   color: var(--error) !important;
