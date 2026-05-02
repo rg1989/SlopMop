@@ -71,6 +71,6 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1–9. v1.0 Foundation | 25/25 | ✅ Complete | 2026-05-02 |
 | 10. PTY Session Persistence | 3/3 | Complete    | 2026-05-02 |
-| 11. Canvas Panel Extraction | 4/4 | Complete   | 2026-05-02 |
+| 11. Canvas Panel Extraction | 4/4 | Complete    | 2026-05-02 |
 | 12. Bottom Panel Shell | 0/? | Planned | — |
 | 13. Raw Terminal Sessions | 0/? | Planned | — |
