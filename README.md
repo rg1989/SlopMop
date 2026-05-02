@@ -2,70 +2,68 @@
 
 # SlopDock
 
-**Your entire AI dev workflow. One browser tab.**
+**The workspace the AI CLI tools forgot to build.**
 
 [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
 [![Node](https://img.shields.io/badge/node-20%2B-brightgreen?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178c6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
 
-SlopDock is a local browser workspace that wraps Claude Code (or any AI CLI) with everything you actually need every day — terminal, file explorer, git diff viewer, voice I/O, GSD roadmap tracker, skills launcher, vault backup, and a second brain — in a single lightweight app that runs entirely on your machine.
-
-**Open browser → select folder → start coding.** No install wizard. No cloud. No telemetry. You own everything.
+Open a browser. Select a folder. Start building.
 
 </div>
 
 ---
 
-## The problem it solves
+## The gap nobody filled
 
-A typical AI coding session today looks like this: terminal open for the agent, VS Code open for the files, a git GUI for staging, a browser for docs, a notes app for context. You're context-switching constantly just to track what's happening.
+Claude Code is excellent. So is Codex CLI, Aider, OpenCode, Gemini CLI. Every major lab now ships a terminal-based coding agent, and the intelligence behind them is genuinely impressive.
 
-SlopDock collapses that entirely. Every tool you reach for is a panel click away — and it's designed around the actual workflow, not just the terminal:
+But they all ship the same thing: **a smart terminal and nothing else.**
 
-- **Source control** is live in the sidebar. Stage, diff, and commit without touching another app.
-- **The file tree** reflects exactly what the agent is reading and writing, in real time.
-- **Voice mode** means you can speak your next prompt and hear the response read back — hands-free while the agent works.
-- **GSD roadmap** keeps the plan visible. You always know which phase you're in and what's left.
-- **Skills launcher** surfaces Claude Code shortcuts you'd otherwise forget — one click to run them.
-- **Second Brain** keeps project-specific knowledge attached to the workspace, not lost in a notes file somewhere.
-- **Vault** backs up your Claude settings, git config, and SSH config automatically — portable across machines.
+They give you the engine. Nobody built the cockpit.
 
-If you have access to a remote machine via VPN, open SlopDock in a browser and develop there without installing anything locally. Your subscription CLI is yours; everything else is offline and free.
+When you're actually working — not demoing, not running a single command, but doing a real multi-hour session across a real project — you need more than a blinking cursor. You need to see the file tree. You need to see what the agent changed before you commit it. You need to stay oriented to the plan. You need to capture the non-obvious decisions it made while it worked so you don't lose them. You need your git history accessible in two clicks, not buried in a second terminal window. You need to be able to speak a prompt and walk away from the keyboard.
+
+None of the CLI tools give you any of that. They expect you to stitch it together yourself — another terminal for git, VS Code for files, a notes app for context, some external tool for planning. You end up with four applications open at once, none of them aware of the others, and the cognitive overhead of managing the environment starts eating into the work itself.
+
+The heavy IDEs (Cursor, Windsurf) went the other direction: replace everything, enforce their own editor, make you adopt their opinions about what a workspace should look like. That works for some people. It doesn't work if you've already invested in your CLI setup, your Claude Code skills and slash commands, your GSD workflow, your personal CLAUDE.md. It doesn't work if you want to open a browser tab on a remote machine over VPN and just be there.
+
+SlopDock is the thing in between: a **lightweight, browser-based workspace that wraps your CLI of choice** and gives it the environment it always should have had. The workspace knows what project you're in, keeps your plan visible, tracks what changed, handles your git operations, remembers your architectural decisions, and surfaces the tools you always forget to use — all without getting in the way or replacing anything you already rely on.
 
 ---
 
-## Screenshots
+## What it looks like in practice
 
-### Active session with Second Brain research panel
+### Active session — Second Brain panel open
 
 ![Second Brain and active session](docs/screenshots/01-second-brain-session.png)
 
-*A live Claude Code session on the left. The Second Brain panel on the right surfaces per-project decisions and architectural notes while the agent works.*
+*The terminal runs Claude Code on the left. The Second Brain panel on the right surfaces per-project decisions and architectural notes — the context the agent needs, visible while it works, not buried in a separate app.*
 
 ---
 
-### GSD Roadmap + Plan viewer
+### GSD Roadmap — live plan tracking
 
 ![GSD Roadmap panel and plan file](docs/screenshots/02-gsd-roadmap.png)
 
-*The roadmap panel renders `.planning/` inline — phases, plans, progress, quick tasks. The right pane previews the active plan file with full markdown rendering. No context switching.*
+*The roadmap panel renders your `.planning/` directory inline. Phases, plan files, progress, quick tasks — always visible, without leaving the session. The right pane previews the active plan with full markdown rendering.*
 
 ---
 
-### Source control — full diff viewer
+### Source control — full diff before every commit
 
 ![Source control diff viewer](docs/screenshots/03-source-control-diff.png)
 
-*Every changed file listed with per-file stage/unstage/discard controls. The diff viewer shows exactly what the agent wrote. Review before you commit, right in the browser.*
+*Every changed file listed with per-file stage, unstage, and discard controls. The diff viewer shows exactly what the agent wrote. You review before you commit. This is the step the CLI tools skip.*
 
 ---
 
-### File explorer + syntax-highlighted editor
+### File explorer and syntax-highlighted editor
 
 ![File explorer and code editor](docs/screenshots/04-file-explorer-editor.png)
 
-*Collapsible tree, file type icons, fuzzy search. The editor opens any file with full syntax highlighting. Preview tabs promote to permanent on first edit — familiar VS Code behavior.*
+*Collapsible tree, file type icons, fuzzy search. The editor opens any file with full syntax highlighting. Preview tabs promote to permanent on first edit — the VS Code pattern, inside the browser workspace.*
 
 ---
 
@@ -73,128 +71,153 @@ If you have access to a remote machine via VPN, open SlopDock in a browser and d
 
 ![Settings vault tab](docs/screenshots/05-settings-vault.png)
 
-*One-click backup and restore for Claude settings, GSD config, git config, and SSH config. Timestamped snapshots, auto-schedule, optional git remote for cross-machine sync.*
+*One-click backup and restore for Claude settings, GSD config, git config, and SSH config. Timestamped snapshots with optional git-backed remote sync. Switch machines without losing your setup.*
 
 ---
 
-### Super Tools — skills launcher
+### Super Tools — skills you'd otherwise forget to invoke
 
 ![Super Tools modal](docs/screenshots/06-super-tools.png)
 
-*A curated palette of Claude Code skills — Improve Codebase Architecture, Test-Driven Development, Security Review, Full Feature Implementation — available in one click. Skills you'd otherwise have to remember to type are always visible.*
+*A curated, one-click palette of Claude Code skills: architecture review, test-driven development, security review, full-feature implementation. The power was always there — it just wasn't visible. Now it's a click away.*
 
 ---
 
-## Features
+## Why SlopDock specifically
 
-### Terminal
-- **Full PTY fidelity** — real pseudo-terminal via node-pty. ANSI color, interactive prompts, resize, scroll, keyboard shortcuts all work exactly as in a native terminal
-- **Multiple sessions per workspace** — open separate tabs for separate contexts; each gets its own PTY, editor tabs, and attachments. Live status indicators show working / waiting / done at a glance
-- **Session persistence** — reload the browser and your session reconnects; the PTY keeps running in the background
+### It's project-centric, not session-centric
+
+Every other tool treats the terminal as the unit of organization. SlopDock treats the **project folder** as the unit. When you open a folder, you get a complete workspace scoped to that project: its own file tree, its own git state, its own roadmap, its own Second Brain, its own config and AI Guardian rules. Open four tabs for four projects — each one is self-contained, no confusion between them. This is how developers actually think about their work.
+
+### It makes the invisible visible
+
+A skilled developer working with Claude Code knows that `/ultrareview`, `/tdd`, `/full-feature`, and a dozen other skills exist — but in the middle of a session, under deadline pressure, they don't get invoked because they're not visible. SlopDock puts them in a launcher. The tools you already have become the tools you actually use.
+
+### It keeps the plan in the room
+
+If you use [GSD](https://github.com/gsd-build/gsd-2) — or any structured planning approach — the biggest risk is losing orientation. Which phase are we in? What's the acceptance criterion for this plan? What changed in the last session? SlopDock renders all of that inline, live, without you having to open a file or switch windows. The plan stays in the room the entire time.
+
+### It closes the git loop
+
+The AI agent writes code. You need to verify it, stage it, and commit it. Right now that means opening a git GUI or running commands in a separate terminal. SlopDock brings the full diff — staged, unstaged, color-coded, per-file — into the sidebar. Stage and commit without leaving your session. The loop closes in one place.
+
+### It gives you your voice back
+
+Push-to-talk or toggle mode. Speak your prompt, transcribed locally by Whisper. Claude's responses read back to you sentence-by-sentence by local Piper TTS. Hands-free while the agent works. No cloud routing, no API key for speech, no subscription beyond what you already have. This is something no CLI tool and no heavy IDE does correctly — and once you've worked this way for an hour, going back feels like a regression.
+
+### It travels with you
+
+Run SlopDock on a remote server — a powerful cloud machine, a workstation at the office, anything accessible over VPN. Open your browser on any device. Your entire development environment is there. No extensions to install, no sync to set up, no credentials on the thin client. The browser is your terminal.
+
+### It's yours
+
+SlopDock wraps your own Claude Code subscription. It has no telemetry, no cloud component, no account. All features except the agent CLI itself run fully offline. You are not a user of SlopDock's platform — you are running your own copy, with your own configuration, against your own projects. The `.slop/` directory in each project lets you define project-specific rules and AI Guardian instructions that guide the agent exactly the way you want for that codebase.
+
+---
+
+## Feature overview
+
+### Terminal and sessions
+- **Full PTY fidelity** — real pseudo-terminal via node-pty. ANSI color, interactive prompts, resize, scroll, and every keyboard shortcut work exactly as in a native terminal
+- **Multiple sessions per workspace** — open separate agent tabs for separate contexts within the same project. Each gets its own PTY, editor tabs, and file attachments. Live status indicators show working / waiting / idle
+- **Session persistence** — reload the browser and the session reconnects. The PTY keeps running in the background
 - **Any CLI agent** — Claude Code, Aider, OpenCode, Goose, Gemini CLI, Codex, Hermes. Auto-detected from PATH; configure command and args in Settings
 
 ### File management
-- **File explorer** — collapsible tree, per-type icons, fuzzy search, hidden-file toggle, inline new file / new folder actions
-- **Syntax-highlighted editor** — view and edit any file using Shiki (`one-dark-pro` theme). Preview tabs promote to permanent on first edit
-- **File sharing with the agent** — attach any file to the active session. The agent receives it as context without you having to type a path
+- **File explorer** — collapsible tree, per-type icons, fuzzy search, hidden-file toggle, inline new-file and new-folder
+- **Syntax-highlighted editor** — view and edit any file via Shiki (`one-dark-pro` theme). Preview tabs promote to permanent on first edit
+- **File sharing with the agent** — attach any file to the current session as context without typing a path
 
-### Git integration
-- **Staged / unstaged diff viewer** — full unified diff per file, color-coded additions and deletions
-- **Per-file controls** — stage, unstage, or discard individual files from the UI
-- **Branch switcher and push** — change branches and push without leaving the app
+### Git
+- **Staged / unstaged diff viewer** — full unified diff, color-coded, per-file
+- **Per-file controls** — stage, unstage, or discard individual files
+- **Branch switcher and push** — change branches and push without leaving the workspace
 - **Commit from the sidebar** — write a message and commit staged changes directly
 
 ### Voice
-- **Voice input (STT)** — push-to-talk or toggle mode. Audio transcribed locally by [Whisper](https://github.com/openai/whisper). Configurable hotkey
-- **Voice output (TTS)** — Claude's terminal output read aloud sentence-by-sentence via local [Piper](https://github.com/rhasspy/piper). Pause or stop at any time
-- **Mutual exclusion** — TTS auto-pauses when recording starts; an active recording cancels TTS. No accidental overlap
+- **Voice input** — push-to-talk or toggle. Transcribed locally by [Whisper](https://github.com/openai/whisper). Configurable hotkey. No cloud routing
+- **Voice output** — responses read aloud sentence-by-sentence via local [Piper](https://github.com/rhasspy/piper). Pause or interrupt at any time
+- **Hands-free design** — TTS pauses automatically when you start recording. No accidental overlap
 
 ### Planning and knowledge
-- **GSD roadmap panel** — renders `.planning/ROADMAP.md` inline: phases, plans, progress bar, quick tasks, planning doc links. Inline removal of phases and plans without opening a terminal
-- **Second Brain panel** — per-workspace knowledge base stored as frontmatter Markdown in `.brain/`. Architectural decisions, pitfalls, and context stay attached to the project
-- **AI Guardian** — per-project toggle that enforces roadmap alignment: flags unplanned work, phase-skip warnings, and prompts to capture knowledge back to the second brain after non-trivial sessions
+- **GSD roadmap panel** — renders `.planning/ROADMAP.md` live: phases, plan files, progress bar, quick tasks, planning doc links. Remove phases and plans from the UI without touching a terminal
+- **Second Brain panel** — per-workspace knowledge base in `.brain/`. Architectural decisions, pitfalls, and running context stay attached to the project, not lost in a notes app
+- **AI Guardian** — per-project rules in `.slop/ai-guardian.md` that guide the agent to respect the roadmap, flag unplanned work, and surface knowledge capture after non-trivial sessions
 
 ### Skills and tooling
-- **Super Tools launcher** — a modal palette of available Claude Code skills with single-click invocation. Surfaces capabilities that would otherwise be forgotten or under-used: architecture review, TDD, security review, full-feature implementation, and more
-- **Skills run via GSD or direct** — each tool shows both a "Run Direct" and "Run via GSD" option. Choose the structured path or the fast path per task
+- **Super Tools launcher** — one-click palette for Claude Code skills that would otherwise require remembering a slash command: architecture review, TDD, security review, full-feature implementation, and more
+- **Run Direct or Run via GSD** — choose the structured path or the fast path per invocation
 
-### Workspace and config
-- **Workspace-scoped configuration** — each folder you open can have its own `.slop/` directory with a `config.json` and `ai-guardian.md`. Different projects get different rules and agent instructions automatically
-- **Vault backup** — timestamped snapshots of `~/.claude/settings.json`, `CLAUDE.md`, `keybindings.json`, `~/.gitconfig`, and `~/.ssh/config`. Auto-schedule (on launch / hourly / daily) and optional git-backed remote sync for cross-machine portability
-- **Drag-resizable panels** — sidebar, terminal, and preview widths adjustable and persisted per workspace
-- **Health check bar** — surfaces missing git, CLAUDE.md, agent CLI, or node_modules at a glance on first open
-
-### Access and portability
-- **Pure browser UI** — open `http://localhost:5173`, pick a folder, start a session. No Electron, no native app install
-- **Multiple tabs / windows** — one tab per project, or one window per machine. No coupling between sessions
-- **Remote development via VPN** — run SlopDock on a remote machine and access it through a browser over VPN. Nothing installed locally except the browser
-- **Your subscription, your keys** — SlopDock wraps your own Claude Code CLI. It never touches your credentials and has no telemetry or cloud component
-- **Fully offline** — all features except the agent CLI itself run without an internet connection
-- **Extensible** — the architecture is intentionally simple (Express + React, ~40 HTTP routes, plain CSS). Adding a new panel, tool, or integration is a few files
+### Workspace and portability
+- **Project-scoped config** — each folder gets its own `.slop/` directory with `config.json` and `ai-guardian.md`. Different projects, different rules, automatically
+- **Vault backup** — timestamped snapshots of `~/.claude/settings.json`, `CLAUDE.md`, `keybindings.json`, `~/.gitconfig`, and `~/.ssh/config`. Auto-schedule (on launch / hourly / daily) with optional git-backed remote sync
+- **Drag-resizable panels** — sidebar, terminal, and preview widths are all adjustable and persisted per workspace
+- **Health check bar** — surfaces missing git, CLAUDE.md, agent CLI, or node_modules on first open
+- **Remote development via VPN** — run on a server, develop from a browser anywhere
+- **Fully offline** — all features except the agent CLI run without internet
+- **Extensible by design** — Express + React, ~40 HTTP routes, plain CSS. Adding a new panel or integration is a few files. The platform is intentionally lean and transparent so you can shape it to your workflow
 
 ---
 
 ## Quick start
 
-**One-liner** — clones the repo, checks dependencies, and starts the server:
-
+**One-liner:**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/rg1989/SlopDock/main/scripts/install.sh | bash
 ```
 
-**Manual install:**
-
+**Manual:**
 ```bash
 npm install
 npm run setup    # verifies Node, Claude CLI, GSD; installs what's missing
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173), pick a workspace folder, and start a session.
+Open [http://localhost:5173](http://localhost:5173), select a workspace folder, start a session.
 
-`npm run setup` is idempotent — safe to re-run. It never downgrades or resets an existing install.
+`npm run setup` is idempotent — safe to re-run at any time.
 
 ---
 
 ## Requirements
 
-| Requirement | Notes |
+| | |
 |---|---|
 | **Node.js 20+** | Backend PTY server |
 | **macOS** | Primary platform; Linux likely works; Windows not supported |
-| **Claude Code** (or another agent CLI) in `PATH` | `claude`, `aider`, `opencode`, `goose`, etc. |
-| **[Piper TTS](https://github.com/rhasspy/piper)** *(optional)* | Enables voice output |
-| **[Whisper](https://github.com/openai/whisper)** *(optional)* | Enables voice input (`pip install openai-whisper` + `brew install ffmpeg`) |
+| **Claude Code** (or another CLI agent) in `PATH` | `claude`, `aider`, `opencode`, `goose`, etc. |
+| **[Piper TTS](https://github.com/rhasspy/piper)** *(optional)* | Voice output |
+| **[Whisper](https://github.com/openai/whisper)** *(optional)* | Voice input (`pip install openai-whisper` + `brew install ffmpeg`) |
 
 ---
 
 ## Voice setup
 
-Voice features are optional and disabled gracefully if dependencies are absent.
+Voice features are optional and degrade gracefully if dependencies are absent.
 
-**Whisper STT** (voice input):
+**Whisper STT:**
 ```bash
 pip install openai-whisper
 brew install ffmpeg
 ```
 
-**Piper TTS** (voice output): download a pre-built binary and voice model from the [Piper releases page](https://github.com/rhasspy/piper/releases). Place the `piper` binary in `PATH` and set the voice model path in **Settings → Audio**.
+**Piper TTS:** download a pre-built binary and voice model from the [Piper releases page](https://github.com/rhasspy/piper/releases). Place the binary in `PATH` and set the model path in **Settings → Audio**.
 
-SlopDock reports setup status in the voice bar at the bottom of the terminal area.
+SlopDock reports voice setup status in the bar at the bottom of the terminal area.
 
 ---
 
 ## GSD integration
 
-If your workspace has a `.planning/` directory created by [GSD](https://github.com/gsd-build/gsd-2), the roadmap panel renders it live:
+If your workspace has a `.planning/` directory from [GSD](https://github.com/gsd-build/gsd-2), the roadmap panel renders it live with no configuration:
 
-- **Progress bar** — milestone completion (plans done / total)
+- **Progress bar** — milestone completion across all phases
 - **Phase list** — each phase with status, plan count, and inline expand
-- **Quick tasks** — ad-hoc tasks from `STATE.md` with completion checkboxes
-- **Planning doc links** — direct links to `ROADMAP.md`, `PROJECT.md`, `REQUIREMENTS.md`, `STATE.md`
+- **Quick tasks** — ad-hoc tasks from `STATE.md` with completion tracking
+- **Planning doc links** — direct access to `ROADMAP.md`, `PROJECT.md`, `REQUIREMENTS.md`, `STATE.md`
 - **Inline removal** — delete phases or plans from the UI without opening a terminal
 
-The GSD panel is read-only by default; writes go through the GSD CLI in the terminal session.
+The GSD panel is read-only by design; writes go through the GSD CLI in the terminal session.
 
 ---
 
@@ -219,10 +242,10 @@ slopdock/
 ├── tests/                    # Vitest unit tests
 ├── docs/
 │   ├── adr/                  # Architecture Decision Records
-│   └── screenshots/          # App screenshots for documentation
+│   └── screenshots/          # App screenshots
 └── scripts/
-    ├── setup.sh              # Idempotent dependency check + install
-    └── install.sh            # One-liner bootstrap for new installs
+    ├── setup.sh              # Idempotent dependency checker
+    └── install.sh            # One-liner bootstrap
 ```
 
 ---
@@ -241,8 +264,6 @@ slopdock/
 
 ## Configuration
 
-Settings are accessible via the gear icon in the top-right corner.
-
 ### Display
 | Setting | Options |
 |---|---|
@@ -253,14 +274,14 @@ Settings are accessible via the gear icon in the top-right corner.
 ### Audio
 | Setting | Description |
 |---|---|
-| PTT key | Configurable keyboard shortcut for push-to-talk |
-| Recording mode | Hold (while key held) / Toggle (one press on, one press off) |
+| PTT key | Configurable push-to-talk hotkey |
+| Recording mode | Hold (while key held) / Toggle (press on, press off) |
 
 ### Agent & Tools
-Configure which CLI agent to spawn. SlopDock auto-detects installed agents (`claude`, `opencode`, `aider`, `gemini`, `codex`, `hermes`, `goose`) and lists available ones in a dropdown. Each entry has a **command**, optional **args**, and a **label** shown in the UI.
+Configure which CLI agent to spawn. SlopDock auto-detects installed agents (`claude`, `opencode`, `aider`, `gemini`, `codex`, `hermes`, `goose`). Each entry has a **command**, optional **args**, and a **label**.
 
 ### Vault
-Backs up dotfiles to `~/.slop/backups/` on a configurable schedule (never / on launch / hourly / daily). Vault data can be synced to a private git remote for cross-machine portability.
+Backs up dotfiles to `~/.slop/backups/` on a configurable schedule. Optional git remote sync for cross-machine portability.
 
 | File | Description |
 |---|---|
@@ -271,13 +292,11 @@ Backs up dotfiles to `~/.slop/backups/` on a configurable schedule (never / on l
 | `~/.ssh/config` | SSH config |
 
 ### AI Guardian
-Per-project toggle that enables roadmap alignment rules from `.slop/ai-guardian.md`. Surfaces unplanned work, phase-skip warnings, and prompts to capture knowledge to the second brain after non-trivial sessions.
+Per-project toggle. Enables roadmap alignment rules from `.slop/ai-guardian.md` — flags unplanned work, phase-skip warnings, and prompts to capture knowledge to the second brain.
 
 ---
 
 ## Architecture
-
-SlopDock is a local web app with two processes connected through a WebSocket:
 
 ```
 Browser (React + xterm.js)
@@ -287,21 +306,14 @@ Browser (React + xterm.js)
   └─ WS   ─────────────────────────────────────────► PTY stdin/stdout
 ```
 
-**Key design decisions:**
-
-- **Session boundary** — the PTY connection, open editor tabs, and staged attachments are all grouped into a single `useSession` hook. Session state is scoped and self-contained; workspace-level state (file tree, roadmap, source control) lives in `App`. See [ADR-0001](docs/adr/0001-session-boundary.md).
-
-- **Agent configuration in settings** — the agent command and args live in user settings, not per-workspace config files. A workspace-level override can be added when the need arises. See [ADR-0002](docs/adr/0002-agent-config-in-settings.md).
-
-- **Audio coordination** — TTS and STT are mutually exclusive. The `AudioCoordinator` hook owns both and enforces no overlap. See [ADR-0003](docs/adr/0003-audio-coordinator-pattern.md).
-
-- **No CSS-in-JS, no component libraries** — plain CSS in `client/App.css` with a single-source color palette in `client/theme.css`. All palette values are CSS custom properties; raw hex values are banned from component code.
+- **Session boundary** — PTY, editor tabs, and attachments grouped into `useSession`. Workspace-level state (file tree, roadmap, source control) lives in `App`. [ADR-0001](docs/adr/0001-session-boundary.md)
+- **Agent configuration in settings** — command and args live in user settings, not per-repo config. [ADR-0002](docs/adr/0002-agent-config-in-settings.md)
+- **Audio coordination** — `AudioCoordinator` hook owns TTS and STT and enforces mutual exclusion. [ADR-0003](docs/adr/0003-audio-coordinator-pattern.md)
+- **No CSS-in-JS, no component libraries** — plain CSS with a single-source palette in `theme.css`. All values are CSS custom properties.
 
 ---
 
 ## Contributing
-
-See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for the full guide. The short version:
 
 1. Fork and clone the repo
 2. `npm install && npm run setup`
@@ -309,7 +321,7 @@ See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for the full guide. The short v
 4. Make your changes with tests where appropriate (`npm test`)
 5. Open a pull request
 
-No large dependencies without discussion — the bundle is intentionally lean. Adding a new panel or tool should touch a handful of files, not require a new library.
+The bundle is intentionally lean. New panels and integrations should touch a handful of files, not introduce a new dependency. See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for the full guide.
 
 ---
 
