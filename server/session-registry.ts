@@ -19,7 +19,7 @@ interface ManagedSession {
 const BUFFER_MAX = 5000;
 const SESSION_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
-class SessionRegistry {
+export class SessionRegistry {
   private sessions = new Map<string, ManagedSession>();
 
   create(id: string, ptyProcess: pty.IPty, cwd: string, sendFn: SendFn, options?: { persistent?: boolean }): void {
