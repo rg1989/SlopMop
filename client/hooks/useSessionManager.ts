@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 
-export type SessionStatus = 'connecting' | 'waiting' | 'working' | 'done' | 'error';
+export type SessionStatus = 'connecting' | 'reconnecting' | 'waiting' | 'working' | 'done' | 'error';
 
 export interface SessionEntry {
   id: string;
@@ -110,7 +110,7 @@ export function useSessionManager(): UseSessionManagerReturn {
     const { sessions: saved, activeId: savedActiveId } = loadActiveSessions(cwd);
     if (!saved.length) return;
 
-    const reconnecting: SessionEntry[] = saved.map(s => ({ ...s, status: 'connecting' as SessionStatus }));
+    const reconnecting: SessionEntry[] = saved.map(s => ({ ...s, status: 'reconnecting' as SessionStatus }));
     const initialSession = reconnecting.find(s => s.name === '') ?? reconnecting[0];
     initialSessionIdRef.current = initialSession?.id ?? null;
     setSessions(reconnecting);
