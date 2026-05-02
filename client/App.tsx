@@ -28,6 +28,8 @@ import { RulesModal } from './components/RulesModal';
 import { OnboardingModal } from './components/OnboardingModal';
 import { useProjectHealth } from './hooks/useProjectHealth';
 import { HealthStatusBar } from './components/HealthStatusBar';
+import { useRawSessionManager } from './hooks/useRawSessionManager';
+import { RawTerminalPane } from './components/RawTerminalPane';
 import './App.css';
 
 type SidebarTabId = 'explorer' | 'changes' | 'roadmap' | 'brain';
@@ -39,8 +41,10 @@ const IconExplorer = () => (
 );
 const IconChanges = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/>
-    <path d="M6 21V9a9 9 0 0 0 9 9"/>
+    <line x1="6" y1="3" x2="6" y2="15"/>
+    <circle cx="18" cy="6" r="3"/>
+    <circle cx="6" cy="18" r="3"/>
+    <path d="M18 9a9 9 0 0 1-9 9"/>
   </svg>
 );
 const IconRoadmap = () => (
@@ -232,6 +236,9 @@ export default function App() {
   // ── Session manager ──────────────────────────────────────────────────────────
   const sessionManager = useSessionManager();
 
+  // ── Raw terminal sessions (bottom panel) ─────────────────────────────────────
+  const { sessions: rawSessions, activeId: rawActiveId, add: rawAdd, remove: rawRemove, setActive: rawSetActive, updateStatus: rawUpdateStatus } = useRawSessionManager(cwd);
+
   // ── Audio coordinator (app-scoped — routes to active session via ref) ────────
   const audio = useAudioCoordinator({
     ttsEnabled,
@@ -274,6 +281,13 @@ export default function App() {
       })
       .catch(() => setSlopExists(null));
   }, [cwd]);
+
+  // Auto-seed one shell session when the bottom panel opens for the first time
+  useEffect(() => {
+    if (bottomPanelOpen && cwd && rawSessions.length === 0) {
+      rawAdd();
+    }
+  }, [bottomPanelOpen, cwd]); // rawAdd intentionally excluded — changes every render, would cause infinite loop
 
   // ── Layout max-width refs (updated every render) ─────────────────────────────
   sidebarMaxRef.current = window.innerWidth - 300 - RESIZE_HANDLE_WIDTH;
@@ -595,6 +609,20 @@ export default function App() {
           </div>
           <div className="bottom-panel-tab-bar">
             <div className="bottom-panel-tab-bar-tabs">
+              {rawSessions.map((s, i) => (
+                <button
+                  key={s.id}
+                  className={`bpanel-tab${s.id === rawActiveId ? ' bpanel-tab--active' : ''}`}
+                  onClick={() => rawSetActive(s.id)}
+                >
+                  <span className="bpanel-tab-label">shell {i + 1}</span>
+                  <button
+                    className="bpanel-tab-close"
+                    onClick={e => { e.stopPropagation(); rawRemove(s.id); }}
+                  >×</button>
+                </button>
+              ))}
+              <button className="bpanel-add-btn" onClick={rawAdd} title="New terminal">+</button>
             </div>
             <button
               className="bottom-panel-toggle-btn"
@@ -620,6 +648,15 @@ export default function App() {
                 style={{ height: bottomPanel.width }}
               >
                 <div className="bottom-panel-body">
+                {rawSessions.map(s => (
+                  <RawTerminalPane
+                    key={s.id}
+                    sessionId={s.id}
+                    cwd={s.cwd}
+                    isActive={s.id === rawActiveId}
+                    onStatus={status => rawUpdateStatus(s.id, status)}
+                  />
+                ))}
                 </div>
               </div>
             </>

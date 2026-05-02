@@ -59,15 +59,26 @@ vi.mock('../client/hooks/useProjectHealth', () => ({
   useProjectHealth: () => [],
 }));
 
-const mockAdd = vi.fn();
+const { mockAdd, mockRemove, mockSetActive, mockRawState } = vi.hoisted(() => {
+  const mockRawState = {
+    sessions: [] as Array<{ id: string; status: string; cwd: string }>,
+    activeId: null as string | null,
+  };
+  return {
+    mockAdd: vi.fn(),
+    mockRemove: vi.fn(),
+    mockSetActive: vi.fn(),
+    mockRawState,
+  };
+});
 
 vi.mock('../client/hooks/useRawSessionManager', () => ({
   useRawSessionManager: () => ({
-    sessions: [],
-    activeId: null,
+    sessions: mockRawState.sessions,
+    activeId: mockRawState.activeId,
     add: mockAdd,
-    remove: vi.fn(),
-    setActive: vi.fn(),
+    remove: mockRemove,
+    setActive: mockSetActive,
     updateStatus: vi.fn(),
   }),
 }));
@@ -149,9 +160,9 @@ vi.mock('../client/components/EditorTabBar', () => ({
 }));
 
 vi.mock('../client/components/RawTerminalPane', () => ({
-  // @ts-expect-error — module does not exist yet (Wave 0 RED)
   RawTerminalPane: ({ isActive, cwd }: any) => (
     <div
+      className="raw-terminal-pane"
       data-testid="raw-terminal-pane"
       data-cwd={cwd}
       style={{ display: isActive ? 'flex' : 'none' }}
@@ -159,7 +170,6 @@ vi.mock('../client/components/RawTerminalPane', () => ({
   ),
 }));
 
-// @ts-expect-error — module does not exist yet (Wave 0 RED)
 import App from '../client/App';
 
 function setupFetchMock() {
@@ -182,6 +192,8 @@ describe('RAWTERM-01: raw-terminal-pane rendered inside bottom panel body', () =
     localStorage.setItem('slopmop_ui:bottom_panel_open', JSON.stringify(true));
     vi.clearAllMocks();
     mockAdd.mockReset();
+    mockRawState.sessions = [{ id: 'a', status: 'waiting', cwd: '/test/project' }];
+    mockRawState.activeId = 'a';
   });
 
   it('bottom-panel-body contains a .raw-terminal-pane element when panel is open', async () => {
@@ -205,20 +217,11 @@ describe('RAWTERM-02: tab bar renders tab chips and add button', () => {
     localStorage.setItem('slopmop_ui:bottom_panel_open', JSON.stringify(true));
     vi.clearAllMocks();
     mockAdd.mockReset();
+    mockRawState.sessions = [{ id: 'a', status: 'waiting', cwd: '/test/project' }];
+    mockRawState.activeId = 'a';
   });
 
   it('.bottom-panel-tab-bar-tabs renders .bpanel-tab chips and .bpanel-add-btn', async () => {
-    vi.mock('../client/hooks/useRawSessionManager', () => ({
-      useRawSessionManager: () => ({
-        sessions: [{ id: 'a', status: 'waiting', cwd: '/test/project' }],
-        activeId: 'a',
-        add: mockAdd,
-        remove: vi.fn(),
-        setActive: vi.fn(),
-        updateStatus: vi.fn(),
-      }),
-    }));
-
     const { container } = render(<App />);
 
     await waitFor(() => {
@@ -242,24 +245,15 @@ describe('RAWTERM-03: clicking tab calls setActive; inactive panes have display:
     localStorage.setItem('slopmop_ui:bottom_panel_open', JSON.stringify(true));
     vi.clearAllMocks();
     mockAdd.mockReset();
+    mockSetActive.mockReset();
+    mockRawState.sessions = [
+      { id: 'a', status: 'waiting', cwd: '/p' },
+      { id: 'b', status: 'waiting', cwd: '/p' },
+    ];
+    mockRawState.activeId = 'a';
   });
 
   it('inactive pane has display:none; clicking tab calls setActive', async () => {
-    const setActiveMock = vi.fn();
-    vi.mock('../client/hooks/useRawSessionManager', () => ({
-      useRawSessionManager: () => ({
-        sessions: [
-          { id: 'a', status: 'waiting', cwd: '/p' },
-          { id: 'b', status: 'waiting', cwd: '/p' },
-        ],
-        activeId: 'a',
-        add: mockAdd,
-        remove: vi.fn(),
-        setActive: setActiveMock,
-        updateStatus: vi.fn(),
-      }),
-    }));
-
     const { container } = render(<App />);
 
     await waitFor(() => {
@@ -274,7 +268,7 @@ describe('RAWTERM-03: clicking tab calls setActive; inactive panes have display:
     const tabs = container.querySelectorAll('.bpanel-tab');
     if (tabs.length > 1) {
       fireEvent.click(tabs[1]);
-      expect(setActiveMock).toHaveBeenCalled();
+      expect(mockSetActive).toHaveBeenCalled();
     }
   });
 });
@@ -287,21 +281,12 @@ describe('RAWTERM-04: closing tab removes session; adjacent becomes active', () 
     localStorage.setItem('slopmop_ui:bottom_panel_open', JSON.stringify(true));
     vi.clearAllMocks();
     mockAdd.mockReset();
+    mockRemove.mockReset();
+    mockRawState.sessions = [{ id: 'a', status: 'waiting', cwd: '/test/project' }];
+    mockRawState.activeId = 'a';
   });
 
   it('clicking .bpanel-tab-close calls remove with session id', async () => {
-    const removeMock = vi.fn();
-    vi.mock('../client/hooks/useRawSessionManager', () => ({
-      useRawSessionManager: () => ({
-        sessions: [{ id: 'a', status: 'waiting', cwd: '/test/project' }],
-        activeId: 'a',
-        add: mockAdd,
-        remove: removeMock,
-        setActive: vi.fn(),
-        updateStatus: vi.fn(),
-      }),
-    }));
-
     const { container } = render(<App />);
 
     await waitFor(() => {
@@ -312,7 +297,7 @@ describe('RAWTERM-04: closing tab removes session; adjacent becomes active', () 
     const closeBtn = container.querySelector('.bpanel-tab-close') as HTMLElement | null;
     if (closeBtn) {
       fireEvent.click(closeBtn);
-      expect(removeMock).toHaveBeenCalled();
+      expect(mockRemove).toHaveBeenCalled();
     } else {
       expect(container.querySelector('.bpanel-tab-close')).not.toBeNull();
     }
@@ -326,6 +311,8 @@ describe('RAWTERM-05: opening bottom panel auto-seeds one session', () => {
     localStorage.setItem('slopmop_last_folder', '/test/project');
     vi.clearAllMocks();
     mockAdd.mockReset();
+    mockRawState.sessions = [];
+    mockRawState.activeId = null;
   });
 
   it('after opening panel, add() is called once to auto-seed a session', async () => {
@@ -355,20 +342,11 @@ describe('RAWTERM-06: RawTerminalPane receives cwd prop matching project cwd', (
     localStorage.setItem('slopmop_ui:bottom_panel_open', JSON.stringify(true));
     vi.clearAllMocks();
     mockAdd.mockReset();
+    mockRawState.sessions = [{ id: 'a', status: 'waiting', cwd: '/test/project' }];
+    mockRawState.activeId = 'a';
   });
 
   it('RawTerminalPane receives cwd equal to the connected project path', async () => {
-    vi.mock('../client/hooks/useRawSessionManager', () => ({
-      useRawSessionManager: () => ({
-        sessions: [{ id: 'a', status: 'waiting', cwd: '/test/project' }],
-        activeId: 'a',
-        add: mockAdd,
-        remove: vi.fn(),
-        setActive: vi.fn(),
-        updateStatus: vi.fn(),
-      }),
-    }));
-
     const { container } = render(<App />);
 
     await waitFor(() => {
