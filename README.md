@@ -75,11 +75,11 @@ SlopMop is the thing in between: a **lightweight, browser-based workspace that w
 
 ---
 
-### Vault — dotfile backup and restore
+### AI Guardian — per-project alignment rules
 
-![Settings vault tab](docs/screenshots/05-settings-vault.png)
+![AI Guardian rules modal](docs/screenshots/05-ai-guardian-rules.png)
 
-*One-click backup and restore for Claude settings, GSD config, git config, and SSH config. Timestamped snapshots with optional git-backed remote sync. Switch machines without losing your setup.*
+*Per-project rules in `.slop/ai-guardian.md` guide the agent to respect the roadmap, flag unplanned work, and prompt knowledge capture after non-trivial sessions. Toggle it on or off per project from the workspace.*
 
 ---
 
@@ -88,6 +88,14 @@ SlopMop is the thing in between: a **lightweight, browser-based workspace that w
 ![Super Tools modal](docs/screenshots/06-super-tools.png)
 
 *A curated, one-click palette of Claude Code skills: architecture review, test-driven development, security review, full-feature implementation. The power was always there — it just wasn't visible. Now it's a click away.*
+
+---
+
+### Vault — dotfile backup and restore
+
+![Settings vault tab](docs/screenshots/07-settings-vault.png)
+
+*One-click backup and restore for Claude settings, GSD config, git config, and SSH config. Timestamped snapshots with optional git-backed remote sync. Switch machines without losing your setup.*
 
 ---
 
