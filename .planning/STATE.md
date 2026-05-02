@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Foundation ✅ SHIPPED 2026-05-02
 status: completed
-stopped_at: "Checkpoint: 11-04 Task 2 human-verify"
-last_updated: "2026-05-02T20:09:32.970Z"
+stopped_at: "Completed 11-04 bug fixes: canvas max-width persist, independent limit, toggle button styling"
+last_updated: "2026-05-02T20:23:39.363Z"
 last_activity: "2026-04-30 - Completed quick task 1: add syntax colors and edit mode to file preview panel"
 progress:
   total_phases: 4
@@ -161,6 +161,7 @@ Recent decisions affecting current work:
 - [Phase 11-02]: toggleCanvas uses functional setIsCanvasVisible updater to write localStorage — avoids stale closure
 - [Phase 11-canvas-panel-extraction]: Canvas toggle button always rendered when prop is provided (not gated on visibility) so user can always re-open canvas panel
 - [Phase 11-canvas-panel-extraction]: CANVAS-05 test fixed: waitFor updated to wait for canvas-column element directly, not app-body which resolves before cwd is set
+- [Phase 11-canvas-panel-extraction]: Canvas max-width formula set to 70% of viewport width, independent of sidebar; canvas init width clamped to max on startup; fp-canvas-btn given border + white default + orange hover
 
 ### Roadmap Evolution
 
@@ -185,6 +186,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-02T20:09:27.944Z
-Stopped at: Checkpoint: 11-04 Task 2 human-verify
+Last session: 2026-05-02T20:23:35.158Z
+Stopped at: Completed 11-04 bug fixes: canvas max-width persist, independent limit, toggle button styling
 Resume file: None

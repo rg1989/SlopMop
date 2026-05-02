@@ -33,6 +33,9 @@ key-decisions:
   - "Canvas toggle button always rendered when prop is provided, not gated on canvas visibility — ensures user can always re-open canvas"
   - "fp-canvas-btn--active modifier class for accent color state, no JS color switching"
   - "CANVAS-05 test waitFor updated to wait for canvas-column element directly instead of app-body"
+  - "Canvas max-width formula changed to Math.floor(window.innerWidth * 0.7) making it independent of sidebar"
+  - "Canvas init width clamped to max on startup to prevent restoring out-of-bounds localStorage values"
+  - "fp-canvas-btn given border: 1px solid --border, var(--txt) default and accent orange on hover matching fp-rules-btn pattern"
 
 patterns-established:
   - "Always-visible toggle pattern: render button regardless of panel visibility so user can re-open"
@@ -60,9 +63,11 @@ completed: 2026-05-02
 ## Accomplishments
 - Added `onCanvasToggle` and `isCanvasVisible` optional props to FolderPickerProps
 - Canvas toggle button rendered in FolderPicker toolbar (always visible when prop is provided)
-- Button shows accent color (`--accent`) when canvas is open, dim (`--txt-dim`) when hidden
-- `fp-canvas-btn` and `fp-canvas-btn--active` CSS added to App.css following design system
+- Button shows accent color (`--accent`) when canvas is open, dim when hidden
+- `fp-canvas-btn` CSS updated: border, white default, orange hover — matching fp-rules-btn pattern
 - App.tsx passes `toggleCanvas` and `isCanvasVisible` to FolderPicker call site
+- Canvas max-width formula changed to 70% of viewport (independent of sidebar)
+- Canvas init width clamped to max on startup to prevent restoring oversized localStorage values
 - All 164 tests pass
 
 ## Task Commits
@@ -93,10 +98,24 @@ Each task was committed atomically:
 - **Verification:** All 164 tests pass including CANVAS-05
 - **Committed in:** `7f05b59` (Task 1 commit)
 
+**2. [Rule 1 - Bug] Canvas max-width not persisting on refresh**
+- **Found during:** Human verification
+- **Issue:** Canvas init width was clamped only by CANVAS_MIN with no upper bound, so stored values could exceed the effective max. Also canvasMaxRef used `window.innerWidth - 300 - RESIZE_HANDLE_WIDTH` which shared the same constant as sidebar, creating coupling.
+- **Fix:** Changed canvas max formula to `Math.floor(window.innerWidth * 0.7)` making it independent of sidebar. Added upper-bound clamp to canvas init width so stored values are clamped on startup.
+- **Files modified:** `client/App.tsx`
+- **Committed in:** `9e7b77e` (fix commit)
+
+**3. [Rule 1 - Bug] Canvas toggle button styling incorrect**
+- **Found during:** Human verification
+- **Issue:** Button had no border, `--txt-dim` (dim grey) default color, and only shifted to `--txt` on hover — too subtle and inconsistent with other fp-* buttons.
+- **Fix:** Added `border: 1px solid var(--border)`, changed default to `var(--txt)` (white), hover to `var(--accent)` orange with accent-tinted background — matching the `fp-rules-btn` pattern.
+- **Files modified:** `client/App.css`
+- **Committed in:** `9e7b77e` (fix commit)
+
 ---
 
-**Total deviations:** 1 auto-fixed (Rule 1 - test timing bug)
-**Impact on plan:** Auto-fix necessary for test correctness. No scope creep.
+**Total deviations:** 3 auto-fixed (Rule 1 bugs)
+**Impact on plan:** All fixes improve UX correctness. No scope creep.
 
 ## Issues Encountered
 Pre-existing TypeScript errors in `tests/usePty.test.ts` (unrelated to this plan's changes — logged as out of scope).
