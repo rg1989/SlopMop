@@ -4493,19 +4493,19 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
 }
 
 .xterm-viewport::-webkit-scrollbar {
-  width: 6px;
+  width: 6px !important;
 }
 .xterm-viewport::-webkit-scrollbar-track {
-  background: var(--bg);
+  background: var(--bg) !important;
 }
 .xterm-viewport::-webkit-scrollbar-thumb {
-  background: rgba(var(--accent-rgb), 0.7);
-  border-radius: 3px;
+  background: rgba(var(--accent-rgb), 0.7) !important;
+  border-radius: 3px !important;
 }
 .xterm-viewport::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
+  background: var(--accent) !important;
 }
 .xterm-viewport {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(var(--accent-rgb), 0.7) var(--bg);
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(var(--accent-rgb), 0.7) var(--bg) !important;
 }
