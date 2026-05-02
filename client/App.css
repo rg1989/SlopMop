@@ -244,7 +244,7 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  min-width: 0;
+  min-width: 280px;
 }
 
 .preview-panel {

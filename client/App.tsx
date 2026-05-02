@@ -69,6 +69,7 @@ const SIDEBAR_DEFAULT = 240;
 const RESIZE_HANDLE_WIDTH = 4;
 const CANVAS_DEFAULT_WIDTH = 360;
 const CANVAS_MIN = 200;
+const CANVAS_MIN_CENTER = 280;
 
 // ── UI state persistence ──────────────────────────────────────────────────────
 const UI = {
@@ -251,7 +252,10 @@ export default function App() {
   // ── Layout max-width refs (updated every render) ─────────────────────────────
   sidebarMaxRef.current = window.innerWidth - 300 - RESIZE_HANDLE_WIDTH;
   editorMaxRef.current = window.innerWidth - (cwd ? sidebar.width + RESIZE_HANDLE_WIDTH : 0) - 300;
-  canvasMaxRef.current = Math.floor(window.innerWidth * 0.7);
+  {
+    const currentSidebarWidth = cwd ? sidebar.width + RESIZE_HANDLE_WIDTH : 0;
+    canvasMaxRef.current = window.innerWidth - currentSidebarWidth - CANVAS_MIN_CENTER - RESIZE_HANDLE_WIDTH;
+  }
 
   // Guard against React StrictMode double-invoking the initial spawn effect
   const initialSpawnedRef = useRef(false);
