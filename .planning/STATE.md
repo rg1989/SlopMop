@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Foundation ✅ SHIPPED 2026-05-02
 status: completed
-stopped_at: "Checkpoint: 12-02 human-verify — awaiting visual QA approval"
-last_updated: "2026-05-02T21:17:31.594Z"
+stopped_at: Completed 12-02-PLAN.md — Phase 12 complete
+last_updated: "2026-05-02T21:30:06.680Z"
 last_activity: "2026-04-30 - Completed quick task 1: add syntax colors and edit mode to file preview panel"
 progress:
   total_phases: 4
@@ -82,6 +82,7 @@ Progress: [██████████] 100% (All Phases)
 | Phase 11-canvas-panel-extraction P01 | 2min | 2 tasks | 2 files |
 | Phase 11-canvas-panel-extraction P02 | 4min | 2 tasks | 1 files |
 | Phase 12-bottom-panel-shell P01 | 4min | 2 tasks | 3 files |
+| Phase 12-bottom-panel-shell P02 | 5min | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -166,6 +167,7 @@ Recent decisions affecting current work:
 - [Phase 11-04-fix]: canvasMaxRef updated to innerWidth - sidebarWidth - CANVAS_MIN_CENTER(280) - handle; .main-area gets min-width: 280px as CSS hard floor — prevents center panel from shrinking to zero
 - [Phase 12-01]: useDragResize mock passes through initialWidth so BPANEL-05 height restoration test reflects localStorage value
 - [Phase 12-01]: bottom-panel-tab-bar rendered unconditionally inside .main-area using existing flex-direction:column layout
+- [Phase 12-02]: Chevron direction was inverted at checkpoint — up when closed, down when open; fixed in d124851 before human approval
 
 ### Roadmap Evolution
 
@@ -190,6 +192,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-02T21:17:31.592Z
-Stopped at: Checkpoint: 12-02 human-verify — awaiting visual QA approval
+Last session: 2026-05-02T21:29:57.646Z
+Stopped at: Completed 12-02-PLAN.md — Phase 12 complete
 Resume file: None
