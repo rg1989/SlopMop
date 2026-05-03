@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Foundation ✅ SHIPPED 2026-05-02
 status: executing
-stopped_at: Checkpoint 15-03 Task 2 — awaiting human verify
-last_updated: "2026-05-03T17:55:47.523Z"
+stopped_at: Completed 15-03-PLAN.md
+last_updated: "2026-05-03T18:17:13.572Z"
 last_activity: 2026-05-03 — Plan 15-01 complete (RED test scaffold for TerminalInput, 5 tests)
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 3
   completed_plans: 3
-  percent: 5
+  percent: 100
 ---
 
 # Project State
@@ -46,6 +46,8 @@ Key decisions affecting v1.2:
 - [Phase 15]: useState for xterm terminal instance enables onData re-wiring after async dynamic import init
 - [Phase 15]: disableStdin prop on Terminal.tsx defaults false; SessionPane passes true for Claude sessions in Plan 03
 - [Phase 15-03]: composerRef type changed from HTMLTextAreaElement to TerminalInputHandle — both expose .focus() so VoiceBar and tab-switch callers work unchanged
+- [Phase 15]: disableStdin=true on display TerminalComponent in SessionPane — display terminal is output-only, all input flows through TerminalInput strip
+- [Phase 15]: localInputRef fallback in SessionPane ensures TerminalInput is always focusable even when composerRef prop is absent from App
 
 ### Pending Todos
 
@@ -57,6 +59,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-03T17:55:43.717Z
-Stopped at: Checkpoint 15-03 Task 2 — awaiting human verify
+Last session: 2026-05-03T18:17:08.601Z
+Stopped at: Completed 15-03-PLAN.md
 Resume file: None
