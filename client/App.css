@@ -52,13 +52,6 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
 
 .terminal-area { flex: 1; overflow: hidden; padding: 0; }
 
-.composer-bottom {
-  flex-shrink: 0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
 .terminal-input-strip {
   flex-shrink: 0;
   height: 80px;
@@ -67,15 +60,23 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
   overflow: hidden;
 }
 
-.composer-area {
-  padding: 8px 12px;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  flex: 1;
+.terminal-input-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.terminal-action-bar {
+  position: absolute;
+  top: 4px;
+  right: 8px;
   display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  min-height: 0;
+  align-items: center;
+  gap: 4px;
+  z-index: 10;
+  background: var(--bg);
+  border-radius: 4px;
+  padding: 2px 4px;
+  pointer-events: all;
 }
 
 .resize-handle--h {
@@ -89,15 +90,6 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
 }
 .resize-handle--h:hover,
 .resize-handle--h.dragging { background: var(--accent); }
-.composer-input {
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  outline: none;
-}
-.composer-input:focus {
-  border-color: var(--accent);
-}
-
 .active-path {
   font-family: monospace;
   font-size: 13px;
@@ -831,7 +823,7 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
 }
 
 /* ============================================================
-   Icon buttons (Composer send / attach — borderless)
+   Icon buttons (borderless)
    ============================================================ */
 
 .icon-btn {
