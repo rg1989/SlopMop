@@ -19,7 +19,7 @@ created: 2026-05-03
 |----------|-------|
 | **Framework** | Vitest 3.x + React Testing Library 16 |
 | **Config file** | `vitest.config.ts` |
-| **Quick run command** | `npx vitest run tests/canvas-tab-store.test.ts tests/canvas-mcp-tools.test.ts tests/MultiTabCanvasPanel.test.tsx tests/McpConnectionsModal.test.tsx` |
+| **Quick run command** | `npx vitest run tests/canvas-tab-store.test.ts tests/canvas-mcp-tools.test.ts tests/MultiTabCanvasPanel.test.tsx tests/McpConnectionsModal.test.tsx tests/App.canvasPanel.test.tsx` |
 | **Full suite command** | `npx vitest run` |
 | **Estimated runtime** | ~15 seconds |
 
@@ -38,7 +38,7 @@ created: 2026-05-03
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 14-01-01 | 01 | 0 | MCP-01..05, CANVASTAB-01..04, MCPUI-01..02 stubs | unit | `npx vitest run tests/canvas-tab-store.test.ts tests/canvas-mcp-tools.test.ts tests/MultiTabCanvasPanel.test.tsx tests/McpConnectionsModal.test.tsx` | ❌ W0 | ⬜ pending |
+| 14-01-01 | 01 | 0 | MCP-01..05, CANVASTAB-01..04, MCPUI-01..02 stubs | unit | `npx vitest run tests/canvas-tab-store.test.ts tests/canvas-mcp-tools.test.ts tests/MultiTabCanvasPanel.test.tsx tests/McpConnectionsModal.test.tsx tests/App.canvasPanel.test.tsx` | ❌ W0 | ⬜ pending |
 | 14-01-02 | 01 | 1 | MCP-01 | unit | `npx vitest run tests/canvas-tab-store.test.ts` | ❌ W0 | ⬜ pending |
 | 14-01-03 | 01 | 1 | MCP-02 | unit | `npx vitest run tests/canvas-tab-store.test.ts` | ❌ W0 | ⬜ pending |
 | 14-01-04 | 01 | 1 | MCP-03 | unit | `npx vitest run tests/canvas-tab-store.test.ts` | ❌ W0 | ⬜ pending |
@@ -50,6 +50,7 @@ created: 2026-05-03
 | 14-02-04 | 02 | 1 | CANVASTAB-03 | component | `npx vitest run tests/MultiTabCanvasPanel.test.tsx` | ❌ W0 | ⬜ pending |
 | 14-03-01 | 03 | 1 | MCPUI-01 | component | `npx vitest run tests/McpConnectionsModal.test.tsx` | ❌ W0 | ⬜ pending |
 | 14-03-02 | 03 | 1 | MCPUI-02 | component | `npx vitest run tests/McpConnectionsModal.test.tsx` | ❌ W0 | ⬜ pending |
+| 14-04-02 | 04 | 2 | CANVASTAB-01..03 App wiring | integration | `npx vitest run tests/App.canvasPanel.test.tsx` | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -61,6 +62,7 @@ created: 2026-05-03
 - [ ] `tests/canvas-mcp-tools.test.ts` — stubs for MCP-05
 - [ ] `tests/MultiTabCanvasPanel.test.tsx` — stubs for CANVASTAB-01, CANVASTAB-02, CANVASTAB-03
 - [ ] `tests/McpConnectionsModal.test.tsx` — stubs for MCPUI-01, MCPUI-02
+- [ ] `tests/App.canvasPanel.test.tsx` — App.tsx canvas SSE state and MCP modal open wiring
 
 ---
 
