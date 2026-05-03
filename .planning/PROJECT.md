@@ -4,6 +4,19 @@
 
 A premium local web application that wraps the Claude CLI in a rich, beautifully designed interface. It provides a real pseudo-terminal (PTY) experience inside the browser, a VSCode-style file explorer sidebar, file attachment with previews, voice-to-text input, and a text-to-speech mode that reads agent responses aloud with mid-speech interruption support.
 
+## Current Milestone: v1.2 — Terminal-Native Composer
+
+**Goal:** Replace the Composer textarea with a real xterm.js terminal input so all Claude interactive prompts (permission menus, arrow-key navigation, Ctrl sequences, Tab completion) work natively — then float attach/voice/TTS buttons as overlays.
+
+**Target features:**
+- Terminal-native input replaces Composer textarea
+- Arrow-key menu navigation for Claude permission prompts
+- Floating action bar (attach, voice, TTS) as overlay on terminal input
+- Slash-command autocomplete preserved (overlay popup)
+- Attachment display/management preserved
+
+---
+
 ## Current State — v1.1 Shipped 2026-05-03
 
 **Version:** v1.1 Shell + Canvas ✅
@@ -67,7 +80,9 @@ A single-user power tool that makes working with Claude CLI feel as fluid as a n
 
 ## v1.2 Goals
 
-_To be defined. Run `/gsd:new-milestone` to begin research and requirements definition._
+1. **Terminal-Native Composer** (Phase 15) — Replace textarea Composer with xterm.js terminal input attached to Claude PTY
+2. **Floating Action Bar** (Phase 15 or 16) — Attach/Voice/TTS buttons float as overlay on terminal input surface
+3. **Slash Command Preservation** (Phase 15 or 16) — Detect /commands typed in terminal, render popup overlay
 
 ---
 
@@ -85,4 +100,4 @@ _To be defined. Run `/gsd:new-milestone` to begin research and requirements defi
 
 ---
 
-*Last updated: 2026-05-03 — Telegram documented, v1.1 in-progress state reflected, Phase 14 added*
+*Last updated: 2026-05-03 — v1.2 milestone started: Terminal-Native Composer*
