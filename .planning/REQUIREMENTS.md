@@ -32,7 +32,7 @@
 
 ### Cleanup
 
-- [ ] **CLEAN-01**: Old Composer textarea component and textarea-specific code is fully removed
+- [x] **CLEAN-01**: Old Composer textarea component and textarea-specific code is fully removed
 
 ---
 
@@ -69,7 +69,7 @@
 | SLASH-02 | Phase 16 | Pending |
 | ATTACH-01 | Phase 16 | Pending |
 | ATTACH-02 | Phase 16 | Pending |
-| CLEAN-01 | Phase 16 | Pending |
+| CLEAN-01 | Phase 16 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 11 total

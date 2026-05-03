@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Foundation ✅ SHIPPED 2026-05-02
 status: executing
-stopped_at: Completed 15-03-PLAN.md
-last_updated: "2026-05-03T18:21:32.618Z"
+stopped_at: Completed 16-04-PLAN.md
+last_updated: "2026-05-03T18:54:43.425Z"
 last_activity: 2026-05-03 — Plan 15-01 complete (RED test scaffold for TerminalInput, 5 tests)
 progress:
   total_phases: 2
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 8
+  completed_plans: 4
   percent: 5
 ---
 
@@ -48,6 +48,7 @@ Key decisions affecting v1.2:
 - [Phase 15-03]: composerRef type changed from HTMLTextAreaElement to TerminalInputHandle — both expose .focus() so VoiceBar and tab-switch callers work unchanged
 - [Phase 15]: disableStdin=true on display TerminalComponent in SessionPane — display terminal is output-only, all input flows through TerminalInput strip
 - [Phase 15]: localInputRef fallback in SessionPane ensures TerminalInput is always focusable even when composerRef prop is absent from App
+- [Phase 16-overlays-cleanup]: Stale Composer comment in App.css icon-btn section updated during cleanup to satisfy zero-references requirement
 
 ### Pending Todos
 
@@ -59,6 +60,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-03T18:17:08.601Z
-Stopped at: Completed 15-03-PLAN.md
+Last session: 2026-05-03T18:54:43.423Z
+Stopped at: Completed 16-04-PLAN.md
 Resume file: None
