@@ -17,8 +17,8 @@
 
 ### Floating Action Bar
 
-- [ ] **ACTION-01**: Attach, Voice, and TTS buttons float as an overlay on the terminal input surface
-- [ ] **ACTION-02**: Action bar is always accessible and does not obscure the terminal input line
+- [x] **ACTION-01**: Attach, Voice, and TTS buttons float as an overlay on the terminal input surface
+- [x] **ACTION-02**: Action bar is always accessible and does not obscure the terminal input line
 
 ### Slash Commands
 
@@ -63,8 +63,8 @@
 | TINPUT-02 | Phase 15 | Complete |
 | TINPUT-03 | Phase 15 | Complete |
 | TINPUT-04 | Phase 15 | Complete |
-| ACTION-01 | Phase 16 | Pending |
-| ACTION-02 | Phase 16 | Pending |
+| ACTION-01 | Phase 16 | Complete |
+| ACTION-02 | Phase 16 | Complete |
 | SLASH-01 | Phase 16 | Pending |
 | SLASH-02 | Phase 16 | Pending |
 | ATTACH-01 | Phase 16 | Pending |
