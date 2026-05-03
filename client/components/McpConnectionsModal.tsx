@@ -61,7 +61,7 @@ export function McpConnectionsModal({ onClose }: McpConnectionsModalProps) {
           <span className="modal-title">MCP Connections</span>
           <button className="modal-close-btn" onClick={onClose}>×</button>
         </div>
-        <div className="modal-body">
+        <div className="modal-body" style={{ padding: '10px 16px', gap: 0 }}>
           {loading && <div className="mcp-loading">Loading...</div>}
           {!loading && Object.keys(servers).length === 0 && (
             <div style={{ color: 'var(--txt-sub)', fontSize: 12 }}>No MCP servers registered.</div>

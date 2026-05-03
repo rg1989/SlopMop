@@ -4409,9 +4409,11 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--border);
+  padding: 8px 0;
   font-size: 12px;
+}
+.mcp-server-row + .mcp-server-row {
+  border-top: 1px solid var(--border);
 }
 .mcp-server-info {
   display: flex;
