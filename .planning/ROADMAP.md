@@ -78,7 +78,7 @@ Plans:
 
 **Depends on:** Phase 13
 **Requirements:** MCP-01, MCP-02, MCP-03, MCP-04, MCP-05, CANVASTAB-01, CANVASTAB-02, CANVASTAB-03, CANVASTAB-04, MCPUI-01, MCPUI-02
-**Plans:** 3/6 plans executed
+**Plans:** 4/6 plans executed
 
 Plans:
 - [ ] 14-01-PLAN.md — Wave 0: npm install MCP SDK + 4 RED test stubs (all 11 requirements)
@@ -99,4 +99,4 @@ Plans:
 | 11. Canvas Panel Extraction | 4/4 | Complete    | 2026-05-02 |
 | 12. Bottom Panel Shell | 2/2 | Complete    | 2026-05-02 |
 | 13. Raw Terminal Sessions | 3/3 | Complete    | 2026-05-02 |
-| 14. Canvas MCP + Connections UI | 3/6 | In Progress|  |
+| 14. Canvas MCP + Connections UI | 4/6 | In Progress|  |

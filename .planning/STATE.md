@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Foundation ✅ SHIPPED 2026-05-02
 status: completed
-stopped_at: Completed 14-02-PLAN.md
-last_updated: "2026-05-03T13:52:52.061Z"
+stopped_at: Completed 14-05-PLAN.md
+last_updated: "2026-05-03T13:56:25.719Z"
 last_activity: "2026-04-30 - Completed quick task 1: add syntax colors and edit mode to file preview panel"
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 18
-  completed_plans: 15
+  completed_plans: 16
   percent: 100
 ---
 
@@ -89,6 +89,7 @@ Progress: [██████████] 100% (All Phases)
 | Phase 14-canvas-mcp-and-connections P03 | 4min | 2 tasks | 5 files |
 | Phase 14-canvas-mcp-and-connections P01 | 4min | 3 tasks | 5 files |
 | Phase 14-canvas-mcp-and-connections P02 | 5min | 2 tasks | 4 files |
+| Phase 14-canvas-mcp-and-connections P05 | 5min | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -185,6 +186,8 @@ Recent decisions affecting current work:
 - [Phase 14-canvas-mcp-and-connections]: @modelcontextprotocol/sdk and zod installed as runtime deps; Wave 0 RED stubs created for canvas MCP tools and MultiTabCanvasPanel
 - [Phase 14-canvas-mcp-and-connections]: setTabsGetter injection to break circular ESM dep between canvas-tab-store and canvas-tab-sse modules
 - [Phase 14-canvas-mcp-and-connections]: initCanvasStore called with process.cwd() — canvas tabs are server-global, not per-project
+- [Phase 14-05]: Export callCanvas* functions alongside server.tool() calls so tests can import tool logic without spawning stdio transport
+- [Phase 14-05]: server.tool() API (not server.registerTool()) used in @modelcontextprotocol/sdk@1.29.0
 
 ### Roadmap Evolution
 
@@ -209,6 +212,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-03T13:52:52.059Z
-Stopped at: Completed 14-02-PLAN.md
+Last session: 2026-05-03T13:56:25.716Z
+Stopped at: Completed 14-05-PLAN.md
 Resume file: None
