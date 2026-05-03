@@ -3,15 +3,11 @@ import type { Terminal as XTerminal } from '@xterm/xterm';
 import { useSession } from '../hooks/useSession';
 import type { SessionStatus } from '../hooks/useSessionManager';
 import type { AgentConfig } from '../hooks/useSettings';
-import { useDragResize } from '../hooks/useDragResize';
 import { Terminal as TerminalComponent } from './Terminal';
-import { AttachBar } from './AttachBar';
-import { Composer } from './Composer';
+import { TerminalInput } from './TerminalInput';
+import type { TerminalInputHandle } from './TerminalInput';
 import type { EditorTab } from './EditorTabBar';
 import type { FilePreviewData } from './FilePreview';
-
-const COMPOSER_MIN = 80;
-const COMPOSER_DEFAULT = 150;
 
 export interface SessionPaneActions {
   sendInput: (data: string) => void;
@@ -40,7 +36,7 @@ interface SessionPaneProps {
   onStatus: (status: SessionStatus) => void;
   onExit: (code: number) => void;
   onFirstInput: (sessionId: string, text: string) => void;
-  composerRef?: React.RefObject<HTMLTextAreaElement | null>;
+  composerRef?: React.RefObject<TerminalInputHandle | null>;
   voiceSlot?: ReactNode;
   brainRefreshTrigger?: () => void;
   ttsEnabled?: boolean;
@@ -78,9 +74,6 @@ export function SessionPane({
     if (isActive && !wasActiveRef.current) setVisibleKey(k => k + 1);
     wasActiveRef.current = isActive;
   }, [isActive]);
-
-  // Drag-resize for composer only — editor panel is hoisted to App level
-  const composerPanel = useDragResize(COMPOSER_DEFAULT, COMPOSER_MIN, 'up');
 
   const cols = terminal?.cols ?? 80;
   const rows = terminal?.rows ?? 24;
@@ -140,22 +133,12 @@ export function SessionPane({
         <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
           <TerminalComponent onReady={handleReady} sendResize={handleSendResize} visibleKey={visibleKey} accentHex={accentHex} />
         </div>
-        <div className="resize-handle--h" onMouseDown={composerPanel.onMouseDown} />
-        <div className="composer-bottom" style={{ height: composerPanel.width }}>
-          <AttachBar attachments={session.attachments} onRemove={session.removeAttachment} />
-          <div className="composer-area">
-            <Composer
-              ref={composerRef}
-              onSend={handleSendInput}
-              disabled={!session.connected}
-              attachments={session.attachments}
-              clearAttachments={session.clearAttachments}
-              onAttach={session.addAttachments}
-              cwd={cwd}
-              voiceSlot={voiceSlot}
-            />
-          </div>
-        </div>
+        <TerminalInput
+          ref={composerRef}
+          sendInput={handleSendInput}
+          connected={session.connected}
+          accentHex={accentHex}
+        />
       </div>
     </div>
   );

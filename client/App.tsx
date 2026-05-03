@@ -17,6 +17,7 @@ import type { CanvasTab } from './components/MultiTabCanvasPanel';
 import { McpConnectionsModal } from './components/McpConnectionsModal';
 import { SessionTabBar } from './components/SessionTabBar';
 import { SessionPane } from './components/SessionPane';
+import type { TerminalInputHandle } from './components/TerminalInput';
 import { SessionHistoryModal } from './components/SessionHistoryModal';
 import { EditorTabBar } from './components/EditorTabBar';
 import type { EditorTab } from './components/EditorTabBar';
@@ -154,7 +155,7 @@ export default function App() {
   const [brainRefreshKey, setBrainRefreshKey] = useState(0);
 
   const [initialPath] = useState(getInitialPath);
-  const composerRef = useRef<HTMLTextAreaElement>(null);
+  const composerRef = useRef<TerminalInputHandle>(null);
 
   // Active session actions — populated by the active SessionPane
   const activeActionsRef = useRef<ActiveSessionActions | null>(null);
