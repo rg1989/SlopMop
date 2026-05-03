@@ -42,7 +42,12 @@ Phases 10–14 — PTY session persistence, canvas panel extraction, bottom pane
   2. When Claude presents a permission menu (Yes/No), user can navigate options with arrow keys and confirm with Enter
   3. User can send Ctrl+C to interrupt, Ctrl+D to end input, and Tab to trigger completion — all reach the PTY
   4. The terminal input renders as a fixed-height strip (~3–4 lines tall) at the bottom of the session pane
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 15-01-PLAN.md — Wave 0: TerminalInput test scaffold (RED tests for TINPUT-01 through TINPUT-04)
+- [ ] 15-02-PLAN.md — Wave 1: TerminalInput.tsx component + Terminal.tsx disableStdin prop
+- [ ] 15-03-PLAN.md — Wave 2: Wire TerminalInput into SessionPane + App.css + human checkpoint
 
 ### Phase 16: Overlays + Cleanup
 **Goal**: Attach, voice, TTS, slash commands, and attachment chips all work on the terminal input surface; old Composer is fully gone
@@ -62,7 +67,7 @@ Phases 10–14 — PTY session persistence, canvas panel extraction, bottom pane
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 15. Terminal Input Core | 0/? | Not started | - |
+| 15. Terminal Input Core | 0/3 | Not started | - |
 | 16. Overlays + Cleanup | 0/? | Not started | - |
 
 ---
