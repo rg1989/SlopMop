@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 
 // Mock heavy hooks so App renders without real side effects
@@ -137,6 +137,23 @@ vi.mock('../client/components/EditorTabBar', () => ({
   EditorTabBar: () => null,
 }));
 
+vi.mock('../client/components/McpConnectionsModal', () => ({
+  McpConnectionsModal: ({ onClose }: { onClose: () => void }) => (
+    <div className="mcp-modal" data-testid="mcp-modal">
+      <button onClick={onClose}>Close</button>
+    </div>
+  ),
+}));
+
+vi.mock('../client/components/MultiTabCanvasPanel', () => ({
+  MultiTabCanvasPanel: ({ tabs }: { tabs: unknown[] }) =>
+    tabs.length === 0 ? (
+      <div className="canvas-empty-state">No canvas tabs</div>
+    ) : (
+      <div className="canvas-tabs">{tabs.length} tabs</div>
+    ),
+}));
+
 import App from '../client/App';
 
 function setupFetchMock() {
@@ -204,5 +221,39 @@ describe('CANVAS-05: canvas column width restored from localStorage', () => {
       const canvasColumn = container.querySelector('.canvas-column');
       expect(canvasColumn).not.toBeNull();
     });
+  });
+});
+
+describe('App canvas MCP wiring (Wave 0 RED)', () => {
+  beforeEach(() => {
+    setupFetchMock();
+    localStorage.clear();
+    localStorage.setItem('slopmop_last_folder', '/test/project');
+  });
+
+  it('renders canvas-empty-state when no canvas tabs (MultiTabCanvasPanel)', async () => {
+    const { container } = render(<App />);
+    await waitFor(() => {
+      expect(container.querySelector('.canvas-column')).not.toBeNull();
+    });
+    expect(container.querySelector('.canvas-empty-state')).not.toBeNull();
+  });
+
+  it('passes onMcpOpen to FolderPicker — fp-mcp-btn is present', async () => {
+    const { container } = render(<App />);
+    await waitFor(() => {
+      expect(container.querySelector('.canvas-column')).not.toBeNull();
+    });
+    expect(container.querySelector('.fp-mcp-btn')).not.toBeNull();
+  });
+
+  it('clicking fp-mcp-btn opens McpConnectionsModal', async () => {
+    const { container } = render(<App />);
+    await waitFor(() => {
+      expect(container.querySelector('.fp-mcp-btn')).not.toBeNull();
+    });
+    const btn = container.querySelector('.fp-mcp-btn') as HTMLElement;
+    await act(async () => { fireEvent.click(btn); });
+    expect(container.querySelector('.mcp-modal')).not.toBeNull();
   });
 });
