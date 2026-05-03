@@ -974,6 +974,38 @@ app.post('/api/fs/file', async (req, res) => {
   }
 });
 
+// PUT /api/fs/rename — rename/move a file or directory
+app.put('/api/fs/rename', async (req, res) => {
+  const { from, to } = req.body as { from?: string; to?: string };
+  if (!from?.trim() || !to?.trim()) { res.status(400).json({ error: 'from and to required' }); return; }
+  try {
+    await rename(path.resolve(from), path.resolve(to));
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
+// POST /api/fs/reveal — reveal a file or directory in the system file manager
+app.post('/api/fs/reveal', async (req, res) => {
+  const { path: targetPath } = req.body as { path?: string };
+  if (!targetPath?.trim()) { res.status(400).json({ error: 'path required' }); return; }
+  const resolved = path.resolve(targetPath);
+  try {
+    const execFileAsync = promisify(execFile);
+    if (process.platform === 'darwin') {
+      await execFileAsync('open', ['-R', resolved]);
+    } else if (process.platform === 'win32') {
+      await execFileAsync('explorer', ['/select,', resolved]);
+    } else {
+      await execFileAsync('xdg-open', [path.dirname(resolved)]);
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
 // ── GSD Super Tool tracking ──────────────────────────────────────────────────
 
 const GSD_TOOLS = path.join(os.homedir(), '.claude/get-shit-done/bin/gsd-tools.cjs');
@@ -1465,6 +1497,29 @@ app.post('/api/mcp-register-canvas', async (_req, res) => {
       args: [path.resolve(process.cwd(), 'server/canvas-mcp-stdio.js')],
       env: {},
     };
+    const tmpFile = CLAUDE_SETTINGS_FILE + '.tmp';
+    await writeFile(tmpFile, JSON.stringify(existing, null, 2), 'utf-8');
+    await rename(tmpFile, CLAUDE_SETTINGS_FILE);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: String(e) });
+  }
+});
+
+app.delete('/api/mcp-remove/:name', async (req, res) => {
+  const { name } = req.params;
+  if (!name) { res.status(400).json({ ok: false, error: 'name required' }); return; }
+  try {
+    let existing: Record<string, unknown> = {};
+    try {
+      const raw = await readFile(CLAUDE_SETTINGS_FILE, 'utf-8');
+      existing = JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      // file missing — nothing to remove
+    }
+    if (existing.mcpServers && typeof existing.mcpServers === 'object') {
+      delete (existing.mcpServers as Record<string, unknown>)[name];
+    }
     const tmpFile = CLAUDE_SETTINGS_FILE + '.tmp';
     await writeFile(tmpFile, JSON.stringify(existing, null, 2), 'utf-8');
     await rename(tmpFile, CLAUDE_SETTINGS_FILE);

@@ -4436,6 +4436,19 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
 }
 .mcp-status-dot--active { background: var(--success); }
 .mcp-status-dot--registered { background: var(--txt-dim); }
+.mcp-remove-btn {
+  background: none;
+  border: none;
+  color: var(--txt-dim);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+  flex-shrink: 0;
+  transition: color 0.12s;
+}
+.mcp-remove-btn:hover { color: var(--error); }
+.mcp-remove-btn:disabled { opacity: 0.4; cursor: default; }
 
 /* ── Health Status Bar ──────────────────────────────────────────────────── */
 .health-bar {
@@ -4786,7 +4799,9 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
 }
 
 .ctx-menu-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   padding: 6px 12px;
   text-align: left;
@@ -4798,6 +4813,15 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
   cursor: pointer;
   border-radius: 4px;
   transition: background 0.12s;
+  white-space: nowrap;
+}
+
+.ctx-menu-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  opacity: 0.75;
+  color: inherit;
 }
 
 .ctx-menu-item:hover { background: var(--surface-hover); }
@@ -4809,4 +4833,10 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
   height: 1px;
   background: var(--border);
   margin: 4px 0;
+}
+
+.ctx-target--active {
+  outline: 1px solid rgba(var(--accent-rgb), 0.5) !important;
+  outline-offset: -1px;
+  border-radius: 3px;
 }

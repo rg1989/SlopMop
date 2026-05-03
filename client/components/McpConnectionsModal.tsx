@@ -14,6 +14,7 @@ export function McpConnectionsModal({ onClose }: McpConnectionsModalProps) {
   const [servers, setServers] = useState<Record<string, McpServer>>({});
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState(false);
+  const [removing, setRemoving] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -27,6 +28,13 @@ export function McpConnectionsModal({ onClose }: McpConnectionsModalProps) {
 
   const handleOverlayMouseDown = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) onClose();
+  };
+
+  const handleRemove = async (name: string) => {
+    setRemoving(name);
+    await fetch(`/api/mcp-remove/${encodeURIComponent(name)}`, { method: 'DELETE' });
+    await load();
+    setRemoving(null);
   };
 
   const handleRegister = async () => {
@@ -50,9 +58,17 @@ export function McpConnectionsModal({ onClose }: McpConnectionsModalProps) {
           )}
           {!loading && Object.entries(servers).map(([name, srv]) => (
             <div key={name} className="mcp-server-row">
+              <span className={`mcp-status-dot mcp-status-dot--${srv.status}`} />
               <span className="mcp-server-name">{name}</span>
               <span className="mcp-server-cmd">{srv.command} {srv.args?.join(' ')}</span>
-              <span className={`mcp-status-dot mcp-status-dot--${srv.status}`} />
+              <button
+                className="mcp-remove-btn"
+                onClick={() => handleRemove(name)}
+                disabled={removing === name}
+                title="Remove"
+              >
+                {removing === name ? '…' : '×'}
+              </button>
             </div>
           ))}
         </div>
