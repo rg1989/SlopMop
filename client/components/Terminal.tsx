@@ -10,9 +10,11 @@ interface TerminalProps {
   /** Bumped by parent when this terminal becomes visible again so we can re-fit + repaint. */
   visibleKey?: number;
   accentHex?: string;
+  /** Pass true from SessionPane for Claude sessions to prevent focus theft by the display terminal. */
+  disableStdin?: boolean;
 }
 
-export function Terminal({ onReady, sendResize, visibleKey, accentHex }: TerminalProps) {
+export function Terminal({ onReady, sendResize, visibleKey, accentHex, disableStdin }: TerminalProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const terminalRef = useRef<XTerminal | null>(null);
   const fitAddonRef = useRef<XFitAddon | null>(null);
@@ -36,6 +38,7 @@ export function Terminal({ onReady, sendResize, visibleKey, accentHex }: Termina
 
       terminal = new XTerm({
         scrollback: 5000,
+        disableStdin: disableStdin ?? false,
         theme: {
           background: '#0d1117',
           foreground: '#c9d1d9',
