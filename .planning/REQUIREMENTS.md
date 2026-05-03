@@ -27,8 +27,8 @@
 
 ### Attachment Display
 
-- [ ] **ATTACH-01**: Attached files appear as chips in a floating strip above the terminal input
-- [ ] **ATTACH-02**: User can dismiss individual attachment chips before sending
+- [x] **ATTACH-01**: Attached files appear as chips in a floating strip above the terminal input
+- [x] **ATTACH-02**: User can dismiss individual attachment chips before sending
 
 ### Cleanup
 
@@ -67,8 +67,8 @@
 | ACTION-02 | Phase 16 | Complete |
 | SLASH-01 | Phase 16 | Complete |
 | SLASH-02 | Phase 16 | Complete |
-| ATTACH-01 | Phase 16 | Pending |
-| ATTACH-02 | Phase 16 | Pending |
+| ATTACH-01 | Phase 16 | Complete |
+| ATTACH-02 | Phase 16 | Complete |
 | CLEAN-01 | Phase 16 | Complete |
 
 **Coverage:**
