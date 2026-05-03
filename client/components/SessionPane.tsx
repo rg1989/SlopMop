@@ -6,6 +6,8 @@ import type { AgentConfig } from '../hooks/useSettings';
 import { Terminal as TerminalComponent } from './Terminal';
 import { TerminalInput } from './TerminalInput';
 import type { TerminalInputHandle } from './TerminalInput';
+import SlashMenu, { SLASH_COMMANDS } from './SlashMenu';
+import type { SlashCommand } from './SlashMenu';
 import type { EditorTab } from './EditorTabBar';
 import type { FilePreviewData } from './FilePreview';
 import { ActionBar } from './ActionBar';
@@ -93,7 +95,29 @@ export function SessionPane({
 
   const localInputRef = useRef<TerminalInputHandle | null>(null);
   const inputRef = composerRef ?? localInputRef;
+  const inputWrapperRef = useRef<HTMLDivElement | null>(null);
   const [picking, setPicking] = useState(false);
+
+  const [slashOpen, setSlashOpen] = useState(false);
+  const [slashIndex, setSlashIndex] = useState(0);
+  const slashItems = SLASH_COMMANDS;
+
+  const handleSlashOpen = useCallback(() => { setSlashOpen(true); setSlashIndex(0); }, []);
+  const handleSlashClose = useCallback(() => setSlashOpen(false), []);
+  const handleSlashNavigate = useCallback((dir: 1 | -1) => {
+    setSlashIndex(i => {
+      const next = i + dir;
+      if (next < 0) return slashItems.length - 1;
+      if (next >= slashItems.length) return 0;
+      return next;
+    });
+  }, [slashItems.length]);
+  const handleSlashSelect = useCallback((cmd?: SlashCommand) => {
+    const selected = cmd ?? slashItems[slashIndex];
+    if (!selected) return;
+    inputRef.current?.injectText?.(selected.command + ' ');
+    setSlashOpen(false);
+  }, [slashItems, slashIndex, inputRef]);
 
   const handleReady = useCallback((t: XTerminal) => setTerminal(t), []);
 
@@ -161,7 +185,7 @@ export function SessionPane({
         <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }} onClick={() => inputRef.current?.focus()}>
           <TerminalComponent onReady={handleReady} sendResize={handleSendResize} visibleKey={visibleKey} accentHex={accentHex} disableStdin={true} />
         </div>
-        <div className="terminal-input-wrapper">
+        <div className="terminal-input-wrapper" ref={inputWrapperRef}>
           <ActionBar
             voiceSlot={voiceSlot}
             onAttach={handlePickFile}
@@ -172,7 +196,20 @@ export function SessionPane({
             sendInput={handleSendInput}
             connected={session.connected}
             accentHex={accentHex}
+            onSlashOpen={handleSlashOpen}
+            onSlashClose={handleSlashClose}
+            onSlashNavigate={handleSlashNavigate}
+            onSlashSelect={handleSlashSelect}
           />
+          {slashOpen && slashItems.length > 0 && (
+            <SlashMenu
+              items={slashItems}
+              selectedIndex={slashIndex}
+              onSelect={handleSlashSelect}
+              onClose={handleSlashClose}
+              anchorRect={inputWrapperRef.current?.getBoundingClientRect() ?? new DOMRect()}
+            />
+          )}
         </div>
       </div>
     </div>

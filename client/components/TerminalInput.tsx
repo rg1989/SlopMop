@@ -5,22 +5,34 @@ import '@xterm/xterm/css/xterm.css';
 
 export interface TerminalInputHandle {
   focus: () => void;
+  injectText: (text: string) => void;
 }
 
 interface TerminalInputProps {
   sendInput: (data: string) => void;
   connected: boolean;
   accentHex?: string;
+  onSlashOpen?: () => void;
+  onSlashClose?: () => void;
+  onSlashNavigate?: (direction: 1 | -1) => void;
+  onSlashSelect?: () => void;
 }
 
 export const TerminalInput = forwardRef<TerminalInputHandle, TerminalInputProps>(
-  function TerminalInput({ sendInput, connected: _connected, accentHex }, ref) {
+  function TerminalInput({ sendInput, connected: _connected, accentHex, onSlashOpen, onSlashClose, onSlashNavigate, onSlashSelect }, ref) {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const fitAddonRef = useRef<XFitAddon | null>(null);
     const [terminal, setTerminal] = useState<XTerminal | null>(null);
+    const slashOpenRef = useRef(false);
+    const inputEmptyRef = useRef(true);
 
     useImperativeHandle(ref, () => ({
       focus: () => terminal?.focus(),
+      injectText: (text: string) => {
+        terminal?.paste('\x7f' + text);
+        slashOpenRef.current = false;
+        inputEmptyRef.current = true;
+      },
     }), [terminal]);
 
     useEffect(() => {
@@ -76,6 +88,25 @@ export const TerminalInput = forwardRef<TerminalInputHandle, TerminalInputProps>
           term.focus();
         }
 
+        term.attachCustomKeyEventHandler((e: KeyboardEvent) => {
+          if (e.type !== 'keydown') return true;
+          if (slashOpenRef.current) {
+            if (e.key === 'ArrowUp') { onSlashNavigate?.(-1); return false; }
+            if (e.key === 'ArrowDown') { onSlashNavigate?.(1); return false; }
+            if (e.key === 'Enter') { onSlashSelect?.(); return false; }
+            if (e.key === 'Escape') { slashOpenRef.current = false; onSlashClose?.(); return false; }
+            slashOpenRef.current = false;
+            onSlashClose?.();
+            return true;
+          }
+          if (e.key === '/' && inputEmptyRef.current) {
+            slashOpenRef.current = true;
+            onSlashOpen?.();
+            return true;
+          }
+          return true;
+        });
+
         fitAddonRef.current = fitAddon;
         setTerminal(term);
       }
@@ -92,7 +123,11 @@ export const TerminalInput = forwardRef<TerminalInputHandle, TerminalInputProps>
 
     useEffect(() => {
       if (!terminal) return;
-      const disposable = terminal.onData(sendInput);
+      const disposable = terminal.onData((data) => {
+        if (data === '\r') inputEmptyRef.current = true;
+        else inputEmptyRef.current = false;
+        sendInput(data);
+      });
       return () => disposable.dispose();
     }, [terminal, sendInput]);
 
