@@ -90,7 +90,15 @@ export function SessionPane({
     onData: ttsEnabled ? onTtsData : undefined,
   });
 
+  const localInputRef = useRef<TerminalInputHandle | null>(null);
+  const inputRef = composerRef ?? localInputRef;
+
   const handleReady = useCallback((t: XTerminal) => setTerminal(t), []);
+
+  // Focus the input strip whenever this pane becomes active
+  useEffect(() => {
+    if (isActive) inputRef.current?.focus();
+  }, [isActive, inputRef]);
 
   const handleSendInput = useCallback((data: string) => {
     if (!hasNamedRef.current && data.replace(/\r$/, '').trim().length > 0) {
@@ -130,11 +138,11 @@ export function SessionPane({
   return (
     <div style={{ display: isActive ? 'flex' : 'none', flex: 1, minHeight: 0, overflow: 'hidden' }}>
       <div style={{ display: 'flex', flex: 1, flexDirection: 'column', minHeight: 0, minWidth: 0 }}>
-        <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
-          <TerminalComponent onReady={handleReady} sendResize={handleSendResize} visibleKey={visibleKey} accentHex={accentHex} />
+        <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }} onClick={() => inputRef.current?.focus()}>
+          <TerminalComponent onReady={handleReady} sendResize={handleSendResize} visibleKey={visibleKey} accentHex={accentHex} disableStdin={true} />
         </div>
         <TerminalInput
-          ref={composerRef}
+          ref={inputRef}
           sendInput={handleSendInput}
           connected={session.connected}
           accentHex={accentHex}
