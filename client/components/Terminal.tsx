@@ -81,10 +81,11 @@ export function Terminal({ onReady, sendResize, visibleKey, accentHex, disableSt
 
       if (containerRef.current) {
         terminal.open(containerRef.current);
-        if (containerRef.current.clientWidth && containerRef.current.clientHeight) {
-          fitAddon.fit();
-        }
         terminal.focus();
+        requestAnimationFrame(() => {
+          const el = containerRef.current;
+          if (el?.clientWidth && el.clientHeight) fitAddon.fit();
+        });
       }
 
       // Inject scrollbar override after xterm opens — static CSS loses the cascade
@@ -118,7 +119,7 @@ export function Terminal({ onReady, sendResize, visibleKey, accentHex, disableSt
     };
   }, [onReady]);
 
-  useResize(containerRef, terminalRef.current, fitAddonRef.current, sendResize);
+  useResize(containerRef, terminalRef, fitAddonRef, sendResize);
 
   useEffect(() => {
     if (visibleKey === undefined) return;
