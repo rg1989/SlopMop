@@ -4181,10 +4181,71 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--txt); font
   border-color: var(--border-muted);
 }
 
-/* Compact mic button — recording state */
-.vb-compact-recording {
-  color: var(--error) !important;
-  animation: vb-blink 1s ease-in-out infinite;
+/* Compact mic button — stateful pill */
+.vb-compact-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--txt-sub);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 12px;
+  font-family: monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  height: 26px;
+  will-change: width, background, border-color, color;
+  transition: width 0.26s ease, padding 0.22s ease,
+              background 0.2s, border-color 0.2s, color 0.2s;
+}
+.vb-compact-btn--idle {
+  width: 26px;
+  padding: 4px;
+}
+.vb-compact-btn--idle:not(:disabled):hover {
+  background: rgba(var(--accent-rgb), 0.1);
+  border-color: rgba(var(--accent-rgb), 0.35);
+  color: var(--accent);
+}
+.vb-compact-btn--recording {
+  width: 126px;
+  padding: 4px 10px;
+  color: var(--error);
+  border-color: var(--error);
+  background: rgba(var(--error-rgb), 0.08);
+  font-weight: 600;
+}
+.vb-compact-btn--recording:hover:not(:disabled) {
+  background: rgba(var(--error-rgb), 0.16);
+}
+.vb-compact-btn--transcribing {
+  width: 138px;
+  padding: 4px 10px;
+  color: var(--warning);
+  border-color: var(--warning);
+  background: rgba(var(--warning-rgb), 0.08);
+  font-weight: 600;
+  cursor: default;
+}
+
+/* Animated ellipsis dots */
+.vb-animated-dots {
+  display: inline-flex;
+}
+.vb-animated-dots span {
+  opacity: 0;
+  animation: vb-dot-appear 1.4s ease-in-out infinite;
+}
+.vb-animated-dots span:nth-child(1) { animation-delay: 0s; }
+.vb-animated-dots span:nth-child(2) { animation-delay: 0.28s; }
+.vb-animated-dots span:nth-child(3) { animation-delay: 0.56s; }
+@keyframes vb-dot-appear {
+  0%, 60%, 100% { opacity: 0; }
+  30%           { opacity: 1; }
 }
 
 /* ── Rules Modal ─────────────────────────────────────────────────────────────── */

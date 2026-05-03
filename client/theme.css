@@ -31,6 +31,7 @@
   --error-rgb:  248, 81, 73;
   --success:    #7ee787;
   --warning:    #e3b341;
+  --warning-rgb: 227, 179, 65;
   --info:       #79c0ff;
 
   /* Syntax highlight (code/token contexts only) */

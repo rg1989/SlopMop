@@ -45,6 +45,8 @@ export function usePty({ cwd, terminal, cols, rows, agentConfig, onData, session
   const onDataRef = useRef(onData);
   const onStatusRef = useRef(onStatus);
   const onExitRef = useRef(onExit);
+  // Suppress onData (TTS) briefly after user sends input to avoid reading back the echo
+  const suppressDataUntilRef = useRef(0);
   const workingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Messages sent before the WS is open are queued here and flushed on open
   const pendingRef = useRef<ClientMessage[]>([]);
@@ -88,7 +90,9 @@ export function usePty({ cwd, terminal, cols, rows, agentConfig, onData, session
       }
       if (msg.type === 'data') {
         terminal.write(msg.data);
-        onDataRef.current?.(msg.data);
+        if (Date.now() >= suppressDataUntilRef.current) {
+          onDataRef.current?.(msg.data);
+        }
         // Status transitions: working on data, debounced back to waiting
         onStatusRef.current?.('working');
         if (workingTimerRef.current) {
@@ -138,7 +142,10 @@ export function usePty({ cwd, terminal, cols, rows, agentConfig, onData, session
     };
   }, [cwd, terminal, reconnectKey, sessionId]); // cols/rows intentionally excluded — resize handled separately
 
-  const sendInput = useCallback((data: string) => send({ type: 'input', data }), [send]);
+  const sendInput = useCallback((data: string) => {
+    suppressDataUntilRef.current = Date.now() + 600;
+    send({ type: 'input', data });
+  }, [send]);
   const sendResize = useCallback((c: number, r: number) => send({ type: 'resize', cols: c, rows: r }), [send]);
 
   return { sendInput, sendResize, connected };

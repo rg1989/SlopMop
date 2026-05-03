@@ -19,15 +19,29 @@ export function useResize(
       const fitAddon = fitAddonRef.current;
       if (!el.clientWidth || !el.clientHeight || !terminal || !fitAddon) return;
 
-      // Refit immediately — keeps rendering correct during drag without waiting for debounce
-      try { fitAddon.fit(); } catch { /* ignore mid-dispose errors */ }
-
-      // Debounce PTY notification to avoid flooding the server during drag
+      // Debounce both fit() and PTY notification together — calling fit() mid-stream
+      // re-wraps the alt screen buffer while Claude is writing, corrupting cursor positions.
+      // 300ms gives streaming output time to settle before we resize.
       clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => {
         const t = terminalRef.current;
-        if (t) onResize(t.cols, t.rows);
-      }, 150);
+        const fa = fitAddonRef.current;
+        if (!t || !fa) return;
+        // Only resize if cols/rows actually changed — avoids redundant re-wrap
+        const proposed = fa.proposeDimensions();
+        if (!proposed || (proposed.cols === t.cols && proposed.rows === t.rows)) return;
+        // Clear scrollback before reflow — xterm's reflow algorithm corrupts ANSI-formatted
+        // lines when cols change. The current screen survives: Claude Code redraws on SIGWINCH.
+        try { t.clear(); } catch { /* ignore */ }
+        try { fa.fit(); } catch { return; }
+        // Defer refresh one frame so the WebGL renderer finishes resizing its canvas
+        requestAnimationFrame(() => {
+          try {
+            const t2 = terminalRef.current;
+            if (t2) { t2.refresh(0, t2.rows - 1); onResize(t2.cols, t2.rows); }
+          } catch { /* ignore mid-dispose errors */ }
+        });
+      }, 300);
     });
 
     observer.observe(el);

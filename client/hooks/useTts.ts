@@ -1,12 +1,25 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 
-// Standard ANSI escape sequence stripping
+// Comprehensive ANSI / VT100 escape sequence stripping for TTS
 function stripAnsi(raw: string): string {
   return raw
-    .replace(/\x1b\[[0-9;]*[A-Za-z]/g, '')    // CSI sequences (colors, cursor)
-    .replace(/\x1b\][^\x07]*\x07/g, '')        // OSC sequences (title changes)
-    .replace(/\x1b[^[\]]/g, '')                // other ESC sequences
-    .replace(/[\x00-\x08\x0b-\x0c\x0e-\x1f\x7f]/g, ''); // control chars
+    // CSI sequences: ESC [ <param bytes 0x30-0x3F> <intermediate bytes 0x20-0x2F> <final byte 0x40-0x7E>
+    // This correctly handles DEC private sequences like \x1b[?2026h, \x1b[?1049h, etc.
+    // (the old regex [0-9;]* missed '?' causing "2026 h" to leak through as readable text)
+    .replace(/\x1b\[[\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e]/g, '')
+    // OSC sequences: ESC ] ... BEL or ST (ESC \)
+    .replace(/\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g, '')
+    // DCS / PM / APC / SOS sequences: ESC [P^_] ... ST
+    .replace(/\x1b[P^_][^\x1b]*(?:\x1b\\)?/g, '')
+    // Remaining 2-char ESC sequences (Fp, Fe, Fs codes)
+    .replace(/\x1b[\x20-\x7e]/g, '')
+    // Bare ESC (e.g. at chunk boundary where sequence was split)
+    .replace(/\x1b/g, '')
+    // Carriage-return overwrites: \r + content until newline = spinner / status bar lines
+    // "\rWorking..." is a line overwrite — not visible text the user should hear
+    .replace(/\r[^\n]*/g, '')
+    // Non-printable control chars (keep \t=0x09, \n=0x0A)
+    .replace(/[\x00-\x08\x0b-\x0c\x0e-\x1f\x7f]/g, '');
 }
 
 // Strip markdown/HTML so Piper reads clean prose, not symbols

@@ -1,7 +1,7 @@
 .PHONY: dev server client build test install
 
 dev:
-	npm run dev
+	@bash scripts/dev.sh
 
 server:
 	npm run server
