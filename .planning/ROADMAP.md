@@ -26,7 +26,7 @@ Phases 10–14 — PTY session persistence, canvas panel extraction, bottom pane
 
 ### Phases
 
-- [ ] **Phase 15: Terminal Input Core** - Replace Composer textarea with xterm.js terminal strip wired to Claude PTY
+- [x] **Phase 15: Terminal Input Core** - Replace Composer textarea with xterm.js terminal strip wired to Claude PTY (completed 2026-05-03)
 - [ ] **Phase 16: Overlays + Cleanup** - Float action bar, slash command popup, and attachment chips as overlays; remove old Composer
 
 ---
@@ -67,7 +67,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 15. Terminal Input Core | 2/3 | In Progress|  |
+| 15. Terminal Input Core | 3/3 | Complete   | 2026-05-03 |
 | 16. Overlays + Cleanup | 0/? | Not started | - |
 
 ---

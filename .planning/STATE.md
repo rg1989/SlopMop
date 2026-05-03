@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Foundation ✅ SHIPPED 2026-05-02
 status: executing
-stopped_at: Completed 15-02-PLAN.md
-last_updated: "2026-05-03T17:52:22.505Z"
+stopped_at: Checkpoint 15-03 Task 2 — awaiting human verify
+last_updated: "2026-05-03T17:55:47.523Z"
 last_activity: 2026-05-03 — Plan 15-01 complete (RED test scaffold for TerminalInput, 5 tests)
 progress:
   total_phases: 2
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
   percent: 5
 ---
 
@@ -45,6 +45,7 @@ Key decisions affecting v1.2:
 - [v1.2]: xterm.js already used for display (Terminal.tsx, RawTerminalPane.tsx) — same pattern applies to input strip
 - [Phase 15]: useState for xterm terminal instance enables onData re-wiring after async dynamic import init
 - [Phase 15]: disableStdin prop on Terminal.tsx defaults false; SessionPane passes true for Claude sessions in Plan 03
+- [Phase 15-03]: composerRef type changed from HTMLTextAreaElement to TerminalInputHandle — both expose .focus() so VoiceBar and tab-switch callers work unchanged
 
 ### Pending Todos
 
@@ -56,6 +57,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-03T17:52:22.502Z
-Stopped at: Completed 15-02-PLAN.md
+Last session: 2026-05-03T17:55:43.717Z
+Stopped at: Checkpoint 15-03 Task 2 — awaiting human verify
 Resume file: None
