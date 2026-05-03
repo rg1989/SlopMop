@@ -12,7 +12,9 @@ import { SourceControl } from './components/SourceControl';
 import { SettingsModal } from './components/SettingsModal';
 import { GsdRoadmap } from './components/GsdRoadmap';
 import { BrainPanel } from './components/BrainPanel';
-import { LiveCanvasPanel } from './components/LiveCanvasPanel';
+import { MultiTabCanvasPanel } from './components/MultiTabCanvasPanel';
+import type { CanvasTab } from './components/MultiTabCanvasPanel';
+import { McpConnectionsModal } from './components/McpConnectionsModal';
 import { SessionTabBar } from './components/SessionTabBar';
 import { SessionPane } from './components/SessionPane';
 import { SessionHistoryModal } from './components/SessionHistoryModal';
@@ -31,6 +33,9 @@ import { useAccentColor } from './hooks/useAccentColor';
 import { HealthStatusBar } from './components/HealthStatusBar';
 import { useRawSessionManager } from './hooks/useRawSessionManager';
 import { RawTerminalPane } from './components/RawTerminalPane';
+import { ContextMenu } from './components/ContextMenu';
+import { contextMenuLookup } from './hooks/useContextMenu';
+import type { ContextMenuItem } from './hooks/useContextMenu';
 import './App.css';
 
 type SidebarTabId = 'explorer' | 'changes' | 'roadmap' | 'brain';
@@ -232,6 +237,27 @@ export default function App() {
     });
   }, []);
 
+  const [mcpModalOpen, setMcpModalOpen] = useState(false);
+  const [canvasTabs, setCanvasTabs] = useState<CanvasTab[]>([]);
+  const [activeCanvasId, setActiveCanvasId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!cwd) return;
+    const es = new EventSource('/api/canvas/events');
+    es.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      setCanvasTabs(data.tabs ?? []);
+      setActiveCanvasId(prev =>
+        data.tabs?.find((t: CanvasTab) => t.id === prev) ? prev : data.tabs?.[0]?.id ?? null
+      );
+    };
+    return () => es.close();
+  }, [cwd]);
+
+  const handleCanvasClose = useCallback(async (id: string) => {
+    await fetch(`/api/canvas/tabs/${id}`, { method: 'DELETE' });
+  }, []);
+
   // Ref used to restore editor tabs exactly once per cwd
   const initialSessionRestoredRef = useRef(false);
 
@@ -366,12 +392,38 @@ export default function App() {
     };
   }, [settings.pttKey, settings.recordingMode, audio.voice]);
 
+  // ── Context menu (global registry listener) ──────────────────────────────────
+  const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; items: ContextMenuItem[] } | null>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const el = (e.target as HTMLElement).closest('[data-ctx-id]') as HTMLElement | null;
+      if (!el) return;
+      const id = el.dataset.ctxId;
+      if (!id) return;
+      const reg = contextMenuLookup(id);
+      if (!reg) return;
+      e.preventDefault();
+      setCtxMenu({ x: e.clientX, y: e.clientY, items: reg.items });
+    };
+    document.addEventListener('contextmenu', handler);
+    return () => document.removeEventListener('contextmenu', handler);
+  }, []);
+
   // ── Sidebar routing — resolved from active session via ref ───────────────────
   const handleSidebarPreview = useCallback((p: string) => activeActionsRef.current?.openFile(p, true), []);
   const handleSidebarOpen = useCallback((p: string) => activeActionsRef.current?.openFile(p, false), []);
+  const handleSidebarOpenEdit = useCallback((p: string) => {
+    activeActionsRef.current?.openFile(p, false);
+    activeActionsRef.current?.promoteTab(p);
+  }, []);
   const handleSidebarAttach = useCallback((p: string) => activeActionsRef.current?.addAttachment(p), []);
   const handleSidebarDiff = useCallback((p: string, staged: boolean) => activeActionsRef.current?.openDiff(p, staged), []);
   const handleSidebarBrainEntry = useCallback((id: string, isPreview: boolean) => activeActionsRef.current?.openBrainEntry(id, isPreview), []);
+  const handleSidebarBrainEntryEdit = useCallback((id: string) => {
+    activeActionsRef.current?.openBrainEntry(id, false);
+    activeActionsRef.current?.promoteTab(`brain:${id}`);
+  }, []);
 
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
@@ -398,6 +450,7 @@ export default function App() {
           onRulesOpen={() => setRulesOpen(true)}
           onCanvasToggle={toggleCanvas}
           isCanvasVisible={isCanvasVisible}
+          onMcpOpen={() => setMcpModalOpen(true)}
         />
       </div>
       {cwd && <HealthStatusBar health={health} slopExists={slopExists} />}
@@ -447,6 +500,8 @@ export default function App() {
         />
       )}
 
+      {mcpModalOpen && <McpConnectionsModal onClose={() => setMcpModalOpen(false)} />}
+
       <div className="app-body">
         {cwd && (
           <>
@@ -494,6 +549,7 @@ export default function App() {
                     selected={new Set(activeAttachments)}
                     onPreview={handleSidebarPreview}
                     onOpen={handleSidebarOpen}
+                    onOpenEdit={handleSidebarOpenEdit}
                     onAttach={handleSidebarAttach}
                     changedPaths={changedPaths}
                     mode={mode}
@@ -523,6 +579,7 @@ export default function App() {
                   <BrainPanel
                     cwd={cwd}
                     onOpenEntry={handleSidebarBrainEntry}
+                    onOpenEntryEdit={handleSidebarBrainEntryEdit}
                     onAttach={handleSidebarAttach}
                     refreshKey={brainRefreshKey}
                     activeEntryId={activeBrainTabId?.startsWith('brain:') ? activeBrainTabId.slice(6) : undefined}
@@ -726,7 +783,12 @@ export default function App() {
                   </svg>
                 </button>
               </div>
-              <LiveCanvasPanel cwd={cwd} isDragging={canvas.isDragging} />
+              <MultiTabCanvasPanel
+                tabs={canvasTabs}
+                activeId={activeCanvasId}
+                onClose={handleCanvasClose}
+                onActivate={setActiveCanvasId}
+              />
             </div>
           </>
         )}
@@ -737,6 +799,15 @@ export default function App() {
           rg1989
         </a>
       </footer>
+
+      {ctxMenu && (
+        <ContextMenu
+          x={ctxMenu.x}
+          y={ctxMenu.y}
+          items={ctxMenu.items}
+          onClose={() => setCtxMenu(null)}
+        />
+      )}
     </div>
   );
 }

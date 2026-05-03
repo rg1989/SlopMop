@@ -63,6 +63,16 @@ vi.stubGlobal('SpeechSynthesisUtterance', class {
   constructor(text: string) { this.text = text; }
 });
 
+// --- EventSource mock (jsdom does not implement EventSource) ---
+class MockEventSource {
+  url: string;
+  onmessage: ((e: MessageEvent) => void) | null = null;
+  onerror: ((e: Event) => void) | null = null;
+  close = vi.fn();
+  constructor(url: string) { this.url = url; }
+}
+vi.stubGlobal('EventSource', MockEventSource);
+
 // --- ResizeObserver mock (jsdom does not implement ResizeObserver) ---
 class MockResizeObserver {
   callback: ResizeObserverCallback;

@@ -66,10 +66,15 @@ vi.mock('../client/components/SessionPane', () => ({
 }));
 
 vi.mock('../client/components/FolderPicker', () => ({
-  FolderPicker: ({ onConnect }: { onConnect: (p: string) => void }) => (
-    <button data-testid="folder-picker-connect" onClick={() => onConnect('/test/project')}>
-      Connect
-    </button>
+  FolderPicker: ({ onConnect, onMcpOpen }: { onConnect: (p: string) => void; onMcpOpen?: () => void }) => (
+    <>
+      <button data-testid="folder-picker-connect" onClick={() => onConnect('/test/project')}>
+        Connect
+      </button>
+      {onMcpOpen && (
+        <button className="fp-mcp-btn" onClick={onMcpOpen}>MCP</button>
+      )}
+    </>
   ),
 }));
 
